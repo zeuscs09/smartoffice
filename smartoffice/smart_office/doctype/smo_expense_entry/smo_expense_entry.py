@@ -24,9 +24,7 @@ class SMOExpenseEntry(Document):
 		if total_cost != self.total_amount:
 			frappe.throw("Total cost is not equal to total amount")
 	def before_save(self):
-		
 		if self.workflow_state != "Draft":
-			
 			for item in self.expense_item:
 				result = frappe.db.sql("""
 					SELECT SUM(1) AS total_count, 
@@ -38,8 +36,9 @@ class SMOExpenseEntry(Document):
 						AND ee.workflow_state NOT IN ('Draft')
 						AND ee.service_report = %s
 						AND ei.expense_type = %s
+						and ee.name !=%s
 					GROUP BY ei.expense_type
-				""", (self.service_report, item.expense_type), as_dict=True)
+				""", (self.service_report, item.expense_type, self.name), as_dict=True)
 				
 				for row in result:
 					total_count = row['total_count']  # จำนวนรวม

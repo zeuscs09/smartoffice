@@ -1,0 +1,40 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-09-17 21:57:41.577162",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "expense",
+  "expense_item"
+ ],
+ "fields": [
+  {
+   "fieldname": "expense",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Expense",
+   "options": "SMO Expense Entry"
+  },
+  {
+   "fieldname": "expense_item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Expense Item",
+   "options": "SMO Expense Item"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-09-17 22:03:42.739816",
+ "modified_by": "Administrator",
+ "module": "Smart Office",
+ "name": "SMO Expense Request Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

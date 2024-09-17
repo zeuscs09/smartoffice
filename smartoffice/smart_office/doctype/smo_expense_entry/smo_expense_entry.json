@@ -18,7 +18,8 @@
   "expense_item_section",
   "expense_item",
   "section_break_fvul",
-  "amended_from"
+  "amended_from",
+  "is_request"
  ],
  "fields": [
   {
@@ -42,7 +43,8 @@
    "label": "Service Report",
    "link_filters": "[[\"SMO Service Report\",\"workflow_state\",\"=\",\"Customer Approve\"]]",
    "options": "SMO Service Report",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "expense_item_section",
@@ -110,13 +112,20 @@
    "fieldtype": "Link",
    "label": "Project",
    "options": "SMO Project"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_request",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Request"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-09-16 21:29:54.057108",
+ "modified": "2024-09-17 23:21:40.100847",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Entry",
@@ -134,6 +143,18 @@
    "role": "System Manager",
    "share": 1,
    "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Engineer Staff",
+   "share": 1,
    "write": 1
   }
  ],

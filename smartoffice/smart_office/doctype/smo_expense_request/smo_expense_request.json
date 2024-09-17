@@ -1,11 +1,22 @@
 {
  "actions": [],
- "allow_rename": 1,
+ "autoname": "format:ER-{YYYY}-{MM}-{#####}",
  "creation": "2024-09-16 22:25:12.155404",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "request_by",
+  "year",
+  "month",
+  "period",
+  "column_break_gmlg",
+  "total",
   "get_data",
+  "section_break_erng",
+  "html_data",
+  "section_break_obtr",
+  "expense_request_item",
+  "data_for_preview",
   "section_break_snwq",
   "amended_from"
  ],
@@ -25,18 +36,85 @@
    "search_index": 1
   },
   {
+   "depends_on": "eval:doc.workflow_state==\"Draft\"",
    "fieldname": "get_data",
    "fieldtype": "Button",
    "label": "Get Data"
+  },
+  {
+   "fieldname": "html_data",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "section_break_obtr",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "data_for_preview",
+   "fieldtype": "HTML Editor",
+   "label": "Data for Preview"
+  },
+  {
+   "fieldname": "request_by",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Request by",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "year",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Year",
+   "reqd": 1
+  },
+  {
+   "fieldname": "month",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Month",
+   "options": "January\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_gmlg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_erng",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "expense_request_item",
+   "fieldtype": "Table",
+   "options": "SMO Expense Request Item"
+  },
+  {
+   "fieldname": "total",
+   "fieldtype": "Float",
+   "label": "Total",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "period",
+   "fieldtype": "Select",
+   "label": "Period",
+   "options": "Mid month\nEnd of month"
   }
  ],
+ "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-09-16 22:25:40.557302",
+ "modified": "2024-09-17 22:54:33.146911",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Request",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
@@ -50,6 +128,18 @@
    "role": "System Manager",
    "share": 1,
    "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Engineer Staff",
+   "share": 1,
    "write": 1
   }
  ],

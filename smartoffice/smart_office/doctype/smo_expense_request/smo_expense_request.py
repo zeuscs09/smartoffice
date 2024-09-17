@@ -1,9 +1,16 @@
 # Copyright (c) 2024, beansx and contributors
 # For license information, please see license.txt
 
-# import frappe
+import frappe
 from frappe.model.document import Document
 
 
 class SMOExpenseRequest(Document):
-	pass
+	def before_save(self):
+		if self.workflow_state != "Draft":
+			for item in self.expense_request_item:
+				frappe.db.set_value("SMO Expense Entry", item.expense, "is_request", 1)
+	# def after_insert(self):
+	# 	for item in self.expense_request_item:
+	# 		frappe.db.set_value("SMO Expense Entry", item.expense, "is_request", 1)
+#is_request

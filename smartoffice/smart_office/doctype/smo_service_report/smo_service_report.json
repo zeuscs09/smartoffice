@@ -49,6 +49,7 @@
    "fieldname": "task",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_preview": 1,
    "label": "Task",
    "link_filters": "[[\"SMO Task\",\"status\",\"not in\",[\"In Review\",\"Completed\",\"Cancel\",null]]]",
    "options": "SMO Task",
@@ -62,6 +63,7 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Task Name",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -81,6 +83,7 @@
    "fieldname": "project_link",
    "fieldtype": "Link",
    "hidden": 1,
+   "in_preview": 1,
    "label": "Project",
    "options": "SMO Project",
    "read_only": 1
@@ -102,6 +105,7 @@
    "fetch_if_empty": 1,
    "fieldname": "customer_site",
    "fieldtype": "Link",
+   "in_preview": 1,
    "label": "Customer Site",
    "options": "SMO Customer Site"
   },
@@ -177,8 +181,10 @@
    "fetch_from": "task.customer",
    "fieldname": "customer",
    "fieldtype": "Link",
+   "in_preview": 1,
    "label": "Customer",
-   "options": "SMO Customer"
+   "options": "SMO Customer",
+   "width": "2000"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -189,7 +195,7 @@
    "link_fieldname": "service_report"
   }
  ],
- "modified": "2024-09-16 22:24:45.917924",
+ "modified": "2024-09-17 23:10:41.493905",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Service Report",
@@ -208,9 +214,22 @@
    "share": 1,
    "submit": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Engineer Staff",
+   "share": 1,
+   "write": 1
   }
  ],
  "search_fields": "task_name",
+ "show_preview_popup": 1,
  "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",

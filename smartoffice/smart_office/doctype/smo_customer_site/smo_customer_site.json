@@ -68,7 +68,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-16 00:47:35.799214",
+ "modified": "2024-09-17 22:57:12.637534",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Customer Site",
@@ -86,6 +86,15 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Engineer Staff",
+   "share": 1
   }
  ],
  "search_fields": "customer_name, site_name",
