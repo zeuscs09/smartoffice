@@ -1,0 +1,236 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:SR-{YYYY}-{MM}-{#####}",
+ "creation": "2024-09-16 09:32:33.586778",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "task_detail_section",
+  "task",
+  "task_name",
+  "job_type",
+  "column_break_debu",
+  "project_link",
+  "customer",
+  "customer_site",
+  "contact_person",
+  "contact_mobile",
+  "contact_email",
+  "job_detail_section",
+  "job_start_on",
+  "column_break_lqgd",
+  "job_fininish",
+  "section_break_tmzs",
+  "team",
+  "section_break_irho",
+  "part_usage",
+  "section_break_wski",
+  "solutions",
+  "section_break_8awl",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_8awl",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "SMO Service Report",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "task",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Task",
+   "link_filters": "[[\"SMO Task\",\"status\",\"not in\",[\"In Review\",\"Completed\",\"Cancel\",null]]]",
+   "options": "SMO Task",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "task.task_name",
+   "fetch_if_empty": 1,
+   "fieldname": "task_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Task Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "task.job_type",
+   "fetch_if_empty": 1,
+   "fieldname": "job_type",
+   "fieldtype": "Link",
+   "label": "Job Type",
+   "options": "SMO Job Type"
+  },
+  {
+   "fieldname": "column_break_debu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "task.project",
+   "fieldname": "project_link",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Project",
+   "options": "SMO Project",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "task.contact_person",
+   "fieldname": "contact_person",
+   "fieldtype": "Data",
+   "label": "Contact Person"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "task_detail_section",
+   "fieldtype": "Section Break",
+   "label": "Task Detail"
+  },
+  {
+   "fetch_from": "task.site",
+   "fetch_if_empty": 1,
+   "fieldname": "customer_site",
+   "fieldtype": "Link",
+   "label": "Customer Site",
+   "options": "SMO Customer Site"
+  },
+  {
+   "fetch_from": "task.contact_mobile",
+   "fieldname": "contact_mobile",
+   "fieldtype": "Data",
+   "label": "Contact Mobile"
+  },
+  {
+   "fetch_from": "task.contact_email",
+   "fetch_if_empty": 1,
+   "fieldname": "contact_email",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Contact Email",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "job_detail_section",
+   "fieldtype": "Section Break",
+   "label": "Job Detail"
+  },
+  {
+   "fieldname": "job_start_on",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Job Start On",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_lqgd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "job_fininish",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Job Fininish",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_tmzs",
+   "fieldtype": "Section Break",
+   "label": "Team"
+  },
+  {
+   "fieldname": "team",
+   "fieldtype": "Table",
+   "options": "SMO Working Team"
+  },
+  {
+   "fieldname": "section_break_irho",
+   "fieldtype": "Section Break",
+   "label": "Part Usage"
+  },
+  {
+   "fieldname": "part_usage",
+   "fieldtype": "Table",
+   "options": "SMO Part Usage"
+  },
+  {
+   "fieldname": "section_break_wski",
+   "fieldtype": "Section Break",
+   "label": "Solution / Service Description"
+  },
+  {
+   "fieldname": "solutions",
+   "fieldtype": "Long Text"
+  },
+  {
+   "fetch_from": "task.customer",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "SMO Customer"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [
+  {
+   "link_doctype": "SMO Expense Entry",
+   "link_fieldname": "service_report"
+  }
+ ],
+ "modified": "2024-09-16 22:24:45.917924",
+ "modified_by": "Administrator",
+ "module": "Smart Office",
+ "name": "SMO Service Report",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "task_name",
+ "show_title_field_in_link": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [
+  {
+   "color": "Gray",
+   "title": "Draft"
+  },
+  {
+   "color": "Yellow",
+   "title": "Customer Review"
+  },
+  {
+   "color": "Green",
+   "title": "Customer Approve"
+  },
+  {
+   "color": "Red",
+   "title": "Customer Reject"
+  }
+ ],
+ "title_field": "task"
+}

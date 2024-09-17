@@ -1,0 +1,95 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "autoname": "format:C-{YYYY}-{MM}-{#####}",
+ "creation": "2024-09-15 18:50:14.161047",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "customer_name",
+  "customer_name_local",
+  "abbreviate",
+  "column_break_ftfz",
+  "customer_group",
+  "primary_phone",
+  "contact_email",
+  "contact_full_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Customer Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer_name_local",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Customer Name (Local)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "abbreviate",
+   "fieldtype": "Data",
+   "label": "Abbreviate"
+  },
+  {
+   "fieldname": "column_break_ftfz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "customer_group",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Customer Group",
+   "options": "Apparel\nHospitality\nInsurance\nMachinery\nManufacturing\nMedia\nNot For Profit\nRecreation\nRetail\nShipping\nTechnology\nTelecommunications\nTransportation\nUtilities\nOther\nHealthcare\nGovernment\nBanking\nBiotechnology\nChemicals\nCommunications\nConstruction\nConsulting\nEducation\nElectronics\nFood & Beverage\nFinance\nEnvironmental\nEntertainment\nEngineering\nEnergy\n????\nInvestment Services\nComputers and Internet\nOthers\nEnergy and Utilities",
+   "reqd": 1
+  },
+  {
+   "fieldname": "primary_phone",
+   "fieldtype": "Data",
+   "label": "Primary Phone"
+  },
+  {
+   "fieldname": "contact_email",
+   "fieldtype": "Data",
+   "label": "Contact Email"
+  },
+  {
+   "fieldname": "contact_full_name",
+   "fieldtype": "Data",
+   "label": "Contact Full Name",
+   "mandatory_depends_on": "contact_email"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-09-16 00:46:35.893555",
+ "modified_by": "Administrator",
+ "module": "Smart Office",
+ "name": "SMO Customer",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "abbreviate,customer_name,customer_name_local",
+ "show_title_field_in_link": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "customer_name"
+}

@@ -1,0 +1,186 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "format:PJ-{YYYY}-{MM}-{#####}",
+ "creation": "2024-09-15 18:48:53.510606",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "project_code",
+  "project_name",
+  "type",
+  "project_number",
+  "opt_id",
+  "column_break_jruz",
+  "customer",
+  "customer_name",
+  "contact_person",
+  "contact_mobile",
+  "contact_email",
+  "implementtation_section",
+  "start_date",
+  "target_end_date",
+  "status",
+  "column_break_xkqi",
+  "project_period",
+  "actual_end_date",
+  "progress"
+ ],
+ "fields": [
+  {
+   "fieldname": "project_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Project Code",
+   "reqd": 1
+  },
+  {
+   "fieldname": "project_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Project Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "Product & Service\nProduct only\nServices only\nCabling only\nMA Contract"
+  },
+  {
+   "fieldname": "project_number",
+   "fieldtype": "Data",
+   "label": "Project Number"
+  },
+  {
+   "fieldname": "opt_id",
+   "fieldtype": "Data",
+   "label": "Opt Id"
+  },
+  {
+   "fieldname": "column_break_jruz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "SMO Customer",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "customer.customer_name",
+   "fetch_if_empty": 1,
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer.contact_full_name",
+   "fetch_if_empty": 1,
+   "fieldname": "contact_person",
+   "fieldtype": "Data",
+   "label": "Contact Person"
+  },
+  {
+   "fetch_from": "customer.primary_phone",
+   "fetch_if_empty": 1,
+   "fieldname": "contact_mobile",
+   "fieldtype": "Data",
+   "label": "Contact Mobile"
+  },
+  {
+   "fetch_from": "customer.contact_email",
+   "fetch_if_empty": 1,
+   "fieldname": "contact_email",
+   "fieldtype": "Data",
+   "label": "Contact Email"
+  },
+  {
+   "fieldname": "implementtation_section",
+   "fieldtype": "Section Break",
+   "label": "Implementtation"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date"
+  },
+  {
+   "fieldname": "target_end_date",
+   "fieldtype": "Date",
+   "label": "Target End Date"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "initiated\nwaiting for equipment\nwaiting for vendor contract\nready to deliver\ndelivered\ninstallation\nin progress\nCustomer Pending\nTuning\nAcceptant Test\ncompleted\nMA Contract Active\nExpired\narchived\nOutsource\nCancelled"
+  },
+  {
+   "fieldname": "column_break_xkqi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "project_period",
+   "fieldtype": "Duration",
+   "label": "Project Period"
+  },
+  {
+   "fieldname": "actual_end_date",
+   "fieldtype": "Date",
+   "label": "Actual End Date"
+  },
+  {
+   "fieldname": "progress",
+   "fieldtype": "Percent",
+   "label": "Progress"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [
+  {
+   "link_doctype": "SMO Task",
+   "link_fieldname": "project"
+  }
+ ],
+ "modified": "2024-09-16 11:43:11.272470",
+ "modified_by": "Administrator",
+ "module": "Smart Office",
+ "name": "SMO Project",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Engineer Staff",
+   "share": 1
+  }
+ ],
+ "search_fields": "customer_name,project_code, project_name",
+ "show_title_field_in_link": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "project_code"
+}

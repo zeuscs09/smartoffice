@@ -1,0 +1,7 @@
+{% extends "templates/web.html" %}
+
+{%- block title -%}{{_("Customer Portal")}}{%- endblock -%}
+
+{% block page_content %}
+{{frappe.session}}
+{% endblock %}

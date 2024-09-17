@@ -1,0 +1,228 @@
+{
+ "actions": [],
+ "autoname": "format:Task-{YYYY}-{MM}-{#####}",
+ "creation": "2024-09-15 21:22:59.368645",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "task_infromation_section",
+  "job_type",
+  "task_name",
+  "start_date",
+  "finish_date",
+  "other_detail",
+  "status",
+  "priority",
+  "period",
+  "start_time",
+  "to_time",
+  "expected_time_use",
+  "column_break_wfvh",
+  "project",
+  "customer",
+  "customer_name",
+  "contact_person",
+  "contact_mobile",
+  "contact_email",
+  "site",
+  "section_break_giws",
+  "team",
+  "assign_to",
+  "detail"
+ ],
+ "fields": [
+  {
+   "fieldname": "task_infromation_section",
+   "fieldtype": "Section Break",
+   "label": "Task Infromation"
+  },
+  {
+   "fieldname": "task_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Task Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "job_type",
+   "fieldtype": "Link",
+   "label": "Job Type",
+   "options": "SMO Job Type",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.job_type == \"Other\"",
+   "fieldname": "other_detail",
+   "fieldtype": "Small Text",
+   "label": "Other Detail"
+  },
+  {
+   "default": "Open",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Open\nOn Hold\nIn Review\nDelayed\nCompleted\nCancel"
+  },
+  {
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "label": "Priority",
+   "options": "High\nMedium\nLow"
+  },
+  {
+   "fieldname": "period",
+   "fieldtype": "Select",
+   "label": "Period",
+   "options": "All day\nAM\nPM\nAfter working hours"
+  },
+  {
+   "default": "00:00:00",
+   "fieldname": "start_time",
+   "fieldtype": "Time",
+   "label": "Plan Start Time"
+  },
+  {
+   "fieldname": "column_break_wfvh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "23:59:59",
+   "fieldname": "to_time",
+   "fieldtype": "Time",
+   "label": "Plan To"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Start Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "finish_date",
+   "fieldtype": "Date",
+   "label": "Finish Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "expected_time_use",
+   "fieldtype": "Duration",
+   "label": "Expected Time Use"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "SMO Project",
+   "search_index": 1
+  },
+  {
+   "fetch_from": "project.customer",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Customer",
+   "options": "SMO Customer"
+  },
+  {
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name"
+  },
+  {
+   "fetch_from": "customer.primary_phone",
+   "fieldname": "contact_mobile",
+   "fieldtype": "Data",
+   "label": "Contact Mobile"
+  },
+  {
+   "fetch_from": "customer.contact_email",
+   "fieldname": "contact_email",
+   "fieldtype": "Data",
+   "label": "Contact Email"
+  },
+  {
+   "depends_on": "customer",
+   "fieldname": "site",
+   "fieldtype": "Link",
+   "label": "Site",
+   "mandatory_depends_on": "customer",
+   "options": "SMO Customer Site"
+  },
+  {
+   "fieldname": "section_break_giws",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "team",
+   "fieldtype": "Table",
+   "label": "Team",
+   "options": "SMO Working Team"
+  },
+  {
+   "fieldname": "detail",
+   "fieldtype": "Small Text",
+   "label": "Detail"
+  },
+  {
+   "fieldname": "assign_to",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Assign To"
+  },
+  {
+   "fetch_from": "customer.contact_full_name",
+   "fieldname": "contact_person",
+   "fieldtype": "Data",
+   "label": "Contact Person"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [
+  {
+   "link_doctype": "SMO Service Report",
+   "link_fieldname": "task"
+  }
+ ],
+ "modified": "2024-09-16 11:56:00.744905",
+ "modified_by": "Administrator",
+ "module": "Smart Office",
+ "name": "SMO Task",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Engineer Staff",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "customer_name, project",
+ "show_title_field_in_link": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "task_name"
+}

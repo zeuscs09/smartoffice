@@ -1,0 +1,23 @@
+{%
+    set show_sidebar=true%}
+
+{% extends "templates/web.html" %} 
+{%- block title -%}{{_("My Task")}}
+{%-endblock -%} 
+{% block page_content %}
+<script>
+  frappe.ready(function () {
+    frappe.call({
+      method: "smartoffice.smart_office.doctype.smo_task.smo_task.fetch_task_data",
+      args: {
+        task: "Task-2024-09-01920"
+      },
+      callback: function (r) {
+        console.log(r.message);
+      },
+    });
+  });
+</script>
+{{frappe.user}} 
+
+{% endblock %}

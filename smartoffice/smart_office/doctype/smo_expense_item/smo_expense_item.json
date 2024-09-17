@@ -1,0 +1,199 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-09-16 14:02:15.596439",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "expense_type",
+  "description",
+  "system_reminder",
+  "column_break_xpyp",
+  "paid_by",
+  "rate_per_km",
+  "total_cost",
+  "receipt_date",
+  "ref_code",
+  "attachment",
+  "ep001",
+  "taxi_depart_distance",
+  "column_break_zhiq",
+  "ep002",
+  "taxi_return_distance",
+  "ep008",
+  "fuel_detail",
+  "fuel_liter",
+  "ep003",
+  "hotel_name",
+  "from_date",
+  "column_break_hiom",
+  "total_day",
+  "to_date"
+ ],
+ "fields": [
+  {
+   "fieldname": "expense_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Expense Type",
+   "options": "SMO Expense Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "column_break_xpyp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "paid_by",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Paid By",
+   "options": "\u0e40\u0e07\u0e34\u0e19\u0e2a\u0e14\n\u0e1a\u0e31\u0e15\u0e23\u0e40\u0e04\u0e23\u0e14\u0e34\u0e15\n\u0e40\u0e07\u0e34\u0e19\u0e42\u0e2d\u0e19\n\u0e40\u0e07\u0e34\u0e19\u0e17\u0e14\u0e23\u0e2d\u0e07",
+   "reqd": 1
+  },
+  {
+   "fieldname": "attachment",
+   "fieldtype": "Attach",
+   "label": "Attachment"
+  },
+  {
+   "depends_on": "eval:doc.expense_type=='EP001'",
+   "fieldname": "ep001",
+   "fieldtype": "Section Break",
+   "label": "Taxi - Depart"
+  },
+  {
+   "depends_on": "eval:doc.expense_type=='EP002'",
+   "fieldname": "ep002",
+   "fieldtype": "Section Break",
+   "label": "Taxi - Return"
+  },
+  {
+   "fieldname": "fuel_detail",
+   "fieldtype": "Select",
+   "label": "Fuel Detail",
+   "mandatory_depends_on": "eval:doc.expense_type=='EP008'",
+   "options": "\n\u0e40\u0e1a\u0e19\u0e0b\u0e34\u0e19\n\u0e14\u0e35\u0e40\u0e0b\u0e25"
+  },
+  {
+   "fieldname": "total_cost",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Total Cost",
+   "read_only_depends_on": "eval:doc.expense_type == 'EP001' || doc.expense_type == 'EP002'",
+   "reqd": 1
+  },
+  {
+   "default": "0.00",
+   "depends_on": "eval:doc.expense_type == 'EP001' || doc.expense_type == 'EP002'",
+   "fieldname": "rate_per_km",
+   "fieldtype": "Float",
+   "label": "Rate (bath/km)",
+   "mandatory_depends_on": "eval:doc.expense_type == 'EP001' || doc.expense_type == 'EP002'",
+   "non_negative": 1,
+   "precision": "2",
+   "read_only_depends_on": "eval:doc.expense_type == 'EP001' || doc.expense_type == 'EP002'"
+  },
+  {
+   "fieldname": "taxi_depart_distance",
+   "fieldtype": "Float",
+   "label": "Distance",
+   "mandatory_depends_on": "eval:doc.expense_type=='EP001'",
+   "non_negative": 1,
+   "precision": "2"
+  },
+  {
+   "fieldname": "column_break_zhiq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "taxi_return_distance",
+   "fieldtype": "Float",
+   "label": "Distance",
+   "mandatory_depends_on": "eval:doc.expense_type=='EP002'"
+  },
+  {
+   "depends_on": "eval:doc.expense_type=='EP008'",
+   "fieldname": "ep008",
+   "fieldtype": "Section Break",
+   "label": "Fuel"
+  },
+  {
+   "fieldname": "fuel_liter",
+   "fieldtype": "Float",
+   "label": "Liter",
+   "mandatory_depends_on": "eval:doc.expense_type=='EP008'"
+  },
+  {
+   "fieldname": "system_reminder",
+   "fieldtype": "Data",
+   "label": "System Reminder",
+   "read_only": 1
+  },
+  {
+   "fieldname": "receipt_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Receipt Date",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.expense_type==\"EP004\" || doc.expense_type==\"EP005\" || doc.expense_type==\"EP006\" || doc.expense_type==\"EP007\" || doc.expense_type==\"EP009\"",
+   "fieldname": "ep003",
+   "fieldtype": "Section Break",
+   "label": "Service Detail"
+  },
+  {
+   "depends_on": "eval:doc.expense_type==\"EP005\"",
+   "fieldname": "hotel_name",
+   "fieldtype": "Data",
+   "label": "Hotel Name",
+   "mandatory_depends_on": "eval:doc.expense_type==\"EP005\""
+  },
+  {
+   "fieldname": "column_break_hiom",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.expense_type==\"EP005\"",
+   "fieldname": "total_day",
+   "fieldtype": "Int",
+   "label": "Total (day)",
+   "mandatory_depends_on": "eval:doc.expense_type==\"EP005\""
+  },
+  {
+   "depends_on": "eval:doc.expense_type==\"EP009\"",
+   "fieldname": "ref_code",
+   "fieldtype": "Data",
+   "label": "Ref Code.",
+   "mandatory_depends_on": "eval:doc.expense_type==\"EP009\""
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-09-16 17:26:35.059233",
+ "modified_by": "Administrator",
+ "module": "Smart Office",
+ "name": "SMO Expense Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

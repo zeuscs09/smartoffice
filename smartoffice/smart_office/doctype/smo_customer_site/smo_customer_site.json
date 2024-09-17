@@ -1,0 +1,97 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "autoname": "format:{customer}-{site_name}",
+ "creation": "2024-09-15 21:09:58.933869",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "customer",
+  "customer_name",
+  "site_name",
+  "depart_km",
+  "return_km",
+  "column_break_oxhv",
+  "location"
+ ],
+ "fields": [
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "SMO Customer",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Customer Name"
+  },
+  {
+   "fieldname": "site_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Site Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "depart_km",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Depart (km)",
+   "non_negative": 1,
+   "precision": "2",
+   "reqd": 1
+  },
+  {
+   "fieldname": "return_km",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Return (km)",
+   "non_negative": 1,
+   "precision": "2",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_oxhv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Geolocation",
+   "label": "Location"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-09-16 00:47:35.799214",
+ "modified_by": "Administrator",
+ "module": "Smart Office",
+ "name": "SMO Customer Site",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "customer_name, site_name",
+ "show_title_field_in_link": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "site_name"
+}

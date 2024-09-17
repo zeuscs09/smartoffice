@@ -1,0 +1,144 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "autoname": "format:EE-{YYYY}-{MM}-{####}",
+ "creation": "2024-09-16 14:16:24.445257",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "service_report",
+  "customer",
+  "project",
+  "total_amount",
+  "column_break_xeie",
+  "customer_site",
+  "distance_depart",
+  "distance_return",
+  "config_taxi_rate",
+  "expense_item_section",
+  "expense_item",
+  "section_break_fvul",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_fvul",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "SMO Expense Entry",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "service_report",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Service Report",
+   "link_filters": "[[\"SMO Service Report\",\"workflow_state\",\"=\",\"Customer Approve\"]]",
+   "options": "SMO Service Report",
+   "reqd": 1
+  },
+  {
+   "fieldname": "expense_item_section",
+   "fieldtype": "Section Break",
+   "label": "Expense Item"
+  },
+  {
+   "fieldname": "expense_item",
+   "fieldtype": "Table",
+   "options": "SMO Expense Item",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "service_report.customer_site",
+   "fieldname": "customer_site",
+   "fieldtype": "Link",
+   "label": "Customer Site",
+   "options": "SMO Customer Site"
+  },
+  {
+   "fieldname": "column_break_xeie",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "customer_site",
+   "fetch_from": "customer_site.depart_km",
+   "fieldname": "distance_depart",
+   "fieldtype": "Float",
+   "label": "Distance Depart"
+  },
+  {
+   "depends_on": "customer_site",
+   "fetch_from": "customer_site.return_km",
+   "fieldname": "distance_return",
+   "fieldtype": "Float",
+   "label": "Distance Return",
+   "precision": "2"
+  },
+  {
+   "default": "0.00",
+   "description": "Bath/km",
+   "fieldname": "config_taxi_rate",
+   "fieldtype": "Float",
+   "label": "Taxi Rate",
+   "non_negative": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0.00",
+   "fieldname": "total_amount",
+   "fieldtype": "Float",
+   "label": "Total Amount"
+  },
+  {
+   "fetch_from": "service_report.customer",
+   "fetch_if_empty": 1,
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "SMO Customer"
+  },
+  {
+   "fetch_from": "service_report.project_link",
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "SMO Project"
+  }
+ ],
+ "hide_toolbar": 1,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-09-16 21:29:54.057108",
+ "modified_by": "Administrator",
+ "module": "Smart Office",
+ "name": "SMO Expense Entry",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
