@@ -5,14 +5,7 @@ frappe.ui.form.on("SMO Expense Request", {
   onload: function (frm) {
     // เมื่อเปิดฟอร์ม, ดึงข้อมูลจากฟิลด์ Text Editor (hidden) และแสดงในฟิลด์ HTML
 
-    $("[data-fieldname=html_data]").html("");
-
-    if (frm.doc.data_for_preview) {
-      // ฟิลด์ hidden
-      // $("[data-fieldname=html_data]").html(frm.doc.data_for_preview);
-      // frm.set_df_property("html_data", "options", frm.doc.data_for_preview);
-    }
-    frm.set_value("request_by", frappe.user.name);
+    if (!frm.doc.request_by) frm.set_value("request_by", frappe.user.name);
 
     let currentYear = new Date().getFullYear();
     let lastYear = currentYear - 1;
@@ -21,7 +14,7 @@ frappe.ui.form.on("SMO Expense Request", {
     frm.set_df_property("year", "options", [currentYear, lastYear].join("\n"));
 
     // ตั้งค่าปีปัจจุบันเป็นค่าเริ่มต้น
-    frm.set_value("year", currentYear);
+    if (!frm.doc.year) frm.set_value("year", currentYear);
 
     const monthNames = [
       "January",
@@ -43,9 +36,23 @@ frappe.ui.form.on("SMO Expense Request", {
     const fullMonthName = monthNames[currentMonth]; // ชื่อเดือนเต็ม
 
     // ตั้งค่าเดือนปัจจุบันในฟิลด์ (สมมติว่าเป็นฟิลด์ชื่อ 'month')
-    frm.set_value("month", fullMonthName);
+    if (!frm.doc.month) frm.set_value("month", fullMonthName);
   },
-  refresh(frm) {},
+  refresh(frm) {
+    if (frm.doc.expense_request_item) {
+      let msg = [];
+
+      $.each(frm.doc.expense_request_item, function (i, d) {
+        msg.push(JSON.parse(d.object_data));
+      });
+
+      render_summary(msg, function (html) {
+        $("[data-fieldname='html_data']").html(html);
+      });
+
+      // frm.set_df_property("html_data", "options", html);
+    }
+  },
   get_data: function (frm) {
     if (!frm.doc.request_by) {
       frappe.throw("Please select Request By");
@@ -60,7 +67,7 @@ frappe.ui.form.on("SMO Expense Request", {
       args: {
         month: 9,
         year: 2024,
-        request_by:frappe.user.name
+        request_by: frappe.user.name,
       },
       callback: function (r) {
         if (r.message) {
@@ -76,6 +83,7 @@ frappe.ui.form.on("SMO Expense Request", {
 
             row.expense = d.expense_entry_id; // แทนที่ด้วยฟิลด์จริงใน child table
             row.expense_item = d.expense_item; // แทนที่ด้วยฟิลด์จริงใน child table
+            row.object_data = JSON.stringify(d);
             total += d.total_cost;
           });
 
@@ -83,11 +91,9 @@ frappe.ui.form.on("SMO Expense Request", {
           frm.refresh_field("expense_request_item");
           frm.set_value("total", total);
 
-          let html = render_summary(r.message);
-          frm.set_df_property("html_data", "options", html);
-          frm.set_value("data_for_preview", html);
-          $(".expense-group").click(function () {
-            $(this).find(".expense-details").toggle();
+          
+          render_summary(r.message, function (html) {
+            $("[data-fieldname='html_data']").html(html);
           });
           frappe.dom.unfreeze();
         }
@@ -96,109 +102,143 @@ frappe.ui.form.on("SMO Expense Request", {
   },
 });
 
-frappe.ui.form.on("SMO Expense Request", {
-  onload: function (frm) {
-    // เมื่อเปิดฟอร์ม, ดึงข้อมูลจากฟิลด์ Text Editor (hidden) และแสดงในฟิลด์ HTML
+function render_summary(data, callback) {
+  get_expense_type(function (expenseTypes) {
+    // กำหนดรายการประเภทค่าใช้จ่ายและลำดับคอลัมน์
 
-    $("[data-fieldname=html_data]").html("");
+    // จัดกลุ่มข้อมูลตาม expense_entry_id
+    let groupedData = data.reduce((acc, cur) => {
+      if (!acc[cur.expense_entry_id]) {
+        acc[cur.expense_entry_id] = {
+          expense_entry_id: cur.expense_entry_id,
+          service_date: cur.service_date ? new Date(cur.service_date) : null,
+          customer_name: cur.customer_name || "",
+          project_name: cur.project_name || "",
+          receipt_date: cur.receipt_date ? new Date(cur.receipt_date) : null,
+          paid_by: cur.paid_by || "",
+          expense_types: {}, // เก็บค่าใช้จ่ายแต่ละประเภท
+        };
+      }
 
-    if (frm.doc.data_for_preview) {
-      // ฟิลด์ hidden
+      // สะสมค่าใช้จ่ายแต่ละประเภท
+      if (!acc[cur.expense_entry_id].expense_types[cur.expense_type_desc]) {
+        acc[cur.expense_entry_id].expense_types[cur.expense_type_desc] = 0;
+      }
+      acc[cur.expense_entry_id].expense_types[cur.expense_type_desc] +=
+        cur.total_cost;
 
-      frm.set_df_property("html_data", "options", frm.doc.data_for_preview);
-    }
+      return acc;
+    }, {});
 
-    let currentYear = new Date().getFullYear();
-    let lastYear = currentYear - 1;
+    // แปลง groupedData เป็น array และจัดเรียงตาม service_date
+    let groupedArray = Object.values(groupedData).sort((a, b) => {
+      if (a.service_date && b.service_date) {
+        return a.service_date - b.service_date;
+      } else if (a.service_date) {
+        return -1;
+      } else if (b.service_date) {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
 
-    // เพิ่มตัวเลือกปีปัจจุบันและปีก่อนหน้าในฟิลด์ Select
-    frm.set_df_property("year", "options", [currentYear, lastYear].join("\n"));
+    // เริ่มต้นสร้าง HTML สำหรับตารางโดยใช้ Bootstrap
+    let html = `
+    <table class="table table-bordered table-striped">
+      <thead class="thead-dark">
+        <tr>
+          <th>Service Date</th>
+          <th>Customer</th>
+          <th>Project</th>
+          <th>Receipt Date</th>
+          ${expenseTypes.map((type) => `<th>${type.desc}</th>`).join("")}
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+    console.log(html);
+    // ตัวแปรสำหรับเก็บผลรวมของแต่ละประเภท
+    let grandTotals = expenseTypes.reduce((acc, type) => {
+      acc[type.desc] = 0;
+      return acc;
+    }, {});
+    let grandTotalOverall = 0;
 
-    // ตั้งค่าปีปัจจุบันเป็นค่าเริ่มต้น
-    frm.set_value("year", currentYear);
+    groupedArray.forEach((group) => {
+      // คำนวณ total สำหรับแต่ละแถว
+      const total = expenseTypes.reduce((sum, type) => {
+        const cost = group.expense_types[type.desc] || 0;
+        // เพิ่มค่าใช้จ่ายลงใน grandTotals
+        grandTotals[type.desc] += cost;
+        return sum + cost;
+      }, 0);
+      grandTotalOverall += total;
 
-    const monthNames = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
+      html += `
+      <tr>
+        <td>${group.service_date ? formatDate(group.service_date) : ""}</td>
+        <td>${group.customer_name}</td>
+        <td>${group.project_name}</td>
+        <td>${group.receipt_date ? formatDate(group.receipt_date) : ""}</td>
+        ${expenseTypes
+          .map((type) => {
+            const cost = group.expense_types[type.desc] || 0;
+            return `<td>${cost.toLocaleString()}</td>`;
+          })
+          .join("")}
+        <td>${total.toLocaleString()}</td>
+      </tr>
+    `;
+    });
 
-    // ดึงเดือนปัจจุบัน
-    const currentMonth = new Date().getMonth(); // ดึง index ของเดือน (เริ่มจาก 0)
-    const fullMonthName = monthNames[currentMonth]; // ชื่อเดือนเต็ม
-
-    // ตั้งค่าเดือนปัจจุบันในฟิลด์ (สมมติว่าเป็นฟิลด์ชื่อ 'month')
-    frm.set_value("month", fullMonthName);
-  },
-});
-function render_summary(data) {
-  // จัดกลุ่มข้อมูลตาม expense_type_desc
-  let groupedData = data.reduce((acc, cur) => {
-    if (!acc[cur.expense_type_desc]) {
-      acc[cur.expense_type_desc] = {
-        total_cost: 0,
-        entries: [],
-      };
-    }
-    acc[cur.expense_type_desc].total_cost += cur.total_cost;
-    acc[cur.expense_type_desc].entries.push(cur);
-    return acc;
-  }, {});
-
-  // เริ่มต้นสร้าง HTML ที่จะแสดงผลโดยใช้ Card ของ Bootstrap 4/5
-  let html = '<div style="margin-bottom: 20px;">';
-
-  Object.keys(groupedData).forEach((expenseType) => {
-    let group = groupedData[expenseType];
+    // เพิ่มแถว Grand Total
     html += `
-        <div class="card mt-3">
-          <div class="card-header bg-primary text-white expense-group" style="cursor: pointer;">
-            <strong>${expenseType}:</strong> ${group.total_cost.toLocaleString()} THB
-          </div>
-          <div class="card-body expense-details" >
-            <div class="row">
-              ${group.entries
-                .map(
-                  (entry) => `
-                  <div class="col-md-4">
-                    <div class="card" style="border: 1px solid #ddd; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                      <p><strong>Customer:</strong> ${entry.customer_name}${
-                    entry.system_reminder
-                      ? ` <span class="badge badge-danger"> (${entry.system_reminder})</span>`
-                      : ""
-                  } </p>
-                      <p><strong>Project:</strong> ${entry.project_name}</p>
-                      <p><strong>Total Cost:</strong> ${entry.total_cost.toLocaleString()} THB <span> (${entry.paid_by.toLocaleString()}) </span></p>
-                       <p><strong>Receipt Date:</strong> ${entry.receipt_date.toLocaleString()} </p>
-                    </div>
-                  </div>
-                `
-                )
-                .join("")}
-            </div>
-          </div>
-        </div>
-      `;
+      </tbody>
+      <tfoot>
+        <tr>
+          <th colspan="4">Grand Total</th>
+          ${expenseTypes
+            .map(
+              (type) => `<th>${grandTotals[type.desc].toLocaleString()}</th>`
+            )
+            .join("")}
+          <th>${grandTotalOverall.toLocaleString()}</th>
+        </tr>
+      </tfoot>
+    </table>
+  `;
+
+    // คืนค่า HTML string
+    return callback(html);
   });
-
-  html += "</div>";
-
-  // Return the HTML string
-  return html;
 }
 
-// เรียกใช้หลังจากที่ HTML ถูกสร้างแล้ว เพื่อให้ toggle ทำงานได้
-$(document).on("click", ".expense-group", function () {
-  $(this).next(".expense-details").toggle();
-});
+function get_expense_type(callback) {
+  frappe.db
+    .get_list("SMO Expense Type", {
+      fields: ["name", "description"],
+    })
+    .then((records) => {
+      let expenseType = records.map((record) => {
+        return {
+          code: record.name,
+          desc: record.description,
+        };
+      });
 
-// $(".layout-side-section").hide();
+      callback(expenseType);
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+}
+
+function formatDate(date) {
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}

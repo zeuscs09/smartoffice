@@ -10,7 +10,9 @@ class SMOExpenseRequest(Document):
 		if self.workflow_state != "Draft":
 			for item in self.expense_request_item:
 				frappe.db.set_value("SMO Expense Entry", item.expense, "is_request", 1)
-	# def after_insert(self):
-	# 	for item in self.expense_request_item:
-	# 		frappe.db.set_value("SMO Expense Entry", item.expense, "is_request", 1)
-#is_request
+	def on_cancel(self):
+		for item in self.expense_request_item:
+				frappe.db.set_value("SMO Expense Entry", item.expense, "is_request", 0)
+	def after_delete(self):
+		for item in self.expense_request_item:
+				frappe.db.set_value("SMO Expense Entry", item.expense, "is_request", 0)

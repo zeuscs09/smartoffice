@@ -148,7 +148,7 @@
    "link_fieldname": "project"
   }
  ],
- "modified": "2024-09-16 11:43:11.272470",
+ "modified": "2024-09-18 00:52:01.657316",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Project",
@@ -182,5 +182,5 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
- "title_field": "project_code"
+ "title_field": "project_name"
 }

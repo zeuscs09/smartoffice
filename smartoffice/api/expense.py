@@ -34,7 +34,8 @@ def get_expense_entries(month, year,request_by):
             ei.to_date,
             ei.total_cost,
             ei.total_day,
-            ei.name AS expense_item
+            ei.name AS expense_item,
+            ee.service_date
         FROM
             `tabSMO Expense Entry` ee
         INNER JOIN

@@ -71,6 +71,7 @@
    "fetch_if_empty": 1,
    "fieldname": "job_type",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Job Type",
    "options": "SMO Job Type"
   },
@@ -187,6 +188,7 @@
    "width": "2000"
   }
  ],
+ "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [
@@ -195,7 +197,7 @@
    "link_fieldname": "service_report"
   }
  ],
- "modified": "2024-09-17 23:10:41.493905",
+ "modified": "2024-09-18 11:26:24.192163",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Service Report",

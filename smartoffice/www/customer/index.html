@@ -1,7 +1,77 @@
 {% extends "templates/web.html" %}
 
 {%- block title -%}{{_("Customer Portal")}}{%- endblock -%}
-
+<head>
+    <style>
+        /* เพิ่มสไตล์เพิ่มเติมถ้าจำเป็น */
+        .status-pending {
+            color: #f0ad4e; /* สีเหลืองสำหรับ Pending */
+        }
+        .status-approved {
+            color: #5cb85c; /* สีเขียวสำหรับ Approved */
+        }
+        .status-rejected {
+            color: #d9534f; /* สีแดงสำหรับ Rejected */
+        }
+    </style>
+</head>
 {% block page_content %}
-{{frappe.session}}
+<div class="container mt-4">
+    <!-- ส่วนหลักของหน้า -->
+    <div class="col-md-12">
+        <h2 class="mb-4">รายการ Service Reports</h2>
+        
+        <!-- ฟิลเตอร์สถานะแบบ Tabs -->
+        <ul class="nav nav-tabs mb-3" id="statusTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="all-tab" data-status="All" type="button" role="tab">ทั้งหมด</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pending-tab" data-status="Pending" type="button" role="tab">รออนุมัติ</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="approved-tab" data-status="Approved" type="button" role="tab">อนุมัติแล้ว</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="rejected-tab" data-status="Rejected" type="button" role="tab">ปฏิเสธ</button>
+            </li>
+        </ul>
+        
+        <!-- แถบค้นหา -->
+        <div class="mb-4">
+            <input type="text" class="form-control" placeholder="ค้นหารายงาน..." id="searchReport" onkeyup="filterReports()">
+        </div>
+        
+        <!-- รายการรายงาน -->
+        <div class="list-group" id="serviceReportsList">
+            <!-- รายการตัวอย่าง - คุณสามารถใช้ loop เพื่อแสดงข้อมูลจากฐานข้อมูล -->
+            <a href="/customer/mytask" class="list-group-item list-group-item-action flex-column align-items-start report-item" data-status="Pending">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">SR-2024-001</h5>
+                    <small>วันที่: 2024-04-25</small>
+                </div>
+                <p class="mb-1">บริการซ่อมแซมเครื่องจักร X</p>
+                <small class="status-pending">สถานะ: รออนุมัติ</small>
+            </a>
+            <a href="/report-detail" class="list-group-item list-group-item-action flex-column align-items-start report-item" data-status="Approved">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">SR-2024-002</h5>
+                    <small>วันที่: 2024-04-26</small>
+                </div>
+                <p class="mb-1">บริการตรวจสอบระบบ Y</p>
+                <small class="status-approved">สถานะ: อนุมัติแล้ว</small>
+            </a>
+            <a href="/report-detail" class="list-group-item list-group-item-action flex-column align-items-start report-item" data-status="Rejected">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">SR-2024-003</h5>
+                    <small>วันที่: 2024-04-27</small>
+                </div>
+                <p class="mb-1">บริการติดตั้งอุปกรณ์ Z</p>
+                <small class="status-rejected">สถานะ: ปฏิเสธ</small>
+            </a>
+            <!-- เพิ่มรายการเพิ่มเติมตามข้อมูลจริง -->
+        </div>
+    </div>
+</div>
+
 {% endblock %}

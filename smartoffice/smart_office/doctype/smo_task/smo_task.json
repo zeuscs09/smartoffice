@@ -60,6 +60,7 @@
    "default": "Open",
    "fieldname": "status",
    "fieldtype": "Select",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Status",
    "options": "Open\nOn Hold\nIn Review\nDelayed\nCompleted\nCancel"
@@ -114,6 +115,7 @@
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
+   "link_filters": "[[\"SMO Project\",\"status\",\"not in\",[\"Expired\",\"Cancelled\",null]]]",
    "options": "SMO Project",
    "search_index": 1
   },
@@ -180,6 +182,7 @@
    "label": "Contact Person"
   }
  ],
+ "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [
   {
@@ -187,7 +190,7 @@
    "link_fieldname": "task"
   }
  ],
- "modified": "2024-09-17 23:06:17.109755",
+ "modified": "2024-09-18 11:13:27.239083",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Task",

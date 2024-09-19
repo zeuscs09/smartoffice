@@ -5,6 +5,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "start_taxi",
   "taxi_rate"
  ],
  "fields": [
@@ -17,12 +18,20 @@
    "non_negative": 1,
    "precision": "2",
    "reqd": 1
+  },
+  {
+   "default": "38",
+   "fieldname": "start_taxi",
+   "fieldtype": "Int",
+   "label": "Start Taxi",
+   "non_negative": 1,
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-09-16 14:37:36.466899",
+ "modified": "2024-09-19 11:22:28.688506",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "Smart Office Setting",

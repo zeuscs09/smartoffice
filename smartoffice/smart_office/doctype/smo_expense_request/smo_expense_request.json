@@ -16,7 +16,6 @@
   "html_data",
   "section_break_obtr",
   "expense_request_item",
-  "data_for_preview",
   "section_break_snwq",
   "amended_from"
  ],
@@ -52,11 +51,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "data_for_preview",
-   "fieldtype": "HTML Editor",
-   "label": "Data for Preview"
-  },
-  {
    "fieldname": "request_by",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -69,6 +63,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Year",
+   "options": "2023\n2024",
    "reqd": 1
   },
   {
@@ -110,7 +105,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-09-17 22:54:33.146911",
+ "modified": "2024-09-18 01:24:20.168262",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Request",

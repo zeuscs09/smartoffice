@@ -4,14 +4,17 @@
 frappe.ui.form.on("SMO Expense Entry", {
   refresh(frm) {
     frappe.call({
-      method: "smartoffice.api.setting.get_taxi_rate", // API ที่สร้างไว้
+      method: "smartoffice.api.setting.get_taxi", // API ที่สร้างไว้
       args: {},
       callback: function (r) {
         if (r.message) {
 
-          console.log(frm.doc.config_taxi_rate);
+         let config=r.message;
           if (frm.doc.config_taxi_rate == 0) {
-            frm.set_value("config_taxi_rate", r.message);
+            frm.set_value("config_taxi_rate", config.taxi_rate);
+          }
+          if (frm.doc.config_taxi_init == 0) {
+            frm.set_value("config_taxi_init", config.taxi_start);
           }
           // frm.set_value("config_taxi_rate", r.message);
         }
@@ -37,13 +40,13 @@ frappe.ui.form.on("SMO Expense Item", {
   refresh(frm) {},
   expense_item_add: function (frm, cdt, cdn) {
     let taxi_rate = frm.get_field("config_taxi_rate").value;
-
+    let taxi_initial=frm.get_field("config_taxi_init").value;
     // เข้าถึงแถวที่ถูกเพิ่ม (child row)
     let row = locals[cdt][cdn];
 
     // ตั้งค่าฟิลด์ใน child row ด้วยค่าเริ่มต้น
     row.rate_per_km = taxi_rate;
-
+    row.taxi_initial=taxi_initial;
     // รีเฟรช Child Table เพื่อให้เห็นการเปลี่ยนแปลง
     frm.trigger("cal_total");
     frm.refresh_field("expense_item");
@@ -55,16 +58,18 @@ frappe.ui.form.on("SMO Expense Item", {
     let row = locals[cdt][cdn];
     if ( row.rate_per_km == 0) {
       let taxi_rate = frm.get_field("config_taxi_rate").value;
+      let taxi_initial = frm.get_field("config_taxi_init").value;
       row.rate_per_km = taxi_rate;
+      row.taxi_initial = taxi_initial;
     }
     if (row.expense_type == "EP001") {
       row.taxi_depart_distance = frm.get_field("distance_depart").value;
-      row.total_cost = row.taxi_depart_distance * row.rate_per_km;
+      row.total_cost = row.taxi_initial +( row.taxi_depart_distance * row.rate_per_km);
     }
 
     if (row.expense_type == "EP002") {
       row.taxi_return_distance = frm.get_field("distance_return").value;
-      row.total_cost = row.taxi_return_distance * row.rate_per_km;
+      row.total_cost = row.taxi_initial +( row.taxi_depart_distance * row.rate_per_km);
     }
     frm.trigger("cal_total");  
     frm.refresh_field("expense_item");

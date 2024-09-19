@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "service_report",
+  "service_date",
   "customer",
   "project",
   "total_amount",
@@ -14,6 +15,7 @@
   "customer_site",
   "distance_depart",
   "distance_return",
+  "config_taxi_init",
   "config_taxi_rate",
   "expense_item_section",
   "expense_item",
@@ -119,13 +121,27 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Is Request"
+  },
+  {
+   "fetch_from": "service_report.job_start_on",
+   "fieldname": "service_date",
+   "fieldtype": "Date",
+   "label": "Service Date",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "config_taxi_init",
+   "fieldtype": "Int",
+   "label": "Taxi Initial",
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-09-17 23:21:40.100847",
+ "modified": "2024-09-19 12:00:45.565543",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Entry",
