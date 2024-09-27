@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "prompt",
  "creation": "2024-09-16 09:44:20.054063",
@@ -17,7 +18,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-17 22:56:11.912597",
+ "modified": "2024-09-26 13:03:34.954887",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Job Type",

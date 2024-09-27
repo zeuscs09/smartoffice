@@ -10,6 +10,8 @@
   "month",
   "period",
   "column_break_gmlg",
+  "advance_payment",
+  "general_payment",
   "total",
   "get_data",
   "section_break_erng",
@@ -99,13 +101,29 @@
    "fieldtype": "Select",
    "label": "Period",
    "options": "Mid month\nEnd of month"
+  },
+  {
+   "fieldname": "advance_payment",
+   "fieldtype": "Float",
+   "label": "Advance Payment",
+   "precision": "2",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "general_payment",
+   "fieldtype": "Float",
+   "label": "General Payment",
+   "precision": "2",
+   "read_only": 1,
+   "reqd": 1
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-09-18 01:24:20.168262",
+ "modified": "2024-09-27 09:34:29.993507",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Request",

@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "prompt",
  "creation": "2024-09-15 23:48:44.405352",
@@ -19,7 +20,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-17 22:56:38.082569",
+ "modified": "2024-09-26 13:04:00.658569",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Type",

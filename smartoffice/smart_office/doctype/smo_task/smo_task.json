@@ -46,6 +46,7 @@
   {
    "fieldname": "job_type",
    "fieldtype": "Link",
+   "in_preview": 1,
    "label": "Job Type",
    "options": "SMO Job Type",
    "reqd": 1
@@ -63,7 +64,7 @@
    "hidden": 1,
    "in_list_view": 1,
    "label": "Status",
-   "options": "Open\nOn Hold\nIn Review\nDelayed\nCompleted\nCancel"
+   "options": "Open\nOn Hold\nIn Process\nDelayed\nCompleted\nCancel"
   },
   {
    "fieldname": "priority",
@@ -114,33 +115,37 @@
   {
    "fieldname": "project",
    "fieldtype": "Link",
+   "in_preview": 1,
    "label": "Project",
-   "link_filters": "[[\"SMO Project\",\"status\",\"not in\",[\"Expired\",\"Cancelled\",null]]]",
-   "options": "SMO Project",
+   "link_filters": "[[\"Project\",\"custom_project_status\",\"not in\",[\"completed\",\"Cancelled\",null]]]",
+   "options": "Project",
    "search_index": 1
   },
   {
    "fetch_from": "project.customer",
    "fieldname": "customer",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Customer",
-   "options": "SMO Customer"
+   "options": "Customer"
   },
   {
    "fetch_from": "customer.customer_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
+   "hidden": 1,
+   "in_preview": 1,
    "label": "Customer Name"
   },
   {
-   "fetch_from": "customer.primary_phone",
+   "fetch_from": "contact_person.mobile_no",
+   "fetch_if_empty": 1,
    "fieldname": "contact_mobile",
    "fieldtype": "Data",
    "label": "Contact Mobile"
   },
   {
-   "fetch_from": "customer.contact_email",
+   "fetch_from": "contact_person.email_id",
+   "fetch_if_empty": 1,
    "fieldname": "contact_email",
    "fieldtype": "Data",
    "label": "Contact Email"
@@ -158,6 +163,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "depends_on": "eval:doc.start_date != null",
    "fieldname": "team",
    "fieldtype": "Table",
    "label": "Team",
@@ -173,13 +179,16 @@
    "fieldtype": "Data",
    "hidden": 1,
    "in_list_view": 1,
+   "in_preview": 1,
    "label": "Assign To"
   },
   {
-   "fetch_from": "customer.contact_full_name",
+   "fetch_from": "customer.customer_primary_contact",
+   "fetch_if_empty": 1,
    "fieldname": "contact_person",
-   "fieldtype": "Data",
-   "label": "Contact Person"
+   "fieldtype": "Link",
+   "label": "Contact Person",
+   "options": "Contact"
   }
  ],
  "hide_toolbar": 1,
@@ -190,7 +199,7 @@
    "link_fieldname": "task"
   }
  ],
- "modified": "2024-09-18 11:13:27.239083",
+ "modified": "2024-09-27 07:47:52.747905",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Task",
@@ -223,6 +232,7 @@
   }
  ],
  "search_fields": "customer_name, project",
+ "show_preview_popup": 1,
  "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",

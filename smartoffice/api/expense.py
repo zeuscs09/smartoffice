@@ -43,9 +43,9 @@ def get_expense_entries(month, year,request_by):
             AND ei.parenttype = 'SMO Expense Entry' 
             AND ei.parentfield = 'expense_item'
         INNER JOIN
-            `tabSMO Customer` ec ON ee.customer = ec.name
+            `tabCustomer` ec ON ee.customer = ec.name
         INNER JOIN
-            `tabSMO Project` ep ON ee.project = ep.name
+            `tabProject` ep ON ee.project = ep.name
         LEFT JOIN
             `tabSMO Expense Type` et ON ei.expense_type = et.name
         WHERE

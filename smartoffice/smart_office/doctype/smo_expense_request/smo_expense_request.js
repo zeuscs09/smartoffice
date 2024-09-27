@@ -14,7 +14,6 @@ frappe.ui.form.on("SMO Expense Request", {
     frm.set_df_property("year", "options", [currentYear, lastYear].join("\n"));
 
     // ตั้งค่าปีปัจจุบันเป็นค่าเริ่มต้น
-    if (!frm.doc.year) frm.set_value("year", currentYear);
 
     const monthNames = [
       "January",
@@ -31,12 +30,16 @@ frappe.ui.form.on("SMO Expense Request", {
       "December",
     ];
 
-    // ดึงเดือนปัจจุบัน
-    const currentMonth = new Date().getMonth(); // ดึง index ของเดือน (เริ่มจาก 0)
-    const fullMonthName = monthNames[currentMonth]; // ชื่อเดือนเต็ม
+    if (frm.is_new()) {
+      // ฟอร์มนี้เป็นฟอร์มใหม่และยังไม่เคยบันทึก
+      // ดึงเดือนปัจจุบัน
+      const currentMonth = new Date().getMonth(); // ดึง index ของเดือน (เริ่มจาก 0)
+      const fullMonthName = monthNames[currentMonth]; // ชื่อเดือนเต็ม
 
-    // ตั้งค่าเดือนปัจจุบันในฟิลด์ (สมมติว่าเป็นฟิลด์ชื่อ 'month')
-    if (!frm.doc.month) frm.set_value("month", fullMonthName);
+      // ตั้งค่าเดือนปัจจุบันในฟิลด์ (สมมติว่าเป็นฟิลด์ชื่อ 'month')
+      frm.set_value("month", fullMonthName);
+      frm.set_value("year", currentYear);
+    }
   },
   refresh(frm) {
     if (frm.doc.expense_request_item) {
@@ -75,6 +78,8 @@ frappe.ui.form.on("SMO Expense Request", {
           // เรียกฟังก์ชันเพื่อแสดงผลลัพธ์ใน HTML field
           frm.clear_table("expense_request_item");
           let total = 0;
+          let others = 0;
+          let advance = 0;
           // วนลูปเพิ่มข้อมูลที่ได้จาก API ลงใน child table
           $.each(r.message, function (i, d) {
             // เพิ่มแถวใหม่ใน child table
@@ -85,13 +90,18 @@ frappe.ui.form.on("SMO Expense Request", {
             row.expense_item = d.expense_item; // แทนที่ด้วยฟิลด์จริงใน child table
             row.object_data = JSON.stringify(d);
             total += d.total_cost;
+       
+            if (d.paid_by == "เงินทดรอง") advance += d.total_cost;
+            else others += d.total_cost;
+
           });
 
           // รีเฟรชหน้าจอเพื่อแสดงข้อมูลใน child table
           frm.refresh_field("expense_request_item");
           frm.set_value("total", total);
+          frm.set_value("advance_payment", advance);
+          frm.set_value("general_payment", others);
 
-          
           render_summary(r.message, function (html) {
             $("[data-fieldname='html_data']").html(html);
           });
@@ -158,7 +168,7 @@ function render_summary(data, callback) {
       </thead>
       <tbody>
   `;
-    console.log(html);
+
     // ตัวแปรสำหรับเก็บผลรวมของแต่ละประเภท
     let grandTotals = expenseTypes.reduce((acc, type) => {
       acc[type.desc] = 0;
@@ -209,8 +219,7 @@ function render_summary(data, callback) {
       </tfoot>
     </table>
   `;
-
-    // คืนค่า HTML string
+   
     return callback(html);
   });
 }

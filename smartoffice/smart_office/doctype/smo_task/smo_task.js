@@ -57,3 +57,36 @@ frappe.ui.form.on("SMO Task", {
     }
   },
 });
+
+frappe.ui.form.on("SMO Working Team", {
+  user(frm,cdt, cdn) {
+    let row = locals[cdt][cdn];
+    if (row.user) {
+      frappe.dom.freeze("Load Data");
+      frappe.call({
+        method: "smartoffice.api.task.check_user_task", // API ที่สร้างไว้
+        args: {
+          user: row.user,
+          activity_date: frm.doc.start_date,
+          
+        },
+        callback: function (r) {
+          if (r.message) {
+            console.log(r.message);
+            if (r.message.length > 0) {
+              row.overlapping_job_on_date=1;
+              row.filter=`?start_date=${frm.doc.start_date}&assign_to=["like","%${row.user}%"]`
+            }
+            frappe.dom.unfreeze();
+            frm.refresh_field("user");
+          }
+        },
+      });
+    }
+  },
+  view_task(frm,cdt, cdn) {
+    let row = locals[cdt][cdn];
+    let url=`/app/smo-task/${row.filter}`;
+    window.open(url);
+  },
+});

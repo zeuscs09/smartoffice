@@ -19,8 +19,13 @@
   "contact_email",
   "job_detail_section",
   "job_start_on",
+  "is_holiday",
+  "holiday_description",
   "column_break_lqgd",
   "job_fininish",
+  "column_break_wuat",
+  "finish_time",
+  "duration",
   "section_break_tmzs",
   "team",
   "section_break_irho",
@@ -51,7 +56,7 @@
    "in_list_view": 1,
    "in_preview": 1,
    "label": "Task",
-   "link_filters": "[[\"SMO Task\",\"status\",\"not in\",[\"In Review\",\"Completed\",\"Cancel\",null]]]",
+   "link_filters": "[[\"SMO Task\",\"status\",\"not in\",[\"Cancel\",null]]]",
    "options": "SMO Task",
    "reqd": 1,
    "search_index": 1
@@ -83,10 +88,9 @@
    "fetch_from": "task.project",
    "fieldname": "project_link",
    "fieldtype": "Link",
-   "hidden": 1,
    "in_preview": 1,
    "label": "Project",
-   "options": "SMO Project",
+   "options": "Project",
    "read_only": 1
   },
   {
@@ -144,9 +148,10 @@
   },
   {
    "fieldname": "job_fininish",
-   "fieldtype": "Datetime",
+   "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Job Fininish",
+   "label": "Finish Date",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -184,8 +189,37 @@
    "fieldtype": "Link",
    "in_preview": 1,
    "label": "Customer",
-   "options": "SMO Customer",
+   "options": "Customer",
    "width": "2000"
+  },
+  {
+   "fieldname": "duration",
+   "fieldtype": "Duration",
+   "label": "Duration",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_wuat",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "finish_time",
+   "fieldtype": "Time",
+   "label": "Finish Time",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_holiday",
+   "fieldtype": "Check",
+   "label": "Is Holiday",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.is_holiday == 1",
+   "fieldname": "holiday_description",
+   "fieldtype": "Data",
+   "label": "Holiday Description"
   }
  ],
  "hide_toolbar": 1,
@@ -197,7 +231,7 @@
    "link_fieldname": "service_report"
   }
  ],
- "modified": "2024-09-18 11:26:24.192163",
+ "modified": "2024-09-27 06:31:58.621397",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Service Report",

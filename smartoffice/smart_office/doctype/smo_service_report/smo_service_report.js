@@ -44,4 +44,10 @@ frappe.ui.form.on("SMO Service Report", {
       };
     });
   },
+  job_start_on: function(frm) {
+    if(frm.doc.job_start_on) {
+        
+        frm.set_value("job_fininish", frm.doc.job_start_on);
+    }
+}
 });

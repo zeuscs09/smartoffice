@@ -34,6 +34,18 @@ frappe.ui.form.on("SMO Expense Entry", {
     console.log(total_amount);
     frm.set_value("total_amount", total_amount);
   },
+  is_holiday(frm) {
+    if (frm.doc.is_holiday && frm.doc.is_holiday == 1) {
+      
+      if (frm.doc.working_hour>4*3600) {
+        frm.set_value("ot_rate", 1000);
+      }else{
+        frm.set_value("ot_rate", 500);
+      }
+    } else {
+      frm.set_value("ot_rate", 0);
+    }
+  }
 });
 
 frappe.ui.form.on("SMO Expense Item", {
@@ -43,7 +55,7 @@ frappe.ui.form.on("SMO Expense Item", {
     let taxi_initial=frm.get_field("config_taxi_init").value;
     // เข้าถึงแถวที่ถูกเพิ่ม (child row)
     let row = locals[cdt][cdn];
-
+    row.receipt_date=frappe.datetime.get_datetime_as_string(frm.doc.service_date).substr(0,10)
     // ตั้งค่าฟิลด์ใน child row ด้วยค่าเริ่มต้น
     row.rate_per_km = taxi_rate;
     row.taxi_initial=taxi_initial;
@@ -69,7 +81,10 @@ frappe.ui.form.on("SMO Expense Item", {
 
     if (row.expense_type == "EP002") {
       row.taxi_return_distance = frm.get_field("distance_return").value;
-      row.total_cost = row.taxi_initial +( row.taxi_depart_distance * row.rate_per_km);
+      row.total_cost = row.taxi_initial +( row.taxi_return_distance * row.rate_per_km);
+    }
+    if (row.expense_type == "EP004") {
+      row.total_cost =  cur_frm.doc.ot_rate;
     }
     frm.trigger("cal_total");  
     frm.refresh_field("expense_item");

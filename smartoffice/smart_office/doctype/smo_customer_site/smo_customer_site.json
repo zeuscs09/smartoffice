@@ -21,7 +21,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Customer",
-   "options": "SMO Customer",
+   "options": "Customer",
    "reqd": 1
   },
   {
@@ -68,7 +68,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-17 22:57:12.637534",
+ "modified": "2024-09-25 16:51:31.112633",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Customer Site",
