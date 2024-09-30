@@ -25,6 +25,9 @@ frappe.ui.form.on("SMO Expense Entry", {
           if (frm.doc.config_taxi_init == 0) {
             frm.set_value("config_taxi_init", config.taxi_start);
           }
+          if (frm.doc.over_night_rate == 0) {
+            frm.set_value("over_night_rate", config.over_night_rate);
+          }
           // frm.set_value("config_taxi_rate", r.message);
         }
       },
@@ -141,6 +144,11 @@ frappe.ui.form.on("SMO Expense Item", {
     }
     if (row.expense_type == "EP004") {
       row.total_cost = cur_frm.doc.ot_rate;
+    }
+    if (row.expense_type == "EP009") {
+      row.total_cost = cur_frm.doc.over_night_rate;
+      row.from_date=cur_frm.doc.service_date
+      row.to_date=cur_frm.doc.finish_date
     }
     frm.trigger("cal_total");
     frm.refresh_field("expense_item");

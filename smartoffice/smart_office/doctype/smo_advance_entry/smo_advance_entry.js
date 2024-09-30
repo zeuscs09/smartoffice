@@ -15,8 +15,11 @@ frappe.ui.form.on("SMO Advance Entry", {
         };
       }
     );
+
+   
   },
   refresh(frm) {
+    frm.toggle_display("summary_tab", true);
     frappe.dom.freeze("Loading...");
     frappe.call({
       method: "smartoffice.api.setting.get_taxi", // API ที่สร้างไว้
@@ -36,22 +39,7 @@ frappe.ui.form.on("SMO Advance Entry", {
       },
     });
 
-    // frm.fields_dict["expense_item"].grid.get_field("expense_type").get_query =
-    //   function (doc, cdt, cdn) {
-    //     return {
-    //       filters: {
-    //         // เงื่อนไขในการกรองข้อมูล
-    //         for_advance: 1,
-    //       },
-    //     };
-    //   };
-    // frm.set_query("expense_type", "expense_item", function () {
-    //     return {
-    //       filters: {
-    //         for_advance: 1
-    //       },
-    //     };
-    //   });
+    
   },
   cal_total(frm) {
     console.log("cal_total");
@@ -93,13 +81,13 @@ frappe.ui.form.on("SMO Advance Entry", {
 frappe.ui.form.on("SMO Expense Item", {
   refresh(frm) {
     var df = frappe.meta.get_docfield(
-        "SMO Expense Item",
-        "paid_by",
-        cur_frm.doc.name
-      );
-      df.hidden = 1;
+      "SMO Expense Item",
+      "paid_by",
+      cur_frm.doc.name
+    );
+    df.hidden = 1;
   },
-  
+
   expense_item_add: function (frm, cdt, cdn) {
     let cur_frm = frm;
     let taxi_rate = frm.get_field("config_taxi_rate").value;

@@ -6,6 +6,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "workflow_state",
   "task_detail_section",
   "task",
   "task_name",
@@ -28,6 +29,7 @@
   "column_break_cfaf",
   "finish_date_input",
   "duration",
+  "over_night",
   "column_break_jidf",
   "finish_hour_input",
   "column_break_qrnv",
@@ -36,7 +38,6 @@
   "job_start_on",
   "column_break_dkaa",
   "job_finish",
-  "over_night",
   "section_break_tmzs",
   "team",
   "section_break_irho",
@@ -238,7 +239,6 @@
    "fieldname": "finish_date_input",
    "fieldtype": "Date",
    "label": "Finish Date",
-   "read_only": 1,
    "reqd": 1
   },
   {
@@ -290,8 +290,17 @@
    "default": "0",
    "fieldname": "over_night",
    "fieldtype": "Check",
+   "label": "Over Night ?",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "workflow_state",
+   "fieldtype": "Link",
    "hidden": 1,
-   "label": "Over Night"
+   "label": "Workflow State",
+   "no_copy": 1,
+   "options": "Workflow State"
   }
  ],
  "hide_toolbar": 1,
@@ -303,7 +312,7 @@
    "link_fieldname": "service_report"
   }
  ],
- "modified": "2024-09-28 11:19:30.367389",
+ "modified": "2024-09-30 11:45:44.202565",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Service Report",

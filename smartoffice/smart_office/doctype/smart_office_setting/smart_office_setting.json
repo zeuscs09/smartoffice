@@ -6,7 +6,8 @@
  "engine": "InnoDB",
  "field_order": [
   "start_taxi",
-  "taxi_rate"
+  "taxi_rate",
+  "over_night_rate"
  ],
  "fields": [
   {
@@ -26,12 +27,19 @@
    "label": "Start Taxi",
    "non_negative": 1,
    "reqd": 1
+  },
+  {
+   "default": "300",
+   "fieldname": "over_night_rate",
+   "fieldtype": "Float",
+   "label": "Over night Rate",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-09-19 11:22:28.688506",
+ "modified": "2024-09-30 11:47:30.973882",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "Smart Office Setting",

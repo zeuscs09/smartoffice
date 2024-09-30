@@ -9,6 +9,8 @@
   "service_report",
   "service_date",
   "is_holiday",
+  "finish_date",
+  "over_night",
   "holiday_description",
   "customer",
   "customer_site",
@@ -16,6 +18,7 @@
   "column_break_xeie",
   "working_hour",
   "ot_rate",
+  "over_night_rate",
   "distance_depart",
   "distance_return",
   "config_taxi_init",
@@ -168,13 +171,37 @@
    "fieldtype": "Float",
    "label": "OT Rate",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.over_night==1",
+   "fetch_from": "service_report.finish_date_input",
+   "fieldname": "finish_date",
+   "fieldtype": "Date",
+   "label": "Finish Date",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "service_report.over_night",
+   "fieldname": "over_night",
+   "fieldtype": "Check",
+   "label": "Over Night",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.over_night==1",
+   "fieldname": "over_night_rate",
+   "fieldtype": "Float",
+   "label": "Overnight Rate",
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-09-28 10:18:43.603878",
+ "modified": "2024-09-30 11:54:35.164654",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Entry",

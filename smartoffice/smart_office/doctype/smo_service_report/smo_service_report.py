@@ -83,6 +83,11 @@ class SMOServiceReport(Document):
 		d = time_diff_in_seconds(self.job_finish,self.job_start_on) 
 		# frappe.errprint(f"Duration in seconds: {d}")
 		self.duration = d
+		# cal diff day from start_date_input and finish_date_input 
+		diff_day = (getdate(self.finish_date_input) - getdate(self.start_date_input)).days
+		frappe.errprint(f"Diff day: {diff_day}")
+		self.over_night = diff_day >0
+
 	
 	def create_timesheet(self):
 		for item in self.team:

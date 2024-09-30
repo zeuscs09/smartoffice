@@ -1,0 +1,103 @@
+{
+ "charts": [
+  {
+   "chart_name": "Pending Task",
+   "label": "Pending Task"
+  }
+ ],
+ "content": "[{\"id\":\"voQjQGuSXc\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Smart Office</span>\",\"col\":12}},{\"id\":\"4SCUS_Be-A\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Pending Task\",\"col\":12}},{\"id\":\"AQ6Zq620J6\",\"type\":\"card\",\"data\":{\"card_name\":\"Job\",\"col\":4}},{\"id\":\"yPzIStMtr1\",\"type\":\"card\",\"data\":{\"card_name\":\"Expense\",\"col\":4}}]",
+ "creation": "2024-09-26 13:01:04.542772",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "quality",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Smart Office",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Job",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Task",
+   "link_count": 0,
+   "link_to": "SMO Task",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Service Report",
+   "link_count": 0,
+   "link_to": "SMO Service Report",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Expense",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Expense Entry",
+   "link_count": 0,
+   "link_to": "SMO Expense Entry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Expense Request",
+   "link_count": 0,
+   "link_to": "SMO Expense Request",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Advance Entry",
+   "link_count": 0,
+   "link_to": "SMO Advance Entry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2024-09-30 12:03:10.878411",
+ "modified_by": "admin@tps.com",
+ "module": "Smart Office",
+ "name": "Smart Office",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 28.0,
+ "shortcuts": [],
+ "title": "Smart Office"
+}
