@@ -1,0 +1,157 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2024-09-28 12:19:38.036503",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "service_date",
+  "customer",
+  "customer_site",
+  "project",
+  "column_break_ifjs",
+  "distance_depart",
+  "distance_return",
+  "config_taxi_init",
+  "config_taxi_rate",
+  "total_amount",
+  "expense_item_section",
+  "reference_code",
+  "expense_item",
+  "section_break_fabx",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_fabx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "SMO Advance Entry",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "service_date",
+   "fieldtype": "Date",
+   "label": "Service Date"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "customer_site",
+   "fieldtype": "Link",
+   "label": "Customer Site",
+   "options": "SMO Customer Site"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "column_break_ifjs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "customer_site.depart_km",
+   "fieldname": "distance_depart",
+   "fieldtype": "Float",
+   "label": "Distance Depart",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer_site.return_km",
+   "fieldname": "distance_return",
+   "fieldtype": "Float",
+   "label": "Distance Return",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_amount",
+   "fieldtype": "Float",
+   "label": "Total Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "expense_item_section",
+   "fieldtype": "Section Break",
+   "label": "Expense Item"
+  },
+  {
+   "depends_on": "eval:doc.reference_code != undefined && doc.reference_code.trim() != ''",
+   "fieldname": "expense_item",
+   "fieldtype": "Table",
+   "options": "SMO Expense Item"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "no_copy": 1,
+   "options": "ADV-.YYYY.-.MM.-.####.",
+   "set_only_once": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "setting.start_taxi",
+   "fieldname": "config_taxi_init",
+   "fieldtype": "Float",
+   "label": "Taxi Initial",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "config_taxi_rate",
+   "fieldtype": "Float",
+   "label": "Taxi Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Reference Code",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-09-28 15:00:26.494740",
+ "modified_by": "Administrator",
+ "module": "Smart Office",
+ "name": "SMO Advance Entry",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

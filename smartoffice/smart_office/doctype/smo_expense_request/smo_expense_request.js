@@ -195,10 +195,10 @@ function render_summary(data, callback) {
         ${expenseTypes
           .map((type) => {
             const cost = group.expense_types[type.desc] || 0;
-            return `<td>${cost.toLocaleString()}</td>`;
+            return `<td style="text-align: right">${cost.toLocaleString()}</td>`;
           })
           .join("")}
-        <td>${total.toLocaleString()}</td>
+        <td style="text-align: right">${total.toLocaleString()}</td>
       </tr>
     `;
     });
@@ -211,10 +211,10 @@ function render_summary(data, callback) {
           <th colspan="4">Grand Total</th>
           ${expenseTypes
             .map(
-              (type) => `<th>${grandTotals[type.desc].toLocaleString()}</th>`
+              (type) => `<th style="text-align: right">${grandTotals[type.desc].toLocaleString()}</th>`
             )
             .join("")}
-          <th>${grandTotalOverall.toLocaleString()}</th>
+          <th style="text-align: right">${grandTotalOverall.toLocaleString()}</th>
         </tr>
       </tfoot>
     </table>

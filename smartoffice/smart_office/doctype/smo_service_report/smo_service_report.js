@@ -3,6 +3,31 @@
 
 frappe.ui.form.on("SMO Service Report", {
   refresh(frm) {},
+  before_save: function(frm) {
+    var hour = frm.doc.start_hour_input;  // ดึงค่าจากฟิลด์ชั่วโมง
+    var minute = frm.doc.start_minute_input;  // ดึงค่าจากฟิลด์นาที
+    
+    if (hour && minute) {
+        var time_value = frm.doc.start_date_input + ' ' + hour + ':' + minute;
+        frm.set_value('job_start_on', time_value);
+    }
+
+     hour = frm.doc.finish_hour_input;  // ดึงค่าจากฟิลด์ชั่วโมง
+     minute = frm.doc.finish_minute_input;  // ดึงค่าจากฟิลด์นาที
+    
+    if (hour && minute) {
+        var time_value = frm.doc.finish_date_input + ' ' + hour + ':' + minute;
+        frm.set_value('job_finish', time_value);
+    }
+    // validate วันที่เริ่มงานต้องน้อยกว่าวันที่สิ้นสุดงาน
+    if (frm.doc.job_start_on > frm.doc.job_finish) {
+        frappe.throw("Start date cannot be greater than Finish date");
+    }
+
+    if (frm.doc.start_date_input > frm.doc.finish_date_input) {
+      frm.set_value('over_night', 1);
+    }
+  },
   task(frm) {
     // get data from SMO Working Team where parent=task parenttype='SMO Task' and parentfield='team'
     frappe.call({
@@ -27,6 +52,8 @@ frappe.ui.form.on("SMO Service Report", {
                      row.email = d.email;  // แทนที่ด้วยฟิลด์จริงใน child table
                      
                      row.full_name = d.full_name;  // แทนที่ด้วยฟิลด์จริงใน child table
+                     row.overlapping_job_on_date = d.overlapping_job_on_date;
+                     row.filter=d.filter;
                  });
 
                  // รีเฟรชหน้าจอเพื่อแสดงข้อมูลใน child table
@@ -44,10 +71,18 @@ frappe.ui.form.on("SMO Service Report", {
       };
     });
   },
-  job_start_on: function(frm) {
-    if(frm.doc.job_start_on) {
+  start_date_input: function(frm) {
+    if(frm.doc.start_date_input) {
         
-        frm.set_value("job_fininish", frm.doc.job_start_on);
+        frm.set_value("finish_date_input", frm.doc.start_date_input);
     }
 }
+});
+frappe.ui.form.on("SMO Working Team", {
+
+  view_task(frm,cdt, cdn) {
+    let row = locals[cdt][cdn];
+    let url=`/app/smo-task/${row.filter}`;
+    window.open(url);
+  },
 });

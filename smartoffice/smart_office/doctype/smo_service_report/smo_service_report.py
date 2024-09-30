@@ -21,6 +21,8 @@ class SMOServiceReport(Document):
 		plan_task = frappe.get_doc("SMO Task", doc.task)
 		plan_task.status = "Completed"
 		plan_task.save()
+  
+		self.create_timesheet()
 		# frappe.msgprint("Submited document and update Task " +plan_task.task_name +" finish.")
 
 	def on_update(self):
@@ -30,8 +32,8 @@ class SMOServiceReport(Document):
 			plan_task = frappe.get_doc("SMO Task", doc.task)
 			plan_task.status = "In Process"
 			plan_task.save()
-		if doc.workflow_state=="Customer Approve":
-			self.create_timesheet()
+		# if doc.workflow_state=="Customer Approve":
+		# 	self.create_timesheet()
 		# # check and set holiday
 			# วันที่ที่ต้องการตรวจสอบ
 	
@@ -76,29 +78,9 @@ class SMOServiceReport(Document):
 			self.is_holiday = 0
 			self.holiday_description = None
 		
-		start_time = self.job_start_on
-		self.job_finish = getdate(start_time)
+		
 
-		# ตรวจสอบว่า self.finish_time เป็น string หรือไม่
-		if isinstance(self.finish_time, str):
-			# แปลงจาก string ("HH:MM:SS") เป็น timedelta
-			time_obj = datetime.strptime(self.finish_time, '%H:%M:%S').time()
-			
-			# แปลง time_obj เป็น timedelta
-			finish_time_parts = timedelta(
-				hours=time_obj.hour, 
-				minutes=time_obj.minute, 
-				seconds=time_obj.second
-			)
-		else:
-			# ถ้าไม่ใช่ string สมมติว่า finish_time เป็น timedelta อยู่แล้ว
-			finish_time_parts = self.finish_time
-
-		# frappe.errprint(f"Job finish date: {self.job_finish}")
-		end_time = datetime.combine(self.job_finish, datetime.min.time()) + finish_time_parts
-		# frappe.errprint(f"End time: {end_time}")
-
-		d = time_diff_in_seconds(end_time,start_time )
+		d = time_diff_in_seconds(self.job_finish,self.job_start_on) 
 		# frappe.errprint(f"Duration in seconds: {d}")
 		self.duration = d
 	
@@ -126,8 +108,11 @@ class SMOServiceReport(Document):
 				timesheet.project = self.project_link
 				timesheet.time_logs[0].project = self.project_link
 			# บันทึก Timesheet
-			timesheet.insert()
-			timesheet.submit()  # ถ้าต้องการให้บันทึกและส่ง Timesheet อัตโนมัติ
+			timesheet.flags.ignore_validate = True
+			timesheet.insert(ignore_permissions=True)
+			
+			# หากต้องการส่ง Timesheet โดยข้าม validation
+			timesheet.submit()
 			# frappe.msgprint(f"Timesheet {timesheet.name} created successfully.")
 # def before_insert(self):
 	# 	task_status = frappe.db.sql("""

@@ -41,7 +41,9 @@ def fetch_task_data(task):
         task_items.append({
             'user': item.user,
             'email': item.email,
-            'full_name':item.full_name
+            'full_name':item.full_name,
+            'overlapping_job_on_date': item.overlapping_job_on_date,
+            'filter': item.filter,
             # เพิ่มฟิลด์ที่ต้องการดึงข้อมูลอื่น ๆ
                     })
 

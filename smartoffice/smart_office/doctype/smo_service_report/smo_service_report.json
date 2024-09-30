@@ -18,14 +18,25 @@
   "contact_mobile",
   "contact_email",
   "job_detail_section",
-  "job_start_on",
+  "start_date_input",
   "is_holiday",
   "holiday_description",
   "column_break_lqgd",
-  "job_fininish",
-  "column_break_wuat",
-  "finish_time",
+  "start_hour_input",
+  "column_break_bgve",
+  "start_minute_input",
+  "column_break_cfaf",
+  "finish_date_input",
   "duration",
+  "column_break_jidf",
+  "finish_hour_input",
+  "column_break_qrnv",
+  "finish_minute_input",
+  "section_break_zguh",
+  "job_start_on",
+  "column_break_dkaa",
+  "job_finish",
+  "over_night",
   "section_break_tmzs",
   "team",
   "section_break_irho",
@@ -138,21 +149,13 @@
   {
    "fieldname": "job_start_on",
    "fieldtype": "Datetime",
+   "hidden": 1,
    "in_list_view": 1,
-   "label": "Job Start On",
-   "reqd": 1
+   "label": "Job Start On"
   },
   {
    "fieldname": "column_break_lqgd",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "job_fininish",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Finish Date",
-   "read_only": 1,
-   "reqd": 1
   },
   {
    "fieldname": "section_break_tmzs",
@@ -199,16 +202,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_wuat",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "finish_time",
-   "fieldtype": "Time",
-   "label": "Finish Time",
-   "reqd": 1
-  },
-  {
    "default": "0",
    "fieldname": "is_holiday",
    "fieldtype": "Check",
@@ -220,6 +213,85 @@
    "fieldname": "holiday_description",
    "fieldtype": "Data",
    "label": "Holiday Description"
+  },
+  {
+   "fieldname": "start_date_input",
+   "fieldtype": "Date",
+   "label": "Job Start On",
+   "reqd": 1
+  },
+  {
+   "fieldname": "start_hour_input",
+   "fieldtype": "Select",
+   "label": "Hour",
+   "options": "00\n01\n02\n03\n04\n05\n06\n07\n08\n09\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23",
+   "reqd": 1
+  },
+  {
+   "fieldname": "start_minute_input",
+   "fieldtype": "Select",
+   "label": "Minute",
+   "options": "00\n10\n20\n30\n40\n50",
+   "reqd": 1
+  },
+  {
+   "fieldname": "finish_date_input",
+   "fieldtype": "Date",
+   "label": "Finish Date",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "finish_hour_input",
+   "fieldtype": "Select",
+   "label": "Hour",
+   "options": "00\n01\n02\n03\n04\n05\n06\n07\n08\n09\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23",
+   "reqd": 1
+  },
+  {
+   "fieldname": "finish_minute_input",
+   "fieldtype": "Select",
+   "label": "Minute",
+   "options": "00\n10\n20\n30\n40\n50",
+   "reqd": 1
+  },
+  {
+   "fieldname": "job_finish",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Finish Date"
+  },
+  {
+   "fieldname": "column_break_bgve",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_jidf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_zguh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_dkaa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_cfaf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_qrnv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "over_night",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Over Night"
   }
  ],
  "hide_toolbar": 1,
@@ -231,7 +303,7 @@
    "link_fieldname": "service_report"
   }
  ],
- "modified": "2024-09-27 06:31:58.621397",
+ "modified": "2024-09-28 11:19:30.367389",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Service Report",
