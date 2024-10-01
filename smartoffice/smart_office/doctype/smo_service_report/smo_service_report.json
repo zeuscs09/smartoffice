@@ -312,7 +312,7 @@
    "link_fieldname": "service_report"
   }
  ],
- "modified": "2024-09-30 11:45:44.202565",
+ "modified": "2024-09-30 22:06:50.664882",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Service Report",
@@ -347,7 +347,6 @@
  ],
  "search_fields": "task_name",
  "show_preview_popup": 1,
- "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [
@@ -367,6 +366,5 @@
    "color": "Red",
    "title": "Customer Reject"
   }
- ],
- "title_field": "task"
+ ]
 }

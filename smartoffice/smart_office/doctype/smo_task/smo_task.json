@@ -7,6 +7,7 @@
  "field_order": [
   "task_infromation_section",
   "job_type",
+  "title",
   "task_name",
   "start_date",
   "finish_date",
@@ -189,6 +190,12 @@
    "fieldtype": "Link",
    "label": "Contact Person",
    "options": "Contact"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title"
   }
  ],
  "hide_toolbar": 1,
@@ -199,7 +206,7 @@
    "link_fieldname": "task"
   }
  ],
- "modified": "2024-09-27 07:47:52.747905",
+ "modified": "2024-09-30 22:08:12.752285",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Task",
@@ -237,5 +244,5 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
- "title_field": "task_name"
+ "title_field": "title"
 }

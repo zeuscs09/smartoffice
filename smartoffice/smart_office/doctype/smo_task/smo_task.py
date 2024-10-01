@@ -25,6 +25,8 @@ class SMOTask(Document):
         else:
             # If there is no team, set assign_to to None
             self.assign_to = None
+        self.title=self.name + ' - ' + self.task_name
+        
 @frappe.whitelist()
 def fetch_task_data(task):
     # ตรวจสอบว่ามีการส่ง task เข้ามา

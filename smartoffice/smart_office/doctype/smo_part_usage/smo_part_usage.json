@@ -10,6 +10,7 @@
   "serial_no",
   "column_break_nreh",
   "description",
+  "status",
   "qty"
  ],
  "fields": [
@@ -42,12 +43,18 @@
    "in_list_view": 1,
    "label": "Qty",
    "precision": "2"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\u0e22\u0e37\u0e21\u0e43\u0e0a\u0e49\u0e23\u0e30\u0e2b\u0e27\u0e48\u0e32\u0e07\u0e0b\u0e48\u0e2d\u0e21\n\u0e22\u0e37\u0e21\u0e2a\u0e33\u0e2b\u0e23\u0e31\u0e1a\u0e19\u0e33\u0e40\u0e2a\u0e19\u0e2d\n\u0e22\u0e37\u0e21\u0e43\u0e0a\u0e49\u0e23\u0e30\u0e2b\u0e27\u0e48\u0e32\u0e07\u0e23\u0e2d\u0e2a\u0e31\u0e48\u0e07\u0e0b\u0e37\u0e49\u0e2d\n\u0e04\u0e37\u0e19"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-09-16 14:01:22.514338",
+ "modified": "2024-09-30 22:03:53.224189",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Part Usage",

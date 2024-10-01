@@ -111,8 +111,8 @@
    "type": "Link"
   }
  ],
- "modified": "2024-09-30 12:03:20.164782",
- "modified_by": "admin@tps.com",
+ "modified": "2024-09-30 18:11:17.249144",
+ "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "Smart Office Configuration",
  "number_cards": [],
@@ -123,6 +123,9 @@
  "roles": [
   {
    "role": "System Manager"
+  },
+  {
+   "role": "Engineer Approval"
   }
  ],
  "sequence_id": 29.0,
