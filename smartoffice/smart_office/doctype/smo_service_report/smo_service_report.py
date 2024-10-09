@@ -8,6 +8,7 @@ from frappe.utils import getdate, time_diff_in_seconds, get_datetime, get_url, c
 import hashlib
 import os
 from frappe.utils import get_url, now
+from urllib.parse import quote
 
 
 class SMOServiceReport(Document):
@@ -100,9 +101,12 @@ class SMOServiceReport(Document):
 		args['formatted_date'] = format_date(job_start, "dd MMMM yyyy")
 		args['formatted_time'] = format_time(job_start)
 		
-		# สร้าง approve_link
-		approve_link = get_url(f"/api/method/smartoffice.api.servicereport.approve_service_report?name={self.name}&customer_email={self.contact_email}&hash={self.approval_hash}&timestamp={self.approval_timestamp}")
-		args['approve_link'] = approve_link
+		# สร้าง approve_link และ reject_link
+		base_url = get_url("/servicereport_landing")
+		common_params = f"name={quote(self.name)}&customer_email={quote(self.contact_email)}&hash={quote(self.approval_hash)}&timestamp={quote(self.approval_timestamp)}"
+		
+		args['approve_link'] = f"{base_url}?action=approve&{common_params}"
+		args['reject_link'] = f"{base_url}?action=reject&{common_params}"
 
 		# ดึง template จาก Smart Office Settings
 		template = frappe.db.get_single_value("Smart Office Setting", "service_report_approval_template")

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายงานบริการ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans Thai', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
+        <h2 id="status" class="text-2xl font-bold mb-4 text-center text-gray-700">กำลังดำเนินการ...</h2>
+        <p id="message" class="text-center text-gray-600">กรุณารอสักครู่</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const action = urlParams.get('action');
+            const name = urlParams.get('name');
+            const customer_email = urlParams.get('customer_email');
+            const hash = urlParams.get('hash');
+            const timestamp = urlParams.get('timestamp');
+            const reason = urlParams.get('reason');
+
+            if (!action || !name || !customer_email || !hash || !timestamp) {
+                showError('ข้อมูลไม่ครบถ้วน กรุณาตรวจสอบลิงก์ของคุณ');
+                return;
+            }
+
+            let apiUrl = `/api/method/smartoffice.api.servicereport.${action}_service_report?name=${encodeURIComponent(name)}&customer_email=${encodeURIComponent(customer_email)}&hash=${encodeURIComponent(hash)}&timestamp=${encodeURIComponent(timestamp)}`;
+            if (reason) {
+                apiUrl += `&reason=${encodeURIComponent(reason)}`;
+            }
+
+            fetch(apiUrl, {
+                method: 'GET'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(`HTTP error! status: ${response.status}, message: ${text}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.message && typeof data.message === 'object') {
+                    showResult(data.message.success, data.message.message);
+                } else {
+                    showResult(data.success, data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์: ' + error.message);
+            });
+        });
+
+        function showResult(success, message) {
+            const statusElement = document.getElementById('status');
+            const messageElement = document.getElementById('message');
+            
+            statusElement.textContent = success ? 'สำเร็จ' : 'ผิดพลาด';
+            statusElement.className = success 
+                ? 'text-2xl font-bold mb-4 text-center text-green-600' 
+                : 'text-2xl font-bold mb-4 text-center text-red-600';
+            
+            messageElement.textContent = message;
+            messageElement.className = 'text-center text-gray-600';
+        }
+
+        function showError(message) {
+            const statusElement = document.getElementById('status');
+            const messageElement = document.getElementById('message');
+            
+            statusElement.textContent = 'ผิดพลาด';
+            statusElement.className = 'text-2xl font-bold mb-4 text-center text-red-600';
+            
+            messageElement.textContent = message;
+            messageElement.className = 'text-center text-gray-600';
+        }
+    </script>
+</body>
+</html>

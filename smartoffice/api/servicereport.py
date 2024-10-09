@@ -2,95 +2,65 @@ import frappe
 from frappe import _
 from frappe.utils import now_datetime, get_datetime
 import hashlib
+from frappe.utils import cstr
+from frappe import response
 
 @frappe.whitelist(allow_guest=True)
 def approve_service_report(name, customer_email, hash, timestamp):
     try:
-        # ตรวจสอบความถูกต้องของข้อมูลที่ส่งมา
         if not validate_service_report_access(name, customer_email, hash, timestamp):
-            frappe.throw(_("Invalid access attempt"))
+            return {"success": False, "message": _("การเข้าถึงไม่ถูกต้อง")}
 
-        # ใช้ frappe.db.get_value แทน frappe.get_doc
         workflow_state = frappe.db.get_value("SMO Service Report", name, "workflow_state")
         
-        # ตรวจสอบสถานะปัจจุบันของรายงาน
         if workflow_state != "Customer Review":
-            return {
-                "success": False,
-                "message": _("This service report is not pending approval.")
-            }
+            return {"success": False, "message": _("รายงานบริการนี้ไม่ได้อยู่ในสถานะรอการอนุมัติ")}
 
-        # ดำเนินการอนุมัติ
         frappe.db.set_value("SMO Service Report", name, {
             "workflow_state": "Customer Approve",
-           
+            "approval_hash": None,
+            "approval_salt": None
         })
         frappe.db.commit()
 
         frappe.logger("servicereport").info(f"Service report {name} approved by {customer_email}")
 
-        return {
-            "success": True,
-            "message": _("Service report approved successfully.")
-        }
+        return {"success": True, "message": _("รายงานบริการได้รับการอนุมัติเรียบร้อยแล้ว")}
 
     except frappe.DoesNotExistError:
-        return {
-            "success": False,
-            "message": _("Service report not found.")
-        }
+        return {"success": False, "message": _("ไม่พบรายงานบริการ")}
     except Exception as e:
         frappe.log_error(f"Error approving service report: {str(e)}")
-        return {
-            "success": False,
-            "message": _("An error occurred while approving the service report. Please try again later.")
-        }
+        return {"success": False, "message": _("เกิดข้อผิดพลาดขณะอนุมัติรายงานบริการ โปรดลองอีกครั้งในภายหลัง")}
 
 @frappe.whitelist(allow_guest=True)
 def reject_service_report(name, customer_email, hash, timestamp, reason=None):
     try:
         if not validate_service_report_access(name, customer_email, hash, timestamp):
-            frappe.throw(_("Invalid access attempt"))
+            return {"success": False, "message": _("การเข้าถึงไม่ถูกต้อง")}
 
-        # ใช้ frappe.db.get_value แทน frappe.get_doc
         workflow_state = frappe.db.get_value("SMO Service Report", name, "workflow_state")
         
         if workflow_state != "Customer Review":
-            return {
-                "success": False,
-                "message": _("This service report is not in a state that can be rejected.")
-            }
+            return {"success": False, "message": _("รายงานบริการนี้ไม่ได้อยู่ในสถานะที่สามารถปฏิเสธได้")}
 
-        # ดำเนินการปฏิเสธ
         frappe.db.set_value("SMO Service Report", name, {
             "workflow_state": "Customer Reject",
-            "rejected_by": customer_email,
-            "rejected_at": frappe.utils.now(),
-            "rejection_reason": reason,
+            
             "approval_hash": None,
             "approval_salt": None
         })
         frappe.db.commit()
         
-        # ส่งการแจ้งเตือนการปฏิเสธ
         send_rejection_notification(name, reason)
 
-        return {
-            "success": True,
-            "message": _("Service report rejected successfully.")
-        }
+        return {"success": True, "message": _("รายงานบริการถูกปฏิเสธเรียบร้อยแล้ว")}
 
     except frappe.DoesNotExistError:
-        return {
-            "success": False,
-            "message": _("Service report not found.")
-        }
+        return {"success": False, "message": _("ไม่พบรายงานบริการ")}
     except Exception as e:
         frappe.log_error(f"Error rejecting service report: {str(e)}")
-        return {
-            "success": False,
-            "message": _("An error occurred while rejecting the service report. Please try again later.")
-        }
+        return {"success": False, "message": _("เกิดข้อผิดพลาดขณะปฏิเสธรายงานบริการ โปรดลองอีกครั้งในภายหลัง")}
 
 # แก้ไขฟังก์ชัน validate_service_report_access เพื่อใช้ frappe.db
 def validate_service_report_access(name, customer_email, hash, timestamp):
@@ -140,5 +110,3 @@ def send_rejection_notification(name, reason):
         )
     except Exception as e:
         frappe.log_error(f"Error sending rejection notification: {str(e)}")
-
-# เพิ่มฟังก์ชันอื่นๆ ที่เกี่ยวข้องกับ API ของ Service Report ตามต้องการ

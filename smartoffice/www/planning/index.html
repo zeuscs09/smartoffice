@@ -1,11 +1,22 @@
-{% extends "templates/web.html" %} {%- block title -%}{{_("Customer
-Portal")}}{%- endblock -%} 
+{% extends "templates/web.html" %}
+{%- block title -%}{{_("ตารางการทำงานวิศวกร")}}{%- endblock -%}
 
+{% block head_include %}
+<!-- เพิ่มการโหลดฟอนต์ Noto Thai จาก Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700&display=swap" rel="stylesheet">
+{% endblock %}
+{% block navbar %}{% endblock %}
 {% block page_content %}
 <style>
+  /* ใช้ฟอนต์ Noto Thai สำหรับทั้งหน้า */
+  body {
+    font-family: 'Noto Sans Thai', sans-serif;
+  }
+
   table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
   }
 
   th,
@@ -19,55 +30,75 @@ Portal")}}{%- endblock -%}
     overflow-x: auto; /* เปิดให้เลื่อนตารางในแนวนอน */
   }
 
-  /* ทำให้คอลัมน์แรกติดอยู่กับที่ */
+  /* ปรับแต่งคอลัมน์แรก */
   td:first-child,
   th:first-child {
     position: sticky;
     left: 0;
     background-color: #fff; /* ให้พื้นหลังเป็นสีขาวเพื่อความชัดเจน */
     z-index: 1;
+    white-space: nowrap;
+    width: 1%;
+    padding-left: 4px;
+    padding-right: 4px;
+    text-align: left;
+  }
+
+  /* เพิ่ม border ด้านขวาของคอลัมน์แรกเพื่อแยกจากคอลัมน์อื่น */
+  td:first-child,
+  th:first-child {
+    border-right: 2px solid #aaa;
+  }
+
+  /* ปรับแต่งคอลัมน์อื่นๆ */
+  td:not(:first-child),
+  th:not(:first-child) {
+    min-width: 30px;
+  }
+  .container {
+    padding: 20px;
   }
 </style>
-<h2 class="text-center">Engineer Availability</h2>
+<div class="text-center" style="font-size: 1.5rem; font-weight: bold;">
+  Manpower Availability
+</div>
 
 <div class="form-group row">
-  <label for="year" class="col-sm-2 col-form-label">Select Year:</label>
-  <div class="col-sm-4">
-    <input
-      type="number"
-      class="form-control"
-      id="year"
-      min="2020"
-      max="2030"
-      value="2024"
-    />
+  <div class="col-sm-3">
+    <label for="year" class="col-form-label">เลือกปี:</label>
+    <select class="form-control" id="year">
+      {% set current_year = frappe.utils.nowdate().split('-')[0] | int %}
+      {% for year in range(current_year - 1, current_year + 2) %}
+        <option value="{{ year }}" {% if year == current_year %}selected{% endif %}>{{ year }}</option>
+      {% endfor %}
+    </select>
   </div>
-  <label for="month" class="col-sm-2 col-form-label">Select Month:</label>
-  <div class="col-sm-4">
-    <input
-      type="number"
-      class="form-control"
-      id="month"
-      min="1"
-      max="12"
-      value="9"
-    />
+  <div class="col-sm-3">
+    <label for="month" class="col-form-label">เลือกเดือน:</label>
+    <select class="form-control" id="month">
+      {% set current_month = frappe.utils.nowdate().split('-')[1] | int %}
+      {% set month_names = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'] %}
+      {% for month in range(1, 13) %}
+        <option value="{{ month }}" {% if month == current_month %}selected{% endif %}>{{ month_names[month-1] }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-sm-3 d-flex align-items-end">
+    <button id="submit-btn" class="btn btn-primary">ยืนยัน</button>
   </div>
 </div>
-<button id="submit-btn" class="btn btn-primary">Submit</button>
 
-<!-- <h2 class="text-center mt-4">Availability for <span id="month-year"></span></h2> -->
-<div class="table-responsive">
+
+<div class="table-responsive mt-4">
   <table id="availability-table" class="table table-bordered table-hover">
     <thead>
       <tr>
-        <th>Name</th>
+        <th>ชื่อ</th>
         <!-- วันที่จะแสดงตรงนี้ -->
       </tr>
       <tr>
         <th></th>
-        <th></th>
-        <!-- แสดง shortname ของวันตรงนี้ -->
+        <!-- แสดงชื่อย่อของวันตรงนี้ -->
       </tr>
     </thead>
     <tbody>
@@ -77,117 +108,70 @@ Portal")}}{%- endblock -%}
 </div>
 
 <script>
-  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const daysOfWeek = ["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."];
 
-  document
-    .getElementById("submit-btn")
-    .addEventListener("click", async function () {
-      const year = document.getElementById("year").value;
-      const month = document.getElementById("month").value;
+  document.addEventListener('DOMContentLoaded', function() {
+    const year = document.getElementById("year").value;
+    const month = document.getElementById("month").value;
+    fetchData(year, month);
+  });
 
-      await fetchData(year, month); // ใช้ await เพื่อรอการดึงข้อมูล
-    });
+  document.getElementById("submit-btn").addEventListener("click", function () {
+    const year = document.getElementById("year").value;
+    const month = document.getElementById("month").value;
+    fetchData(year, month);
+  });
 
   async function fetchData(year, month) {
-    const daysInMonth = new Date().getDate();
-    //document.getElementById("month-year").textContent = `${month}/${year}`;
-
     try {
-      const availabilityData = await frappe.call({
+      const response = await frappe.call({
         method: "smartoffice.api.planing.get_availability",
-        args: {
-          month: month,
-          year: year,
-        },
+        args: { month, year },
       });
 
-      // ตรวจสอบข้อมูลจาก availabilityData
-      console.log("logs", availabilityData.message);
-
-      // ตรวจสอบว่าได้ข้อมูลจาก API หรือไม่
-      if (availabilityData.message) {
-        const engineers = availabilityData.message.data.employees;
-        const holidays = availabilityData.message.data.holidays;
-        const tasks = availabilityData.message.data.tasks;
-        // console.log("Engineers:", engineers);
-        // console.log("Holidays:", holidays);
-        // console.log("Tasks:", tasks);
-        createTable(engineers, daysInMonth, tasks, holidays, year, month);
+      if (response.message && response.message.data) {
+        const { employees, holidays, tasks } = response.message.data;
+        const daysInMonth = new Date(year, month, 0).getDate();
+        createTable(employees, daysInMonth, tasks, holidays, year, month);
       } else {
-        console.warn("API did not return message.");
+        console.warn("ไม่พบข้อมูลจาก API");
       }
     } catch (error) {
-      console.error("Error occurred:", error);
+      console.error("เกิดข้อผิดพลาด:", error);
     }
   }
 
   function createTable(engineers, daysInMonth, tasks, holidays, year, month) {
-    const headerRow = document.querySelector("#availability-table thead tr");
-    const dayNameRow = document.querySelectorAll(
-      "#availability-table thead tr"
-    )[1];
+    const table = document.getElementById("availability-table");
+    const headerRow = table.querySelector("thead tr:first-child");
+    const dayNameRow = table.querySelector("thead tr:last-child");
+    const tbody = table.querySelector("tbody");
 
-    headerRow.innerHTML = "<th>Name</th>"; // ลบเนื้อหาเก่า
-    dayNameRow.innerHTML = "<th></th>"; // สำหรับ shortname ของวัน
-
-    // สร้างหัวตารางสำหรับวันที่ และ shortname ของวัน
+    // สร้างส่วนหัวของตาราง
+    headerRow.innerHTML = "<th>ชื่อ</th>";
+    dayNameRow.innerHTML = "<th></th>";
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month - 1, day);
-
-      const dayShortName = daysOfWeek[date.getDay()];
-
-      const th = document.createElement("th");
-      th.textContent = day;
-      headerRow.appendChild(th);
-
-      const dayNameTh = document.createElement("th");
-      dayNameTh.textContent = dayShortName;
-      dayNameRow.appendChild(dayNameTh);
+      headerRow.innerHTML += `<th>${day}</th>`;
+      dayNameRow.innerHTML += `<th>${daysOfWeek[date.getDay()]}</th>`;
     }
 
-    const tbody = document.querySelector("#availability-table tbody");
-    tbody.innerHTML = ""; // ลบเนื้อหาเก่า
-
+    // สร้างแถวข้อมูลสำหรับแต่ละวิศวกร
+    tbody.innerHTML = "";
     engineers.forEach((engineer) => {
-      const row = document.createElement("tr");
-
-      const engineerCell = document.createElement("td");
-      engineerCell.textContent = engineer.employee_name;
-      row.appendChild(engineerCell);
+      const row = tbody.insertRow();
+      row.insertCell().textContent = engineer.employee_name;
 
       for (let day = 1; day <= daysInMonth; day++) {
-        const idate = new Date(year, month - 1, day).toString();
-        console.log(idate);
-        const date = frappe.datetime
-          .get_datetime_as_string(idate)
-          .substr(0, 10);
-        const td = document.createElement("td");
+        const cell = row.insertCell();
+        const currentDate = frappe.datetime.get_datetime_as_string(new Date(year, month - 1, day)).substr(0, 10);
+        
+        const isHoliday = holidays.some(holiday => holiday.holiday_date === currentDate);
+        const isBusy = tasks.some(task => task.user === engineer.name && task.date === currentDate);
 
-        // ตรวจสอบว่าเป็นวันหยุดจากข้อมูล API หรือไม่
-        const isHoliday = holidays.some(
-          (holiday) => holiday.holiday_date === date
-        );
-        // ตรวจสอบว่าวันนี้เป็นวันที่มีงานสำหรับ engineer คนนั้นหรือไม่
-        const isBusy = tasks.some(
-          (task) => task.user === engineer.name && task.date === date
-        );
-
-        if (isHoliday) {
-          td.style.backgroundColor = "#e0e0e0"; // สีเทา สำหรับวันหยุด (รวมวันหยุดสุดสัปดาห์ด้วย)
-        } else if (isBusy) {
-          td.style.backgroundColor = "#f8d7da"; // สีแดง สำหรับวันที่ยุ่ง
-        } else {
-          td.style.backgroundColor = "#d4edda"; // สีเขียว สำหรับวันที่ว่าง
-        }
-
-        row.appendChild(td);
+        cell.style.backgroundColor = isHoliday ? "#e0e0e0" : isBusy ? "#f8d7da" : "#d4edda";
       }
-
-      tbody.appendChild(row);
     });
-
-   
   }
 </script>
-
 {% endblock %}
