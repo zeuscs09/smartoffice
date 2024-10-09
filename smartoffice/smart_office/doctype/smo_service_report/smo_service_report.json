@@ -14,6 +14,7 @@
   "column_break_debu",
   "project_link",
   "customer",
+  "customer_name",
   "customer_site",
   "contact_person",
   "contact_mobile",
@@ -45,7 +46,10 @@
   "section_break_wski",
   "solutions",
   "section_break_8awl",
-  "amended_from"
+  "amended_from",
+  "approval_hash",
+  "approval_salt",
+  "approval_timestamp"
  ],
  "fields": [
   {
@@ -301,6 +305,29 @@
    "label": "Workflow State",
    "no_copy": 1,
    "options": "Workflow State"
+  },
+  {
+   "fetch_from": "customer.custom_customer_name_local",
+   "fetch_if_empty": 1,
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Customer Name"
+  },
+  {
+   "fieldname": "approval_hash",
+   "fieldtype": "Data",
+   "label": "approval_hash"
+  },
+  {
+   "fieldname": "approval_salt",
+   "fieldtype": "Data",
+   "label": "approval_salt"
+  },
+  {
+   "fieldname": "approval_timestamp",
+   "fieldtype": "Data",
+   "label": "approval_timestamp"
   }
  ],
  "hide_toolbar": 1,
@@ -312,7 +339,7 @@
    "link_fieldname": "service_report"
   }
  ],
- "modified": "2024-09-30 22:06:50.664882",
+ "modified": "2024-10-09 12:19:26.427682",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Service Report",

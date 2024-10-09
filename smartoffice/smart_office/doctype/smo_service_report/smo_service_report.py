@@ -4,8 +4,11 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate,time_diff_in_seconds,add_to_date
-from datetime import datetime,timedelta
+from frappe.utils import getdate, time_diff_in_seconds, get_datetime, get_url, cint, format_datetime, format_date, format_time
+import hashlib
+import os
+from frappe.utils import get_url, now
+
 
 class SMOServiceReport(Document):
     
@@ -13,121 +16,148 @@ class SMOServiceReport(Document):
 		pass
 
 	def after_insert(self):
-		 # สร้าง Timesheet ใหม่
 		pass
 	
 	def on_submit(self):
-		doc=self
-		plan_task = frappe.get_doc("SMO Task", doc.task)
-		plan_task.status = "Completed"
-		plan_task.save()
-  
+		self._update_task_status("Completed")
 		self.create_timesheet()
-		# frappe.msgprint("Submited document and update Task " +plan_task.task_name +" finish.")
-
+  
 	def on_update(self):
-		doc=self
-		# frappe.throw(doc.workflow_state)
-		if doc.workflow_state=="Customer Review" or doc.workflow_state=="Draft":
-			plan_task = frappe.get_doc("SMO Task", doc.task)
-			plan_task.status = "In Process"
-			plan_task.save()
-		# if doc.workflow_state=="Customer Approve":
-		# 	self.create_timesheet()
-		# # check and set holiday
-			# วันที่ที่ต้องการตรวจสอบ
-	
-	def on_cancel(self):
-		doc=self
-		plan_task = frappe.get_doc("SMO Task", doc.task)
-		plan_task.status = "On Hold"
-		plan_task.save()
-	
-	def after_delete(self):
-		doc=self
-		plan_task = frappe.get_doc("SMO Task", doc.task)
-		plan_task.status = "On Hold"
-		plan_task.save()
-	
-	def validate(self):
-        		# duration
-		check_date = getdate(self.job_start_on)
+		if self.workflow_state == "Customer Review":
+			self.notify_customer()
 
-		# รัน query เพื่อเช็ควันหยุด
-		result = frappe.db.sql("""
-			SELECT GROUP_CONCAT(hd.description SEPARATOR ', ') as holiday_description
-			FROM `tabHoliday List` hl
-			INNER JOIN (
-				SELECT holiday_date, parent, description 
-				FROM `tabHoliday` 
-				WHERE parentfield = 'holidays' 
-				AND parenttype = 'Holiday List'
-			) hd ON hl.name = hd.parent
-			WHERE %s BETWEEN hl.from_date AND hl.to_date
-			AND hd.holiday_date = %s
-		""", (check_date, check_date), as_dict=True)
+	def on_cancel(self):
+		self._update_task_status("On Hold")
+
+	def after_delete(self):
+		self._update_task_status("On Hold")
+
+	def validate(self):
+		self._check_holiday()
+		self._calculate_duration()
+		self._check_overnight()
+		self._set_approval_data()
+
+	def _check_holiday(self):
+		check_date = getdate(self.job_start_on)
+		holiday = frappe.db.get_value("Holiday", 
+			{"holiday_date": check_date, "parenttype": "Holiday List"},
+			["description", "name"], as_dict=True)
 		
-		# ถ้ามีรายการวันหยุด
-		if result and result[0].holiday_description:
-			# ตั้งค่าให้ฟิลด์ is_holiday และ holiday_description
+		if holiday:
 			self.is_holiday = 1
-			self.holiday_description = result[0].holiday_description
-			
+			self.holiday_description = holiday.description
 		else:
-			# ถ้าไม่มีวันหยุด ตั้งค่า is_holiday เป็น 0 หรือค่าอื่นๆ
 			self.is_holiday = 0
 			self.holiday_description = None
-		
-		
 
-		d = time_diff_in_seconds(self.job_finish,self.job_start_on) 
-		# frappe.errprint(f"Duration in seconds: {d}")
-		self.duration = d
-		# cal diff day from start_date_input and finish_date_input 
-		diff_day = (getdate(self.finish_date_input) - getdate(self.start_date_input)).days
-		frappe.errprint(f"Diff day: {diff_day}")
-		self.over_night = diff_day >0
+	def _calculate_duration(self):
+		start = get_datetime(self.job_start_on)
+		finish = get_datetime(self.job_finish)
+		self.duration = time_diff_in_seconds(finish, start)
 
-	
+	def _check_overnight(self):
+		start_date = getdate(self.start_date_input)
+		finish_date = getdate(self.finish_date_input)
+		self.over_night = (finish_date - start_date).days > 0
+
+	def _update_task_status(self, status):
+		frappe.db.set_value("SMO Task", self.task, "status", status)
+
 	def create_timesheet(self):
 		for item in self.team:
-			employee = frappe.get_last_doc('Employee', filters={"user_id": item.user})
+			employee = frappe.get_doc('Employee', {"user_id": item.user})
+			
 			timesheet = frappe.get_doc({
 				'doctype': 'Timesheet',
 				'company': employee.company,
 				'employee': employee.name,
-				
-				'time_logs': [
-					{
-						'activity_type': 'Service Customer',
-						'from_time': self.job_start_on,
-						'hours': self.duration/3600,
-						'completed':1
-					}
-				]
+				'time_logs': [{
+					'activity_type': 'Service Customer',
+					'from_time': self.job_start_on,
+					'hours': self.duration / 3600,
+					'completed': 1,
+					'project': self.project_link,
+					'task': self.task
+				}]
 			})
 			
 			if self.customer:
 				timesheet.customer = self.customer
-			if self.project_link:
-				timesheet.project = self.project_link
-				timesheet.time_logs[0].project = self.project_link
-			# บันทึก Timesheet
+			
 			timesheet.flags.ignore_validate = True
 			timesheet.insert(ignore_permissions=True)
-			
-			# หากต้องการส่ง Timesheet โดยข้าม validation
 			timesheet.submit()
-			# frappe.msgprint(f"Timesheet {timesheet.name} created successfully.")
-# def before_insert(self):
-	# 	task_status = frappe.db.sql("""
-	# 									SELECT task.name 
-	# 									FROM `tabSMO Service Report` sv 
-	# 									INNER JOIN `tabSMO Task` task 
-	# 									ON sv.task = task.name 
-	# 									WHERE task.status  IN ('Completed', 'Cancel', 'In Review')
-	# 									AND sv.task = %s
-	# 								""", (self.task))
 
-	# 	if task_status:
-	# 		frappe.throw(_("This task has already been created in a service report with an active status."))
+	def notify_customer(self):
+		if not self.contact_email or not self.approval_hash:
+			return
+
+		args = self.as_dict()
+		
+		# จัดรูปแบบวันที่และเวลา
+		job_start = get_datetime(self.job_start_on)
+		args['formatted_date'] = format_date(job_start, "dd MMMM yyyy")
+		args['formatted_time'] = format_time(job_start)
+		
+		# สร้าง approve_link
+		approve_link = get_url(f"/api/method/smartoffice.api.servicereport.approve_service_report?name={self.name}&customer_email={self.contact_email}&hash={self.approval_hash}&timestamp={self.approval_timestamp}")
+		args['approve_link'] = approve_link
+
+		# ดึง template จาก Smart Office Settings
+		template = frappe.db.get_single_value("Smart Office Setting", "service_report_approval_template")
+		if not template:
+			frappe.msgprint(_("Please set default template for Service Report Review in Smart Office Settings."))
+			return
+
+		email_template = frappe.get_doc("Email Template", template)
+		subject = frappe.render_template(email_template.subject, args)
+		message = frappe.render_template(email_template.response, args)
+
+		# เรียกใช้ฟังก์ชัน notify เพื่อส่งอีเมล
+		self.notify({
+			"message": message,
+			"message_to": self.contact_email,
+			"subject": subject,
+		})
+
+		frappe.msgprint(_("Notification email sent to customer for review."))
+
+	def notify(self, args):
+		args = frappe._dict(args)
+		contact = args.message_to
+
+		sender = dict()
+		user = frappe.get_doc("User", frappe.session.user)
+		sender["email"] = user.email
+		sender["full_name"] = user.full_name
+
+		frappe.errprint(f"Sender: {sender}")  # เพื่อตรวจสอบค่า
+
+		try:
+			frappe.sendmail(
+				recipients=contact,
+				sender=sender["email"],
+				subject=args.subject,
+				message=args.message,
+			)
+			frappe.msgprint(_("Email sent to {0}").format(contact))
+		except frappe.OutgoingEmailError:
+			frappe.log_error(f"Failed to send email for Service Report {self.name}")
+			frappe.msgprint(_("Failed to send email. Please check error logs."))
+
+	def _set_approval_data(self):
+		if self.workflow_state == "Customer Review" and not self.approval_hash:
+			# สร้าง salt
+			salt = os.urandom(16).hex()
+			
+			# สร้าง hash
+			timestamp = now()
+			hash_string = f"{self.name}|{self.contact_email}|{timestamp}|{salt}"
+			hash_object = hashlib.sha256(hash_string.encode())
+			hash_value = hash_object.hexdigest()
+			
+			# บันทึก hash, salt และ timestamp
+			self.approval_hash = hash_value
+			self.approval_salt = salt
+			self.approval_timestamp = timestamp

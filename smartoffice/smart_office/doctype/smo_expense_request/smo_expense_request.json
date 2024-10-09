@@ -14,6 +14,7 @@
   "general_payment",
   "total",
   "get_data",
+  "department",
   "section_break_erng",
   "html_data",
   "section_break_obtr",
@@ -117,13 +118,19 @@
    "precision": "2",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Department"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-09-27 09:34:29.993507",
+ "modified": "2024-10-09 09:07:44.605267",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Request",
