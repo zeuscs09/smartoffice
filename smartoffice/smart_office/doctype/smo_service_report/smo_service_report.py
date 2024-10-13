@@ -34,10 +34,11 @@ class SMOServiceReport(Document):
 		self._update_task_status("On Hold")
 
 	def validate(self):
-		self._check_holiday()
-		self._calculate_duration()
-		self._check_overnight()
-		self._set_approval_data()
+		if self.workflow_state == "Draft":
+			self._check_holiday()
+			self._calculate_duration()
+			self._check_overnight()
+			self._set_approval_data()
 
 	def _check_holiday(self):
 		check_date = getdate(self.job_start_on)
@@ -63,7 +64,8 @@ class SMOServiceReport(Document):
 		self.over_night = (finish_date - start_date).days > 0
 
 	def _update_task_status(self, status):
-		frappe.db.set_value("SMO Task", self.task, "status", status)
+		# frappe.db.set_value("SMO Task", self.task, "status", status)
+		pass
 
 	def create_timesheet(self):
 		for item in self.team:
@@ -79,7 +81,7 @@ class SMOServiceReport(Document):
 					'hours': self.duration / 3600,
 					'completed': 1,
 					'project': self.project_link,
-					'task': self.task
+					
 				}]
 			})
 			

@@ -58,45 +58,53 @@ frappe.ui.form.on("SMO Expense Request", {
   },
   get_data: function (frm) {
     if (!frm.doc.request_by) {
-      frappe.throw("Please select Request By");
-
+      frappe.throw("กรุณาเลือกผู้ขอเบิก");
       return false;
     }
 
-    frappe.dom.freeze("Load Data");
+    frappe.dom.freeze("กำลังโหลดข้อมูล");
+
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ];
 
     frappe.call({
-      method: "smartoffice.api.expense.get_expense_entries", // API ที่สร้างไว้
+      method: "smartoffice.api.expense.get_expense_entries",
       args: {
-        month: 9,
-        year: 2024,
-        request_by: frappe.user.name,
+        month: monthNames.indexOf(frm.doc.month) + 1, // แปลงชื่อเดือนเป็นตัวเลข (1-12)
+        year: frm.doc.year,
+        request_by: frm.doc.request_by,
       },
       callback: function (r) {
         if (r.message) {
           console.log(r.message);
-          // เรียกฟังก์ชันเพื่อแสดงผลลัพธ์ใน HTML field
           frm.clear_table("expense_request_item");
           let total = 0;
           let others = 0;
           let advance = 0;
-          // วนลูปเพิ่มข้อมูลที่ได้จาก API ลงใน child table
+          
           $.each(r.message, function (i, d) {
-            // เพิ่มแถวใหม่ใน child table
-
             let row = frm.add_child("expense_request_item");
-
-            row.expense = d.expense_entry_id; // แทนที่ด้วยฟิลด์จริงใน child table
-            row.expense_item = d.expense_item; // แทนที่ด้วยฟิลด์จริงใน child table
+            row.expense = d.expense_entry_id;
+            row.expense_item = d.expense_item;
             row.object_data = JSON.stringify(d);
             total += d.total_cost;
        
             if (d.paid_by == "เงินทดรอง") advance += d.total_cost;
             else others += d.total_cost;
-
           });
 
-          // รีเฟรชหน้าจอเพื่อแสดงข้อมูลใน child table
           frm.refresh_field("expense_request_item");
           frm.set_value("total", total);
           frm.set_value("advance_payment", advance);
@@ -108,6 +116,10 @@ frappe.ui.form.on("SMO Expense Request", {
           frappe.dom.unfreeze();
         }
       },
+      error: function(xhr, status, error) {
+        frappe.dom.unfreeze();
+        frappe.msgprint("เกิดข้อผิดพลาดในการโหลดข้อมูล: " + error);
+      }
     });
   },
 });

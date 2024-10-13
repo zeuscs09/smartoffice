@@ -22,7 +22,8 @@
   "approver_section",
   "table_ypav",
   "section_break_snwq",
-  "amended_from"
+  "amended_from",
+  "workflow_description"
  ],
  "fields": [
   {
@@ -136,13 +137,18 @@
    "fieldname": "table_ypav",
    "fieldtype": "Table",
    "options": "Workflow Approver"
+  },
+  {
+   "fieldname": "workflow_description",
+   "fieldtype": "Data",
+   "label": "Workflow Description"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-13 22:31:26.228643",
+ "modified": "2024-10-13 22:33:25.446402",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Request",

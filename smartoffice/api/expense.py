@@ -15,20 +15,36 @@ def get_expense_entries(month, year, request_by):
         {
             "expense_entry_id": ee.name,
             "owner": ee.owner,
-            "customer_name": ee.customer,
-            "project_name": ee.project,
+            "customer_name": frappe.db.get_value("Customer", ee.customer, "customer_name"),
+            "project_name": frappe.db.get_value("Project", ee.project, "project_name"),
             "service_date": ee.service_date,
             "expense_items": [
                 {
+                    "expense_item": ei.name,
                     "expense_type": ei.expense_type,
                     "expense_type_desc": frappe.db.get_value("SMO Expense Type", ei.expense_type, "description"),
                     "from_date": ei.from_date,
                     "to_date": ei.to_date,
                     "total_cost": ei.total_cost,
                     "total_day": ei.total_day,
-                    # เพิ่มฟิลด์อื่นๆ ตามต้องการ
+                    "fuel_detail": ei.fuel_detail,
+                    "fuel_liter": ei.fuel_liter,
+                    "hotel_name": ei.hotel_name,
+                    "paid_by": ei.paid_by,
+                    "rate_per_km": ei.rate_per_km,
+                    "receipt_date": ei.receipt_date,
+                    "ref_code": ei.ref_code,
+                    "system_reminder": ei.system_reminder,
+                    "taxi_depart_distance": ei.taxi_depart_distance,
+                    "taxi_return_distance": ei.taxi_return_distance,
                 }
-                for ei in ee.expense_item
+                for ei in frappe.get_all("SMO Expense Item", 
+                    filters={"parent": ee.name}, 
+                    fields=["name", "expense_type", "from_date", "to_date", "total_cost", "total_day",
+                            "fuel_detail", "fuel_liter", "hotel_name", "paid_by", "rate_per_km",
+                            "receipt_date", "ref_code", "system_reminder", "taxi_depart_distance",
+                            "taxi_return_distance"]
+                )
             ]
         }
         for ee in frappe.get_all(
@@ -39,8 +55,7 @@ def get_expense_entries(month, year, request_by):
                 "owner": request_by,
                 "creation": ["between", [f"{year}-{month:02d}-01", f"{year}-{month:02d}-31"]]
             },
-            fields=["name", "owner", "customer", "project", "service_date"],
-            as_dict=True
+            fields=["name", "owner", "customer", "project", "service_date"]
         )
     ]
 
