@@ -114,14 +114,16 @@ def get_approvers(employee, amount):
         approver = frappe.get_doc("User", current_user.reports_to)
         approvers.append(approver.name)
         
-        if amount < 100000 and approver.employee_grade >= 3:
-            break
-        elif amount < 250000 and approver.employee_grade >= 4:
+        approval_limit = frappe.get_value("Approval Limit", 
+                                          {"employee_grade": approver.employee_grade}, 
+                                          "approval_limit")
+        
+        if approval_limit and amount <= approval_limit:
             break
         
         current_user = approver
     
-    if amount >= 250000:
+    if not approvers or amount > approval_limit:
         ceo = frappe.get_all("User", filters={"employee_grade": 5}, limit=1)
         if ceo:
             approvers.append(ceo[0].name)
@@ -281,6 +283,77 @@ graph TD
    - หากปฏิเสธ: Expense ถูกปฏิเสธทันที
 
 Flow diagram นี้แสดงให้เห็นภาพรวมของกระบวนการอนุมัติ Expense ตั้งแต่การสร้างเอกสารจนถึงการอนุมัติขั้นสุดท้าย ช่วยให้เข้าใจลำดับขั้นตอนและเงื่อนไขต่างๆ ได้ง่ายขึ้นครับ
+
+8. DocType: Approval Limit
+```python
+{
+ "name": "Approval Limit",
+ "doctype": "DocType",
+ "fields": [
+  {
+   "fieldname": "employee_grade",
+   "fieldtype": "Int",
+   "label": "ระดับพนักงาน",
+   "reqd": 1
+  },
+  {
+   "fieldname": "approval_limit",
+   "fieldtype": "Currency",
+   "label": "วงเงินอนุมัติสูงสุด",
+   "reqd": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "คำอธิบาย"
+  }
+ ]
+}
+```
+
+9. ปรับปรุงฟังก์ชัน get_approvers ในไฟล์ Python ของ Expense:
+```python
+def get_approvers(employee, amount):
+    approvers = []
+    current_user = frappe.get_doc("User", employee)
+    
+    while current_user.reports_to:
+        approver = frappe.get_doc("User", current_user.reports_to)
+        approvers.append(approver.name)
+        
+        approval_limit = frappe.get_value("Approval Limit", 
+                                          {"employee_grade": approver.employee_grade}, 
+                                          "approval_limit")
+        
+        if approval_limit and amount <= approval_limit:
+            break
+        
+        current_user = approver
+    
+    if not approvers or amount > approval_limit:
+        ceo = frappe.get_all("User", filters={"employee_grade": 5}, limit=1)
+        if ceo:
+            approvers.append(ceo[0].name)
+    
+    return approvers
+```
+
+10. คำอธิบายการเปลี่ยนแปลง:
+
+- สร้าง DocType ใหม่ชื่อ "Approval Limit" เพื่อเก็บข้อมูลวงเงินอนุมัติสำหรับแต่ละระดับพนักงาน
+- ปรับปรุงฟังก์ชัน `get_approvers` ให้ใช้ข้อมูลจาก DocType "Approval Limit"
+- ระบบจะตรวจสอบวงเงินอนุมัติของผู้อนุมัติแต่ละคนตามระดับพนักงาน
+- ถ้าจำนวนเงินที่ขออนุมัติไม่เกินวงเงินของผู้อนุมัติคนใด จะหยุดการเพิ่มผู้อนุมัติ
+- ถ้าจำนวนเงินเกินวงเงินของทุกคนในสายบังคับบัญชา หรือไม่มีผู้อนุมัติเลย จะเพิ่ม CEO (ระดับ 5) เป็นผู้อนุมัติสุดท้าย
+
+11. การนำไปใช้:
+
+1. สร้าง DocType "Approval Limit" ตามที่กำหนดไว้
+2. เพิ่มข้อมูลวงเงินอนุมัติสำหรับแต่ละระดับใน DocType "Approval Limit"
+3. ปรับปรุงฟังก์ชัน `get_approvers` ในไฟล์ Python ของ Expense
+4. ทดสอบระบบโดยสร้าง Expense ที่มีจำนวนเงินต่างๆ เพื่อตรวจสอบว่าระบบเลือกผู้อนุมัติได้ถูกต้องตามวงเงินที่กำหนด
+
+ด้วยการเปลี่ยนแปลงนี้ ระบบจะมีความยืดหยุ่นในการกำหนดวงเงินอนุมัติสำหรับแต่ละระดับพนักงาน และสามารถปรับเปลี่ยนได้ง่ายผ่านการแก้ไขข้อมูลใน DocType "Approval Limit"
 
 การนำไปใช้:
 1. สร้าง DocType "Workflow Approver"

@@ -19,6 +19,8 @@
   "html_data",
   "section_break_obtr",
   "expense_request_item",
+  "approver_section",
+  "table_ypav",
   "section_break_snwq",
   "amended_from"
  ],
@@ -124,13 +126,23 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Department"
+  },
+  {
+   "fieldname": "approver_section",
+   "fieldtype": "Section Break",
+   "label": "Approver"
+  },
+  {
+   "fieldname": "table_ypav",
+   "fieldtype": "Table",
+   "options": "Workflow Approver"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-09 09:07:44.605267",
+ "modified": "2024-10-13 22:31:26.228643",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Request",
