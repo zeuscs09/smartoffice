@@ -29,7 +29,8 @@
   "section_break_giws",
   "team",
   "assign_to",
-  "detail"
+  "detail",
+  "amended_from"
  ],
  "fields": [
   {
@@ -105,8 +106,7 @@
   {
    "fieldname": "finish_date",
    "fieldtype": "Date",
-   "label": "Finish Date",
-   "read_only": 1
+   "label": "Finish Date"
   },
   {
    "fieldname": "expected_time_use",
@@ -196,17 +196,28 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Title"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "SMO Task",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [
   {
    "link_doctype": "SMO Service Report",
    "link_fieldname": "task"
   }
  ],
- "modified": "2024-09-30 22:08:12.752285",
+ "modified": "2024-10-10 21:31:22.065604",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Task",

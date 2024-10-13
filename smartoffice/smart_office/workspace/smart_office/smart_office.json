@@ -5,7 +5,7 @@
    "label": "Pending Task"
   }
  ],
- "content": "[{\"id\":\"voQjQGuSXc\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Smart Office</span>\",\"col\":12}},{\"id\":\"4SCUS_Be-A\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Pending Task\",\"col\":12}},{\"id\":\"AQ6Zq620J6\",\"type\":\"card\",\"data\":{\"card_name\":\"Job\",\"col\":4}},{\"id\":\"yPzIStMtr1\",\"type\":\"card\",\"data\":{\"card_name\":\"Expense\",\"col\":4}}]",
+ "content": "[{\"id\":\"voQjQGuSXc\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Smart Office</span>\",\"col\":12}},{\"id\":\"4SCUS_Be-A\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Pending Task\",\"col\":12}},{\"id\":\"AQ6Zq620J6\",\"type\":\"card\",\"data\":{\"card_name\":\"Job\",\"col\":4}},{\"id\":\"yPzIStMtr1\",\"type\":\"card\",\"data\":{\"card_name\":\"Expense\",\"col\":4}},{\"id\":\"ndiRYrQE4k\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Task\",\"col\":4}}]",
  "creation": "2024-09-26 13:01:04.542772",
  "custom_blocks": [],
  "docstatus": 0,
@@ -87,15 +87,21 @@
    "type": "Link"
   }
  ],
- "modified": "2024-09-30 12:03:10.878411",
- "modified_by": "admin@tps.com",
+ "modified": "2024-10-10 22:57:18.137076",
+ "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "Smart Office",
  "number_cards": [],
  "owner": "Administrator",
  "parent_page": "",
  "public": 1,
- "quick_lists": [],
+ "quick_lists": [
+  {
+   "document_type": "SMO Task",
+   "label": "Task",
+   "quick_list_filter": "[]"
+  }
+ ],
  "roles": [],
  "sequence_id": 28.0,
  "shortcuts": [],

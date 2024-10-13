@@ -3,8 +3,9 @@
 
 import frappe
 from frappe.model.document import Document
+from datetime import datetime, timedelta
 
-
+  
 class SMOTask(Document):
     def validate(self):
         self.assign_to = self.get_assigned_users()
@@ -18,6 +19,42 @@ class SMOTask(Document):
             for team in self.team
             if hasattr(team, 'user')
         )
+
+    def on_submit(self):
+        self.create_todos()
+
+    def on_cancel(self):
+        self.delete_todos()
+
+    def create_todos(self):
+        start_date = datetime.strptime(self.start_date, '%Y-%m-%d')
+        end_date = datetime.strptime(self.finish_date or self.start_date, '%Y-%m-%d')
+        
+        for team_member in self.team:
+            current_date = start_date
+            while current_date <= end_date:
+                todo = frappe.get_doc({
+                    "doctype": "ToDo",
+                    "owner": team_member.user,
+                    "reference_type": self.doctype,
+                    "reference_name": self.name,
+                    "description": f"{self.task_name} - {current_date.strftime('%Y-%m-%d')}",
+                    "date": current_date.strftime('%Y-%m-%d'),
+                    "allocated_to": team_member.user,
+                    "status": "Open"
+                })
+                todo.insert(ignore_permissions=True)
+                current_date += timedelta(days=1)
+
+    def delete_todos(self):
+        todos = frappe.get_all("ToDo", 
+                               filters={
+                                   "reference_type": self.doctype,
+                                   "reference_name": self.name
+                               },
+                               pluck="name")
+        for todo in todos:
+            frappe.delete_doc("ToDo", todo, ignore_permissions=True)
 
 @frappe.whitelist()
 def fetch_task_data(task):
