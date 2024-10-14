@@ -20,7 +20,9 @@
   "section_break_obtr",
   "expense_request_item",
   "approver_section",
-  "table_ypav",
+  "approvers",
+  "max_level",
+  "next_action",
   "section_break_snwq",
   "amended_from",
   "workflow_description"
@@ -134,21 +136,32 @@
    "label": "Approver"
   },
   {
-   "fieldname": "table_ypav",
+   "fieldname": "workflow_description",
+   "fieldtype": "Small Text",
+   "label": "Workflow Description"
+  },
+  {
+   "fieldname": "approvers",
    "fieldtype": "Table",
    "options": "Workflow Approver"
   },
   {
-   "fieldname": "workflow_description",
+   "fieldname": "max_level",
+   "fieldtype": "Int",
+   "label": "Final Approve",
+   "read_only": 1
+  },
+  {
+   "fieldname": "next_action",
    "fieldtype": "Data",
-   "label": "Workflow Description"
+   "label": "Next Action"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-13 22:33:25.446402",
+ "modified": "2024-10-14 15:38:23.423364",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Request",
@@ -178,6 +191,20 @@
    "report": 1,
    "role": "Engineer Staff",
    "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],

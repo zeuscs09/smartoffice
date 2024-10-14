@@ -3,128 +3,196 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe.utils import now_datetime, time_diff_in_seconds, format_duration as frappe_format_duration
 
 
 class SMOExpenseRequest(Document):
 	def before_save(self):
-		if self.workflow_state != "Draft":
+		if self.workflow_state == "Draft":
 			self.set_approvers()
-			self.update_workflow_state()
-	def on_submit(self):
-		self.create_todo_and_send_email()
 	def on_cancel(self):
-		self.update_expense_entries(is_request=0)
-	def after_delete(self):
-		self.update_expense_entries(is_request=0)
-	def set_approvers(self):
-		self.approvers = []
-		amount = self.total_amount
-		employee = frappe.get_value("Employee", {"user_id": self.request_by}, "name")
-		if not employee:
-			frappe.throw("ไม่พบข้อมูลพนักงานสำหรับผู้ใช้นี้")
-		approvers = self.get_approvers(employee, amount)
-		for level, approver in enumerate(approvers, start=1):
-			self.append("approvers", {
-					"approver": approver,
-					"status": "Pending",
-					"approver_level": level
-				})
-	def get_approvers(self, employee, amount):
-		approvers = []
-		current_employee = frappe.get_doc("Employee", employee)
-		
-		while current_employee.reports_to:
-			approver = frappe.get_doc("Employee", current_employee.reports_to)
-			approvers.append(approver.user_id)
-			
-			approval_limit = frappe.get_value("Approval Limit", 
-											  {"employee_grade": approver.grade}, 
-											  "approval_limit")
-			
-			if approval_limit and amount <= approval_limit:
-				break
-			
-			current_employee = approver
-		
-		if not approvers or amount > approval_limit:
-			ceo = frappe.get_all("Employee", filters=[["grade", "like", "999%"]], fields=["user_id"], limit=1)
-			if ceo:
-				approvers.append(ceo[0].user_id)
-		
-		return approvers
-	def update_workflow_state(self):
-		pending_approvers = [a.approver for a in self.approvers if a.status == "Pending"]
-		if pending_approvers:
-			self.workflow_state = "Pending Approval"
-			self.workflow_description = f"รออนุมัติจาก {', '.join(pending_approvers)}"
-		elif all(a.status == "Approved" for a in self.approvers):
-			self.workflow_state = "Approved"
-			self.workflow_description = "อนุมัติแล้ว"
-		else:
-			self.workflow_state = "Rejected"
-			self.workflow_description = "ถูกปฏิเสธ"
-	def create_todo_and_send_email(self):
-		for approver in self.approvers:
-			if approver.status == "Pending":
-				self.create_todo(approver.approver)
-				self.send_email_notification(approver.approver)
-	def create_todo(self, approver):
-		frappe.get_doc({
-			"doctype": "ToDo",
-			"allocated_to": approver,
-			"assigned_by": self.request_by,
-			"reference_type": self.doctype,
-			"reference_name": self.name,
-			"description": f"อนุมัติ {self.doctype} {self.name}",
-			"status": "Open"
-			}).insert(ignore_permissions=True)
-	def send_email_notification(self, approver):
-		subject = f"ขออนุมัติ {self.doctype} {self.name}"
-		message = f"กรุณาอนุมัติ {self.doctype} {self.name}\n\nรายละเอียด: {self.description}\nจำนวนเงิน: {self.total_amount}"
-		frappe.sendmail(
-			recipients=[approver],
-			subject=subject,
-			message=message
-			)
-	def update_expense_entries(self, is_request):
 		for item in self.expense_request_item:
-			frappe.db.set_value("SMO Expense Entry", item.expense, "is_request", is_request)
+				frappe.db.set_value("SMO Expense Entry", item.expense, "is_request", 0)
+	def after_delete(self):
+		for item in self.expense_request_item:
+				frappe.db.set_value("SMO Expense Entry", item.expense, "is_request", 0)
 
-	@frappe.whitelist()
-	def approve_expense(self):
-		if not frappe.has_permission("SMO Expense Request", "write"):
-			frappe.throw("คุณไม่มีสิทธิ์อนุมัติเอกสารนี้")
+	def set_approvers(self):
+		# เคลียร์ข้อมูลผู้อนุมัติเดิม
+		self.approvers = []
+		self.max_level = 0
+		self.next_action = ""
+		self.workflow_description = ""
 
-		if self.workflow_state not in ["Pending Approval"]:
-			frappe.throw("เอกสารนี้ไม่อยู่ในสถานะที่สามารถอนุมัติได้")
+		employee = frappe.get_doc("Employee", {"user_id": self.request_by})
+		total_amount = self.total
+		approvers = []
 
+		# ดึงค่า Approval Limit ทั้งหมดที่มากกว่าหรือเท่ากับยอดรวม
+		approval_limit = frappe.get_all(
+			"Approval Limit",
+			filters={
+				"approval_limit": (">=", total_amount)
+			},
+			fields=["employee_grade", "approval_limit"],
+			order_by="approval_limit asc",
+			limit=1
+		)
+		
+		if approval_limit:
+			required_grade = approval_limit[0].employee_grade
+			current_employee = employee
+			approver_level = 1
+			found_required_grade = False
+
+			while current_employee.reports_to and not found_required_grade:
+				current_employee = frappe.get_doc("Employee", current_employee.reports_to)
+				
+				# ตรวจสอบว่าผู้อนุมัตินี้ยังไม่ได้ถูกเพิ่มไปแล้ว
+				if not any(approver['approver'] == current_employee.name for approver in approvers):
+					approvers.append({
+						"approver": current_employee.name,
+						"user_id": current_employee.user_id,
+						"approver_level": approver_level,
+						"approver_role": current_employee.designation,
+						"status": "Pending"
+					})
+					
+					approver_level += 1
+                    
+					# ถ้าเจอ grade ที่ต้องการ ให้หยุดการวนลูป
+					if current_employee.grade == required_grade:
+						found_required_grade = True
+						break
+
+			# ถ้าไม่พบผู้อนุมัติที่มี grade ตรงกันในสายบังคับบัญชา
+			if not found_required_grade:
+				approver = self.get_approver_by_grade(required_grade)
+				if approver and not any(a['approver'] == approver.name for a in approvers):
+					approvers.append({
+						"approver": approver.name,
+						"user_id": approver.user_id,
+						"approver_level": approver_level,
+						"approver_role": approver.designation,
+							"status": "Pending"
+					})
+
+		else:
+			# ถ้าไม่มี Approval Limit ที่เหมาะสม ใช้วิธีการเดิม
+			current_employee = employee
+			approver_level = 1
+			while current_employee.reports_to:
+				approver = frappe.get_doc("Employee", current_employee.reports_to)
+				if not any(a['approver'] == approver.name for a in approvers):
+					approvers.append({
+						"approver": approver.name,
+						"user_id": approver.user_id,
+						"approver_level": approver_level,
+						"approver_role": approver.designation,
+						"status": "Pending"
+					})
+					approver_level += 1
+				current_employee = approver
+
+		# เพิ่มผู้อนุมัติใหม่
+		for approver in approvers:
+			self.append("approvers", approver)
+
+		self.max_level = len(approvers)
+		
+		# กำหนด next_action เป็น user_id ของ approver คนแรก
+		self.next_action = self.get_next_action()
+
+		# สร้าง workflow_description
+		workflow_steps = []
+		for idx, approver in enumerate(approvers, start=1):
+			step = f"{idx}. {approver['approver_role']} ({approver['approver']})"
+			workflow_steps.append(step)
+		
+		self.workflow_description = "ขั้นตอนการอนุมัติ:\n" + "\n".join(workflow_steps)
+
+	def on_submit(self):
+		self.update_approver_status()
+		self.create_initial_notification()
+
+	def on_update_after_submit(self):
+		self.update_approver_status()
+
+	def update_approver_status(self):
 		current_user = frappe.session.user
-		approver_found = False
+		current_time = now_datetime()
+		last_action_date = None
+		current_approver = None
+		next_approver = None
+  
+		for approver in self.approvers:
+			if approver.user_id == current_user:
+				approver.action_date = current_time
+				approver.status = "Rejected" if self.workflow_state == "Rejected" else "Approved"
+				
+				# คำนวณ duration
+				if approver.receive_date:
+					duration_seconds = time_diff_in_seconds(approver.action_date, approver.receive_date)
+					approver.duration = duration_seconds
+				
+				approver.db_update()
+				last_action_date = current_time
+				current_approver = approver
+				# ดึง next_approver
+				
+			
+		if current_approver:
+			next_approver = next((a for a in self.approvers if a.approver_level > current_approver.approver_level and a.status == "Pending"), None)
+		
+		if not next_approver:
+			next_approver = next((a for a in self.approvers if a.status == "Pending" and a.approver_level == 1), None)
+   
+		frappe.errprint(next_approver)
+		if next_approver:
+			next_approver.receive_date = current_time
+			next_approver.db_update()
+			self.create_notification(next_approver.user_id)
+			self.next_action = next_approver.user_id
+			self.db_update()
 
-		try:
-			for approver in self.approvers:
-				if approver.approver == current_user and approver.status == "Pending":
-					approver.status = "Approved"
-					frappe.db.set_value("Workflow Approver", approver.name, "status", "Approved")
-					approver_found = True
-					break
-			
-			if not approver_found:
-				frappe.throw("คุณไม่ใช่ผู้อนุมัติที่กำลังรอการอนุมัติสำหรับเอกสารนี้")
-			
-			self.update_workflow_state()
-			
-			if self.workflow_state == "Pending Approval":
-				self.create_todo_and_send_email()
-			
-			self.add_comment("Workflow", f"อนุมัติโดย {frappe.session.user}")
-			self.save(ignore_permissions=True)
-			return self.workflow_state
-		except Exception as e:
-			frappe.log_error(f"เกิดข้อผิดพลาดในการอนุมัติ: {str(e)}")
-			frappe.throw("เกิดข้อผิดพลาดในการอนุมัติ กรุณาลองใหม่อีกครั้ง")
+	def create_notification(self, user_id):
+		notification = frappe.get_doc({
+			"doctype": "Notification Log",
+			"subject": f"คำขอเบิกค่าใช้จ่ายใหม่รอการอนุมัติ: {self.name}",
+			"for_user": user_id,
+			"type": "Alert",
+			"document_type": self.doctype,
+			"document_name": self.name,
+			"read": 0,
+		})
+		notification.insert(ignore_permissions=True)
 
-@frappe.whitelist()
-def approve_expense(doc_name):
-	doc = frappe.get_doc("SMO Expense Request", doc_name)
-	return doc.approve_expense()
+	def get_approver_by_grade(self, grade):
+		approver = frappe.get_all(
+				"Employee",
+				filters={
+					"grade": grade
+					},
+				fields=["name", "user_id", "designation"],
+				order_by="grade asc",
+				limit=1
+			)
+		return frappe.get_doc("Employee", approver[0].name) if approver else None
+
+	# เพิ่มฟักชันใหม่สำหรับการเริ่มกระบวนการอนุมัติ
+	def start_approval_process(self):
+		if self.workflow_state == "Pending Approval" and self.approvers:
+			self.approvers[0].receive_date = frappe.utils.now_datetime()
+			self.save()
+
+	def on_update(self):
+		self.update_approver_status()
+
+	def get_next_action(self):
+		pending_approver = next((approver for approver in self.approvers if approver.status == "Pending"), None)
+		return pending_approver.user_id if pending_approver else ""
+
+	def create_initial_notification(self):
+		first_approver = next((a for a in self.approvers if a.status == "Pending"), None)
+		if first_approver:
+			self.create_notification(first_approver.user_id)

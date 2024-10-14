@@ -33,7 +33,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-13 22:40:53.434955",
+ "modified": "2024-10-14 09:54:56.944549",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "Approval Limit",
@@ -52,7 +52,9 @@
    "write": 1
   }
  ],
+ "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "employee_grade"
 }

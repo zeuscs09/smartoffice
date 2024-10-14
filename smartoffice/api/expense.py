@@ -2,61 +2,63 @@ import frappe
 from frappe import _
 
 @frappe.whitelist()
-def get_expense_entries(month, year, request_by):
-    # ตรวจสอบและแปลงค่า month และ year เป็น integer
-    try:
-        month = int(month)
-        year = int(year)
-    except ValueError:
+def get_expense_entries(month, year,request_by):
+    # ตรวจสอบว่า month และ year มีค่าเป็นตัวเลข
+    if not month.isdigit() or not year.isdigit():
         frappe.throw(_("Month and Year must be numeric"))
     
-    # ใช้ list comprehension แทน SQL query
-    expense_entries = [
-        {
-            "expense_entry_id": ee.name,
-            "owner": ee.owner,
-            "customer_name": frappe.db.get_value("Customer", ee.customer, "customer_name"),
-            "project_name": frappe.db.get_value("Project", ee.project, "project_name"),
-            "service_date": ee.service_date,
-            "expense_items": [
-                {
-                    "expense_item": ei.name,
-                    "expense_type": ei.expense_type,
-                    "expense_type_desc": frappe.db.get_value("SMO Expense Type", ei.expense_type, "description"),
-                    "from_date": ei.from_date,
-                    "to_date": ei.to_date,
-                    "total_cost": ei.total_cost,
-                    "total_day": ei.total_day,
-                    "fuel_detail": ei.fuel_detail,
-                    "fuel_liter": ei.fuel_liter,
-                    "hotel_name": ei.hotel_name,
-                    "paid_by": ei.paid_by,
-                    "rate_per_km": ei.rate_per_km,
-                    "receipt_date": ei.receipt_date,
-                    "ref_code": ei.ref_code,
-                    "system_reminder": ei.system_reminder,
-                    "taxi_depart_distance": ei.taxi_depart_distance,
-                    "taxi_return_distance": ei.taxi_return_distance,
-                }
-                for ei in frappe.get_all("SMO Expense Item", 
-                    filters={"parent": ee.name}, 
-                    fields=["name", "expense_type", "from_date", "to_date", "total_cost", "total_day",
-                            "fuel_detail", "fuel_liter", "hotel_name", "paid_by", "rate_per_km",
-                            "receipt_date", "ref_code", "system_reminder", "taxi_depart_distance",
-                            "taxi_return_distance"]
-                )
-            ]
-        }
-        for ee in frappe.get_all(
-            "SMO Expense Entry",
-            filters={
-                "is_request": 0,
-                "workflow_state": "approved",
-                "owner": request_by,
-                "creation": ["between", [f"{year}-{month:02d}-01", f"{year}-{month:02d}-31"]]
-            },
-            fields=["name", "owner", "customer", "project", "service_date"]
-        )
-    ]
+    # แปลงค่า month และ year เป็น integer
+    month = int(month)
+    year = int(year)
+    
+    # Query ข้อมูลจากฐานข้อมูล
+    expense_entries = frappe.db.sql("""
+        SELECT 
+            ee.name AS expense_entry_id,
+            ee.owner,
+            ec.customer_name,
+            ep.project_name,
+            ei.expense_type,
+            et.description AS expense_type_desc,
+            ei.from_date,
+            ei.fuel_detail,
+            ei.fuel_liter,
+            ei.hotel_name,
+            ei.paid_by,
+            ei.rate_per_km,
+            ei.receipt_date,
+            ei.ref_code,
+            ei.system_reminder,
+            ei.taxi_depart_distance,
+            ei.taxi_return_distance,
+            ei.to_date,
+            ei.total_cost,
+            ei.total_day,
+            ei.name AS expense_item,
+            ee.service_date
+        FROM
+            `tabSMO Expense Entry` ee
+        INNER JOIN
+            `tabSMO Expense Item` ei ON ee.name = ei.parent 
+            AND ei.parenttype = 'SMO Expense Entry' 
+            AND ei.parentfield = 'expense_item'
+        INNER JOIN
+            `tabCustomer` ec ON ee.customer = ec.name
+        INNER JOIN
+            `tabProject` ep ON ee.project = ep.name
+        LEFT JOIN
+            `tabSMO Expense Type` et ON ei.expense_type = et.name
+        WHERE
+            ee.is_request = 0 and
+            ee.workflow_state = 'approved'
+            AND MONTH(ee.creation) = %(month)s
+            AND YEAR(ee.creation) = %(year)s
+            and ee.owner = %(request_by)s
+    """, {
+        "month": month,
+        "year": year,
+        "request_by": request_by
+    }, as_dict=True)
 
+    # Return ข้อมูลออกมาในรูปแบบ JSON
     return expense_entries
