@@ -35,12 +35,14 @@ class SMOTask(Document):
             while current_date <= end_date:
                 todo = frappe.get_doc({
                     "doctype": "ToDo",
-                    "owner": team_member.user,
+                    "owner": frappe.session.user,
+                    "assigned_by": frappe.session.user,
                     "reference_type": self.doctype,
                     "reference_name": self.name,
-                    "description": f"{self.task_name} - {current_date.strftime('%Y-%m-%d')}",
+                    "description": f"{self.task_name}",
                     "date": current_date.strftime('%Y-%m-%d'),
                     "allocated_to": team_member.user,
+                    "priority": self.priority,
                     "status": "Open"
                 })
                 todo.insert(ignore_permissions=True)

@@ -16,11 +16,18 @@ def approve_service_report(name, customer_email, hash, timestamp):
         if workflow_state != "Customer Review":
             return {"success": False, "message": _("รายงานบริการนี้ไม่ได้อยู่ในสถานะรอการอนุมัติ")}
 
+        # อัปเดตค่าโดยตรงในฐานข้อมูล
         frappe.db.set_value("SMO Service Report", name, {
             "workflow_state": "Customer Approve",
             "approval_hash": None,
             "approval_salt": None
         })
+
+        # ดึงเอกสารและเรียกใช้ on_submit
+        doc = frappe.get_doc("SMO Service Report", name)
+        doc.flags.ignore_permissions = True
+        doc.submit()
+
         frappe.db.commit()
 
         frappe.logger("servicereport").info(f"Service report {name} approved by {customer_email}")

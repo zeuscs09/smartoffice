@@ -20,9 +20,11 @@
   "expected_time_use",
   "column_break_wfvh",
   "project",
+  "project_name",
   "customer",
   "customer_name",
   "contact_person",
+  "contact_name",
   "contact_mobile",
   "contact_email",
   "site",
@@ -206,6 +208,21 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fetch_from": "project.project_name",
+   "fetch_if_empty": 1,
+   "fieldname": "project_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Project Name"
+  },
+  {
+   "fetch_from": "contact_person.full_name",
+   "fieldname": "contact_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Contact Name"
   }
  ],
  "hide_toolbar": 1,
@@ -217,7 +234,7 @@
    "link_fieldname": "task"
   }
  ],
- "modified": "2024-10-10 21:31:22.065604",
+ "modified": "2024-10-15 01:51:55.203050",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Task",
@@ -246,6 +263,20 @@
    "report": 1,
    "role": "Engineer Staff",
    "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "select": 1,
+   "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],

@@ -2,7 +2,24 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("SMO Service Report", {
-  refresh(frm) {},
+  refresh(frm) {
+    // เพิ่มปุ่มย้อนกลับ
+    frm.add_custom_button(__('ย้อนกลับ'), function() {
+      // ตรวจสอบว่ามี from_page หรือไม่
+      if (frm.doc.from_page) {
+       location.href = frm.doc.from_page;
+      } else {
+        // ถ้าไม่มี from_page ให้ย้อนกลับไปหน้า List View
+        frappe.set_route("List", "SMO Service Report");
+      }
+    },"Intranet");
+
+    if (frm.doc.workflow_state === "Customer Review" && frm.doc.from_page) {
+      // frappe.set_route("/" + frm.doc.from_page);
+      //location.href = "/" + frm.doc.from_page;
+      
+    }
+  },
   before_save: function(frm) {
     var hour = frm.doc.start_hour_input;  // ดึงค่าจากฟิลด์ชั่วโมง
     var minute = frm.doc.start_minute_input;  // ดึงค่าจากฟิลด์นาที
