@@ -23,8 +23,23 @@ class SMOServiceReport(Document):
 		self._update_task_status("Completed")
 		self.create_timesheet()
   
+		# Close ToDo
+		if self.from_todo:
+			todo = frappe.get_doc("ToDo", self.from_todo)
+			todo.status = "Closed"
+			todo.flags.ignore_permissions = True
+			todo.save()
+		
+		# Redirect logic will be handled in JavaScript
+	
 	def on_update(self):
+		frappe.errprint(f"Workflow State: {self.workflow_state}")
 		if self.workflow_state == "Customer Review":
+			if self.from_todo:
+				todo = frappe.get_doc("ToDo", self.from_todo)
+				todo.status = "Closed"
+				todo.flags.ignore_permissions = True
+				todo.save()
 			self.notify_customer()
 
 	def on_cancel(self):
@@ -93,6 +108,7 @@ class SMOServiceReport(Document):
 			timesheet.submit()
 
 	def notify_customer(self):
+		frappe.errprint(f"Notify Customer: {self.contact_email} {self.approval_hash}")
 		if not self.contact_email or not self.approval_hash:
 			return
 
@@ -153,7 +169,7 @@ class SMOServiceReport(Document):
 			frappe.msgprint(_("Failed to send email. Please check error logs."))
 
 	def _set_approval_data(self):
-		if self.workflow_state == "Customer Review" and not self.approval_hash:
+		if self.workflow_state == "Draft" and not self.approval_hash:
 			# สร้าง salt
 			salt = os.urandom(16).hex()
 			
@@ -167,3 +183,4 @@ class SMOServiceReport(Document):
 			self.approval_hash = hash_value
 			self.approval_salt = salt
 			self.approval_timestamp = timestamp
+

@@ -17,6 +17,7 @@
   "customer_name",
   "customer_site",
   "contact_person",
+  "contact_name",
   "contact_mobile",
   "contact_email",
   "job_detail_section",
@@ -49,7 +50,9 @@
   "amended_from",
   "approval_hash",
   "approval_salt",
-  "approval_timestamp"
+  "approval_timestamp",
+  "from_page",
+  "from_todo"
  ],
  "fields": [
   {
@@ -330,6 +333,24 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "approval_timestamp"
+  },
+  {
+   "fieldname": "from_page",
+   "fieldtype": "Data",
+   "label": "from_page"
+  },
+  {
+   "fieldname": "from_todo",
+   "fieldtype": "Link",
+   "label": "from_todo",
+   "options": "ToDo"
+  },
+  {
+   "fetch_from": "task.contact_name",
+   "fieldname": "contact_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "contact_name"
   }
  ],
  "hide_toolbar": 1,
@@ -342,7 +363,7 @@
    "link_fieldname": "service_report"
   }
  ],
- "modified": "2024-10-13 23:25:12.504555",
+ "modified": "2024-10-18 07:20:07.533197",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Service Report",
