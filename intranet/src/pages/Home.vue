@@ -23,9 +23,9 @@
       </div>
 
       <!-- Dashboard and Tasks Section -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1" :class="{ 'lg:grid-cols-3': todos.length > 0 }">
         <!-- Dashboard Section -->
-        <div class="lg:col-span-2 space-y-6">
+        <div :class="{ 'lg:col-span-2': todos.length > 0, 'lg:col-span-3': todos.length === 0 }" class="space-y-6">
           <div class="bg-base-100 p-6 rounded-lg shadow">
             <h2 class="text-2xl font-bold mb-4">แดชบอร์ด</h2>
             <!-- Display Current Period -->
@@ -65,7 +65,7 @@
             </div>
           </div>
 
-          <div class="bg-base-100 p-6 rounded-lg shadow" style="height: 520px;">
+          <div class="bg-base-100 p-6 rounded-lg shadow" >
             <div role="tablist" class="tabs tabs-bordered mb-4">
               <a v-for="tab in tabs" :key="tab.value" role="tab" class="tab"
                 :class="{ 'tab-active': activeTab === tab.value }" @click="activeTab = tab.value">
@@ -91,9 +91,16 @@
         </div>
 
         <!-- Tasks List -->
-        <div class="lg:col-span-1">
+        <div class="lg:col-span-1" v-if="todos.length > 0">
           <div class="bg-base-100 p-6 rounded-lg shadow">
-            <h2 class="text-xl font-bold mb-4">งานคงค้าง</h2>
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-xl font-bold">Task</h2>
+              <button class="btn btn-circle btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
+            </div>
             <div v-if="todosResource.loading" class="flex justify-center items-center h-40">
               <span class="loading loading-spinner loading-lg"></span>
             </div>
@@ -267,7 +274,7 @@ const fetchDocuments = () => {
 
 const load_service_report = async () => {
   console.log('Loading service report...')
-  serviceReportStore.pageSize = 5;
+  serviceReportStore.pageSize = 10;
   serviceReportStore.fetchAll(1)
 
 

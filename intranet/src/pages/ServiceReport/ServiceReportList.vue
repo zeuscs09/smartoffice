@@ -1,24 +1,26 @@
 <template>
     <UserLayout>
         <div class="container mx-auto p-4">
-            <h2 class="text-2xl font-bold mb-4">Service Report</h2>
-            <div class="breadcrumbs text-sm">
-                <ul>
-                    <li><a @click="router.push('/')">Home</a></li>
-
-                    <li>Service Report</li>
-                </ul>
-            </div>
-            <!-- ปุ่ม Filter -->
-            <div class="mb-4 flex justify-end">
-                <button class="btn btn-outline btn-sm" @click="toggleFilter">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+            <div class="flex justify-between items-center mb-4">
+                <div class="breadcrumbs text-sm">
+                    <ul>
+                        <li><a @click="router.push('/')">Home</a></li>
+                        <li>Service Report</li>
+                    </ul>
+                </div>
+                <!-- ปุ่ม Filter -->
+                <button 
+                      class="btn btn-sm" 
+                      :class="{ 'btn-ghost': !showFilter }" 
+                      @click="toggleFilter"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                    </svg>
-                    ตัวกรอง
-                </button>
+                          d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                      </svg>
+                      {{ showFilter ? 'ซ่อนตัวกรอง' : 'ตัวกรอง' }}
+                    </button>
             </div>
 
             <!-- ส่วนค้นหาและกรอง -->

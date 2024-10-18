@@ -1,7 +1,6 @@
 <template>
     <UserLayout>
-      loading : {{ isLoading }}
-      <pre>{{ JSON.stringify(task, null, 2) }}</pre>
+       
         <div v-if="!isLoading" class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
 
             <div v-if="task.doc">
@@ -9,8 +8,10 @@
                     <div class="flex items-center space-x-4">
                         <h1 class="text-2xl font-bold text-gray-800">
                             {{ task.doc.task_name }}
-                            <span :class="getStatusBadgeClass(todo?.doc?.status)" class="ml-2">
-                                {{ todo.doc?.status || 'กำลังโหลด...' }}
+                            <span v-if="todo?.doc?.status">
+                                <span :class="getStatusBadgeClass(todo?.doc?.status)" class="ml-2">
+                                    {{ todo.doc?.status || 'กำลังโหลด...' }}
+                                </span>
                             </span>
                         </h1>
                     </div>
@@ -30,7 +31,8 @@
                         <div class="space-y-4">
                             <h2 class="text-xl font-semibold text-gray-700 mb-3">ข้อมูลงาน</h2>
                             <InfoItem label="ประเภทงาน" :value="task.doc.job_type" />
-                            <InfoItem label="สถานะ" :value="todo.doc ? todo.doc.status : 'กำลังโหลด...'" />
+                            
+                            <InfoItem label="สถานะ" :value="todo ? todo?.doc?.status : ''" />
                             <InfoItem label="ความสำคัญ" :value="task.doc.priority" />
                             <InfoItem label="ช่วงเวลา" :value="task.doc.period" />
                             <InfoItem label="วันที่เริ่ม" :value="formatDate(task.doc.start_date)" />
@@ -81,7 +83,7 @@
                     <h2 class="text-2xl font-bold text-gray-800 mb-2">ไม่พบข้อมูล</h2>
                     <p class="text-gray-600">ขออภัย ไม่พบข้อมูลงานที่คุณกำลังค้นหา</p>
                 </div>
-                
+
                 <button @click="goBack" class="btn btn-primary btn-sm">
                     <span class="mr-2">←</span> ย้อนกลับ
                 </button>
@@ -92,7 +94,7 @@
             <span class="loading loading-spinner loading-lg"></span>
         </div>
     </UserLayout>
-  
+
 </template>
 
 <script setup lang="ts">
@@ -164,4 +166,3 @@ onMounted(() => {
     // }
 })
 </script>
-

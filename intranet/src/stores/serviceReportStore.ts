@@ -18,10 +18,10 @@ export const useServiceReportStore = defineStore('serviceReport', {
     sortOrder: 'asc',
   }),
   actions: {
-    async fetchAll(page: number) {
+     fetchAll(page: number) {
       this.currentPage = page
       
-      await this.documentsResource.fetch({
+       this.documentsResource.fetch({
         page: this.currentPage,
         page_size: this.pageSize,
         search: this.searchQuery,

@@ -1,7 +1,7 @@
 <template>
 
     <div class="container mx-auto">
-        <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
+      
         <div class="drawer-content flex flex-col">
             <!-- Navbar -->
             <div class="navbar bg-base-100">
@@ -15,7 +15,7 @@
                     </label>
                 </div>
                 <div class="flex-1">
-                    <img src="http://smarterp.localhost/files/logo.png" alt="TPS Logo" class="h-8" />
+                    <img  src="http://smarterp.localhost/files/logo.png" alt="TPS Logo" class="h-8 cursor-pointer" @click="router.push('/')" />
                 </div>
                 <div class="flex-none">
                     <!-- <button class="btn btn-ghost btn-circle">
@@ -27,10 +27,17 @@
                     </button> -->
                     <button class="btn btn-ghost btn-circle" @click="router.push('/tasks')">
                         <div class="indicator">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
+                                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                <g id="SVGRepo_iconCarrier">
+                                    <path d="M11 19.5H21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    <path d="M11 12.5H21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    <path d="M11 5.5H21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    <path d="M3 5.5L4 6.5L7 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    <path d="M3 12.5L4 13.5L7 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    <path d="M3 19.5L4 20.5L7 17.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                </g>
                             </svg>
                             <span class="badge badge-xs badge-primary indicator-item"></span>
                         </div>
@@ -57,7 +64,8 @@
                                         <img :src="userImage" alt="User avatar" />
                                     </template>
                                     <template v-else>
-                                        <div class="bg-primary text-primary-content flex items-center justify-center w-full h-full">
+                                        <div
+                                            class="bg-primary text-primary-content flex items-center justify-center w-full h-full">
                                             {{ getInitials(fullName) }}
                                         </div>
                                     </template>
@@ -113,7 +121,7 @@ function getCookie(name: string) {
 }
 
 const getInitials = (name: string) => {
-  return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2)
+    return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2)
 }
 </script>
 
