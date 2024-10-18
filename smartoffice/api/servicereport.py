@@ -23,7 +23,7 @@ def approve_service_report(name, customer_email, hash, timestamp):
             "approval_salt": None
         })
 
-        # ดึงเอกสารและเรียกใช้ on_submit
+        # ดึงเอกสารและเรยกใช้ on_submit
         doc = frappe.get_doc("SMO Service Report", name)
         doc.flags.ignore_permissions = True
         doc.submit()
@@ -117,3 +117,78 @@ def send_rejection_notification(name, reason):
         )
     except Exception as e:
         frappe.log_error(f"Error sending rejection notification: {str(e)}")
+
+
+@frappe.whitelist()
+def get_user_service_reports(page, page_size, search=None, status=None, start_date=None, end_date=None, sort_field=None, sort_order=None):
+    user = frappe.session.user
+    page = int(page)
+    page_size = int(page_size)
+    offset = (page - 1) * page_size
+    
+    conditions = ["wt.users LIKE %s"]
+    values = [f"%{user}%"]
+    
+    if search:
+        conditions.append("(sr.name LIKE %s OR sr.task_name LIKE %s OR sr.customer_name LIKE %s OR wt.users LIKE %s)")
+        values.extend([f"%{search}%"] * 4)
+    
+    if status:
+        conditions.append("sr.workflow_state = %s")
+        values.append(status)
+    
+    if start_date:
+        conditions.append("sr.job_start_on >= %s")
+        values.append(start_date)
+    
+    if end_date:
+        conditions.append("sr.job_start_on <= %s")
+        values.append(end_date)
+    
+    where_clause = " AND ".join(conditions)
+    
+    sort_clause = f"ORDER BY sr.{sort_field} {sort_order}" if sort_field and sort_order else "ORDER BY sr.creation DESC"
+    
+    query = f"""
+        SELECT 
+            sr.name,
+            sr.task,
+            sr.workflow_state,
+            sr.creation,
+            sr.job_start_on ,
+            sr.job_finish,
+            sr.task_name, 
+            sr.customer_name,
+            sr.contact_email,
+            sr.contact_name,
+            COUNT(*) OVER () as ttl_records,
+            sr.owner,
+            wt.parent,
+            wt.users as teams
+        FROM `tabSMO Service Report` sr
+        INNER JOIN (
+            SELECT parent, GROUP_CONCAT(user SEPARATOR ', ') AS users
+            FROM `tabSMO Working Team`
+            GROUP BY parent
+        ) wt ON sr.name = wt.parent
+        WHERE {where_clause}
+        {sort_clause}
+        LIMIT %s OFFSET %s
+    """
+    
+    values.extend([page_size, offset])
+    
+    service_reports = frappe.db.sql(query, tuple(values), as_dict=1)
+    
+    total_count = service_reports[0].ttl_records if service_reports else 0
+    
+    return {
+        "data": [
+            {k: v for k, v in report.items() if k != 'ttl_records'}
+            for report in service_reports
+        ],
+        "total": total_count,
+        "page": page,
+        "page_size": page_size,
+        "total_pages": -(-total_count // page_size)  # การหารปัดขึ้น
+    }

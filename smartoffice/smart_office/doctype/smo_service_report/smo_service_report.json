@@ -17,6 +17,7 @@
   "customer_name",
   "customer_site",
   "contact_person",
+  "contact_name",
   "contact_mobile",
   "contact_email",
   "job_detail_section",
@@ -343,6 +344,13 @@
    "fieldtype": "Link",
    "label": "from_todo",
    "options": "ToDo"
+  },
+  {
+   "fetch_from": "task.contact_name",
+   "fieldname": "contact_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "contact_name"
   }
  ],
  "hide_toolbar": 1,
@@ -355,7 +363,7 @@
    "link_fieldname": "service_report"
   }
  ],
- "modified": "2024-10-14 23:28:27.532982",
+ "modified": "2024-10-18 07:20:07.533197",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Service Report",

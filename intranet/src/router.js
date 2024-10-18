@@ -14,9 +14,34 @@ const routes = [
     component: () => import('@/pages/Login.vue'),
   },
   {
+    name: 'TaskList',
+    path: '/tasks/',
+    component: () => import('@/pages/task/TaskList.vue'),
+  },
+  {
     name: 'TaskDetail',
     path: '/tasks/:id',
-    component: () => import('@/pages/TaskDetail.vue'),
+    component: () => import('@/pages/task/TaskDetail.vue'),
+  },
+  {
+    name: 'ExpenseEntryList',
+    path: '/expense-entry',
+    component: () => import('@/pages/ExpenseEntry/ExpenseEntryList.vue'),
+  },
+  {
+    name: 'ServiceReportList',
+    path: '/service-report',
+    component: () => import('@/pages/ServiceReport/ServiceReportList.vue'),
+  },
+  {
+    name: 'ExpenseRequestList',
+    path: '/expense-request',
+    component: () => import('@/pages/ExpenseRequest/ExpenseRequestList.vue'),
+  },
+  {
+    name: 'AdvanceRequestList',
+    path: '/advance-request',
+    component: () => import('@/pages/AdvanceRequest/AdvanceRequestList.vue'),
   },
 ]
 

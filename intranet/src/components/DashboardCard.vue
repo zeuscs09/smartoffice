@@ -20,6 +20,7 @@ const props = defineProps<{
   icon: string
   color: string
   desc: string
+  change: number
 }>()
 </script>
 

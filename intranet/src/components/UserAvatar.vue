@@ -1,14 +1,24 @@
 <template>
-  <div class="avatar" :class="sizeClass">
-    <img v-if="imageUrl" :src="imageUrl" :alt="email" class="rounded-full" />
+  <div v-if="emails.length > 1" class="avatar-group -space-x-6 rtl:space-x-reverse">
+    <div v-for="(email, index) in emails" :key="index" class="avatar">
+      <div :class="sizeClass">
+        <img v-if="imageUrls[index]" :src="imageUrls[index]" :alt="email" class="rounded-full" />
+        <div v-else class="placeholder rounded-full bg-gray-200 flex items-center justify-center text-gray-600">
+          <span class="text-center">{{ getInitials(email) }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div v-else class="avatar" :class="sizeClass">
+    <img v-if="imageUrls[0]" :src="imageUrls[0]" :alt="emails[0]" class="rounded-full" />
     <div v-else class="placeholder rounded-full bg-gray-200 flex items-center justify-center text-gray-600">
-      <span class="text-center">{{ initials }}</span>
+      <span class="text-center">{{ getInitials(emails[0]) }}</span>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { createResource } from 'frappe-ui'
 
 const props = defineProps<{
@@ -16,10 +26,12 @@ const props = defineProps<{
   size?: 'sm' | 'md' | 'lg'
 }>()
 
-const imageUrl = ref('')
-const initials = computed(() => {
-  return props.email.split('@')[0].slice(0, 2).toUpperCase()
-})
+const emails = computed(() => props.email.split(',').map(e => e.trim()).filter(Boolean))
+const imageUrls = ref<string[]>([])
+
+const getInitials = (email: string) => {
+  return email.split('@')[0].slice(0, 2).toUpperCase()
+}
 
 const sizeClass = computed(() => {
   switch (props.size) {
@@ -31,41 +43,66 @@ const sizeClass = computed(() => {
 
 const userResource = createResource({
   url: 'smartoffice.api.util.get_avartar',
-  params: {
-    doctype: 'User',
-    name: props.email,
-  },
   auto: false,
 })
 
-onMounted(async () => {
-  try {
-    const userData = await userResource.submit()
-    if (userData.user_image) {
-      imageUrl.value = userData.user_image
+const CACHE_EXPIRATION = 2 * 24 * 60 * 60 * 1000 // 2 วันในหน่วยมิลลิวินาที
+
+const fetchUserImages = async () => {
+  imageUrls.value = []
+  for (const email of emails.value) {
+    try {
+      // ตรวจสอบ cache ก่อน
+      const cachedData = localStorage.getItem(`avatar_${email}`)
+      if (cachedData) {
+        const { image, timestamp } = JSON.parse(cachedData)
+        if (Date.now() - timestamp < CACHE_EXPIRATION) {
+          imageUrls.value.push(image)
+          continue
+        }
+      }
+
+      const userData = await userResource.submit({
+        doctype: 'User',
+        name: email,
+      })
+      const userImage = userData.user_image || ''
+      imageUrls.value.push(userImage)
+      // บันทึกลงใน cache พร้อมเวลาปัจจุบัน
+      localStorage.setItem(`avatar_${email}`, JSON.stringify({
+        image: userImage,
+        timestamp: Date.now()
+      }))
+    } catch (error) {
+      console.error('Error fetching user image:', error)
+      imageUrls.value.push('')
     }
-  } catch (error) {
-    console.error('Error fetching user image:', error)
   }
-})
+}
+
+// ฟังก์ชันสำหรับล้าง cache ที่หมดอายุ
+const clearExpiredCache = () => {
+  Object.keys(localStorage).forEach(key => {
+    if (key.startsWith('avatar_')) {
+      const cachedData = localStorage.getItem(key)
+      if (cachedData) {
+        const { timestamp } = JSON.parse(cachedData)
+        if (Date.now() - timestamp >= CACHE_EXPIRATION) {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+  })
+}
+
+// เรียกใช้ฟังก์ชันล้าง cache ที่หมดอายุเมื่อคอมโพเนนต์ถูกโหลด
+clearExpiredCache()
+
+watch(() => props.email, fetchUserImages, { immediate: true })
 </script>
 
 <style scoped>
-.avatar {
-  overflow: hidden;
-}
-.placeholder {
-  font-weight: bold;
+.avatar-group {
   display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.placeholder span {
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
 }
 </style>

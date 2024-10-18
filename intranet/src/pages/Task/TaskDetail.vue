@@ -1,6 +1,7 @@
 <template>
     <UserLayout>
-       
+      loading : {{ isLoading }}
+      <pre>{{ JSON.stringify(task, null, 2) }}</pre>
         <div v-if="!isLoading" class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
 
             <div v-if="task.doc">
@@ -8,7 +9,7 @@
                     <div class="flex items-center space-x-4">
                         <h1 class="text-2xl font-bold text-gray-800">
                             {{ task.doc.task_name }}
-                            <span :class="getStatusBadgeClass(todo.doc?.status)" class="ml-2">
+                            <span :class="getStatusBadgeClass(todo?.doc?.status)" class="ml-2">
                                 {{ todo.doc?.status || 'กำลังโหลด...' }}
                             </span>
                         </h1>
@@ -110,13 +111,13 @@ const todoId = route.query.todo as string
 const task = createDocumentResource({
     doctype: 'SMO Task',
     name: taskId,
-    auto: false,
+    auto: true,
 })
 
 const todo = createDocumentResource({
     doctype: 'ToDo',
     name: todoId,
-    auto: false,
+    auto: true,
 })
 
 // ใช้ computed property เพื่อตรวจสอบสถานะการโหลด
@@ -133,7 +134,7 @@ const formatDate = (dateString: string): string => {
 }
 
 const goBack = () => {
-    router.replace({name: 'Home'})
+    router.go(-1)
 }
 
 const createServiceReport = () => {
@@ -157,10 +158,10 @@ const getStatusBadgeClass = (status: string | undefined) => {
 }
 
 onMounted(() => {
-    task.reload()
-    if (todoId) {
-        todo.reload()
-    }
+    // task.reload()
+    // if (todoId) {
+    //     todo.reload()
+    // }
 })
 </script>
 
