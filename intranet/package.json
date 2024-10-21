@@ -18,7 +18,10 @@
     "vue-router": "^4.4.5",
     "daisyui": "^4.12.13",
     "postcss": "^8.4.5",
-    "tailwindcss": "^3.0.15"
+    "tailwindcss": "^3.0.15",
+    "chart.js": "^4.4.4",
+    "tippy.js": "^6.3.7",
+    "vue3-calendar-heatmap": "^2.0.5"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.0.0",
