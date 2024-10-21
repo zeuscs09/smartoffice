@@ -3,16 +3,20 @@
 
 frappe.ui.form.on("SMO Service Report", {
   refresh(frm) {
+    if(frappe.utils.get_query_params().from){
+      frappe.breadcrumbs.add("");
+    }
     // เพิ่มปุ่มย้อนกลับ
-    frm.add_custom_button(__('ย้อนกลับ'), function() {
+    frm.add_custom_button(__('Back'), function() {
       // ตรวจสอบว่ามี from_page หรือไม่
-      if (frm.doc.from_page) {
-       location.href = frm.doc.from_page;
-      } else {
-        // ถ้าไม่มี from_page ให้ย้อนกลับไปหน้า List View
-        frappe.set_route("List", "SMO Service Report");
-      }
-    },"Intranet");
+      // if (frm.doc.from_page) {
+      //  location.href = frm.doc.from_page;
+      // } else {
+      //   // ถ้าไม่มี from_page ให้ย้อนกลับไปหน้า List View
+      //   frappe.set_route("List", "SMO Service Report");
+      // }
+      history.back();
+    });
 
     if (frm.doc.workflow_state === "Customer Review" && frm.doc.from_page) {
       // frappe.set_route("/" + frm.doc.from_page);

@@ -24,6 +24,6 @@ app.use(resourcesPlugin)
 app.use(pinia)
 app.provide('formatDate', formatDate)
 app.provide('formatCurrency', formatCurrency)
-// app.use(FrappeUI)
+app.use(FrappeUI)
 
 app.mount('#app')

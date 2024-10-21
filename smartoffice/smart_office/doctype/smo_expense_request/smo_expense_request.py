@@ -24,7 +24,7 @@ class SMOExpenseRequest(Document):
 		self.next_action = ""
 		self.workflow_description = ""
 
-		employee = frappe.get_doc("Employee", {"user_id": self.request_by})
+		employee = frappe.db.get_value("Employee", {"user_id": self.request_by}, ["name", "reports_to", "grade"], as_dict=True)
 		total_amount = self.total
 		approvers = []
 
@@ -32,7 +32,8 @@ class SMOExpenseRequest(Document):
 		approval_limit = frappe.get_all(
 			"Approval Limit",
 			filters={
-				"approval_limit": (">=", total_amount)
+				"approval_limit": (">=", total_amount),
+				"flow_type": "Expense Request"
 			},
 			fields=["employee_grade", "approval_limit"],
 			order_by="approval_limit asc",
@@ -45,8 +46,9 @@ class SMOExpenseRequest(Document):
 			approver_level = 1
 			found_required_grade = False
 
-			while current_employee.reports_to and not found_required_grade:
-				current_employee = frappe.get_doc("Employee", current_employee.reports_to)
+			while current_employee.get("reports_to") and not found_required_grade:
+				current_employee = frappe.db.get_value("Employee", current_employee.reports_to, 
+					["name", "user_id", "designation", "grade", "reports_to"], as_dict=True)
 				
 				# ตรวจสอบว่าผู้อนุมัตินี้ยังไม่ได้ถูกเพิ่มไปแล้ว
 				if not any(approver['approver'] == current_employee.name for approver in approvers):
@@ -81,8 +83,9 @@ class SMOExpenseRequest(Document):
 			# ถ้าไม่มี Approval Limit ที่เหมาะสม ใช้วิธีการเดิม
 			current_employee = employee
 			approver_level = 1
-			while current_employee.reports_to:
-				approver = frappe.get_doc("Employee", current_employee.reports_to)
+			while current_employee.get("reports_to"):
+				approver = frappe.db.get_value("Employee", current_employee.reports_to, 
+					["name", "user_id", "designation", "reports_to"], as_dict=True)
 				if not any(a['approver'] == approver.name for a in approvers):
 					approvers.append({
 						"approver": approver.name,
@@ -106,7 +109,7 @@ class SMOExpenseRequest(Document):
 		# สร้าง workflow_description
 		workflow_steps = []
 		for idx, approver in enumerate(approvers, start=1):
-			step = f"{idx}. {approver['approver_role']} ({approver['approver']})"
+			step = f"{idx}. {approver['approver_role']} ({approver['user_id']})"
 			workflow_steps.append(step)
 		
 		self.workflow_description = "ขั้นตอนการอนุมัติ:\n" + "\n".join(workflow_steps)
@@ -168,16 +171,14 @@ class SMOExpenseRequest(Document):
 		notification.insert(ignore_permissions=True)
 
 	def get_approver_by_grade(self, grade):
-		approver = frappe.get_all(
-				"Employee",
-				filters={
-					"grade": grade
-					},
-				fields=["name", "user_id", "designation"],
-				order_by="grade asc",
-				limit=1
-			)
-		return frappe.get_doc("Employee", approver[0].name) if approver else None
+		approver = frappe.db.get_value(
+			"Employee",
+			{"grade": grade},
+			["name", "user_id", "designation"],
+			as_dict=True,
+			order_by="grade asc"
+		)
+		return approver
 
 	# เพิ่มฟักชันใหม่สำหรับการเริ่มกระบวนการอนุมัติ
 	def start_approval_process(self):

@@ -17,11 +17,11 @@
                     </div>
                     <div class="flex items-center space-x-4">
                         <button v-if="canCreateServiceReport" @click="createServiceReport"
-                            class="btn btn-primary btn-sm">
-                            <span>&#10133;</span> สร้าง Service Report
+                            class="btn btn-neutral btn-sm">
+                            <span>&#10133;</span> New Service Report
                         </button>
                         <button @click="goBack" class="btn btn-ghost btn-sm">
-                            <span class="mr-2">←</span> ย้อนกลับ
+                            <span class="mr-2">←</span> Back
                         </button>
                     </div>
                 </div>
@@ -141,7 +141,7 @@ const goBack = () => {
 
 const createServiceReport = () => {
     if (task.doc.name && todoId) {
-        location.href = `/app/smo-service-report/new?from_todo=${todoId}&from_page=${route.fullPath}&task=${task.doc.name}`
+        location.href = `/app/smo-service-report/new?from_todo=${todoId}&from_page=${route.fullPath}&task=${task.doc.name}&from=frontend`
     }
 }
 

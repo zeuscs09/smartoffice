@@ -9,164 +9,75 @@
                     </ul>
                 </div>
                 <!-- ปุ่ม Filter -->
-                <button 
-                      class="btn btn-sm" 
-                      :class="{ 'btn-ghost': !showFilter }" 
-                      @click="toggleFilter"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                <button class="btn btn-sm" :class="{ 'btn-ghost': !showFilter }" @click="toggleFilter">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                      </svg>
-                      {{ showFilter ? 'ซ่อนตัวกรอง' : 'ตัวกรอง' }}
-                    </button>
+                            d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                    <!-- {{ showFilter ? 'ซ่อนตัวกรอง' : 'ตัวกรอง' }} -->
+                </button>
             </div>
 
             <!-- ส่วนค้นหาและกรอง -->
             <div v-if="showFilter" class="flex flex-wrap gap-4 mb-4">
-                <input type="text" placeholder="No.,Task,Customer,Responsible"
-                    class="input input-bordered input-sm flex-grow" v-model="searchQuery" @input="handleSearch" />
-                <select class="select select-bordered select-sm w-full max-w-xs" v-model="statusFilter"
+                <input type="text" placeholder="Search..."
+                    class="input input-bordered flex-grow" v-model="searchQuery" @input="handleSearch" />
+                <select class="select select-bordered w-full max-w-xs" v-model="statusFilter"
                     @change="handleFilter">
                     <option value="">All Status</option>
                     <option value="Customer Review">Customer Review</option>
                     <option value="Customer Approve">Customer Approve</option>
                 </select>
-                <input type="date" class="input input-bordered input-sm" v-model="startDate" @change="handleFilter" />
-                <input type="date" class="input input-bordered input-sm" v-model="endDate" @change="handleFilter" />
+                <input type="date" class="input input-bordered " v-model="startDate" @change="handleFilter" />
+                <input type="date" class="input input-bordered " v-model="endDate" @change="handleFilter" />
 
             </div>
 
             <!-- ตารางแสดงข้อมูล -->
             <div class="overflow-x-auto mt-4">
-                <table class="table table-zebra w-full">
-                    <thead>
-                        <tr>
-                            <th class="cursor-pointer" @click="sortBy('name')">
-                                No.
-                                <span class="ml-1">
-                                    <span :class="{ 'text-primary': serviceReportStore.sortField === 'name' }">
-                                        {{ serviceReportStore.sortField === 'name' && serviceReportStore.sortOrder ===
-                                            'asc' ? '▲' : '△' }}
-                                    </span>
-                                    <span :class="{ 'text-primary': serviceReportStore.sortField === 'name' }">
-                                        {{ serviceReportStore.sortField === 'name' && serviceReportStore.sortOrder ===
-                                            'desc' ? '▼' : '▽' }}
-                                    </span>
-                                </span>
-                            </th>
-                            <th class="cursor-pointer" @click="sortBy('workflow_state')">
-                                Task
-                                <span class="ml-1">
-                                    <span
-                                        :class="{ 'text-primary': serviceReportStore.sortField === 'workflow_state' }">
-                                        {{ serviceReportStore.sortField === 'workflow_state' &&
-                                            serviceReportStore.sortOrder === 'asc' ? '▲' : '△' }}
-                                    </span>
-                                    <span
-                                        :class="{ 'text-primary': serviceReportStore.sortField === 'workflow_state' }">
-                                        {{ serviceReportStore.sortField === 'workflow_state' &&
-                                            serviceReportStore.sortOrder === 'desc' ? '▼' : '▽' }}
-                                    </span>
-                                </span>
-                            </th>
-                            <th class="cursor-pointer" @click="sortBy('job_start_on')">
-                                Job Date
-                                <span class="ml-1">
-                                    <span :class="{ 'text-primary': serviceReportStore.sortField === 'job_start_on' }">
-                                        {{ serviceReportStore.sortField === 'job_start_on' &&
-                                            serviceReportStore.sortOrder === 'asc' ? '▲' : '△' }}
-                                    </span>
-                                    <span :class="{ 'text-primary': serviceReportStore.sortField === 'job_start_on' }">
-                                        {{ serviceReportStore.sortField === 'job_start_on' &&
-                                            serviceReportStore.sortOrder === 'desc' ? '▼' : '▽' }}
-                                    </span>
-                                </span>
-                            </th>
-
-                            <th>Customer</th>
-                            <th>Responsible</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="report in serviceReportStore.data" :key="report.name">
-                            <td>
-                                <span class="cursor-pointer" @click="viewDocument(report.name)">
-                                    {{ report.name }}
-                                </span>
-                            </td>
-                            <td>
-                                <!-- router.push({ name: 'TaskDetail', params: { id: todo.reference_name }, query: { todo: todo.name } }) -->
-                                <span class="cursor-pointer"
-                                    @click="router.push({ name: 'TaskDetail', params: { id: report.task } })">
-                                    {{ report.task_name }}
-                                </span>
-                                <br />
-                                
-                                <span class="badge badge-sm" :class="{
-                                    'badge-primary': report.workflow_state === 'Customer Review',
-                                    'badge-success': report.workflow_state === 'Customer Approve'
-                                }">{{ report.workflow_state }}</span>
-                            </td>
-                            <td>{{ formatDate(report.job_start_on) }}</td>
-
-                            <td> {{ report.contact_name }} - {{ report.contact_email }} <br />
-                                <span class="badge badge-sm badge-ghost">{{ report.customer_name }}</span>
-
-                            </td>
-                            <td>
-                                <UserAvatar :email="report.teams" />
-
-
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <ServiceReportTable 
+                    :data="serviceReportStore.data" 
+                    :loading="serviceReportStore.documentsResource.loading"
+                    :error="serviceReportStore.documentsResource.error" 
+                    :sortField="serviceReportStore.sortField"
+                    :sortOrder="serviceReportStore.sortOrder" 
+                    :sortable="true" 
+                    @sort="sortBy" 
+                />
             </div>
 
             <!-- Pagination -->
-            <div class="flex justify-between items-center mt-4">
-                <div class="join">
-                    <button class="join-item btn" @click="serviceReportStore.previousPage()"
-                        :disabled="serviceReportStore.isFirstPage">
-                        «
-                    </button>
-                    <button class="join-item btn">
-                        หน้า {{ serviceReportStore.currentPage }}
-                    </button>
-                    <button class="join-item btn" @click="serviceReportStore.nextPage()"
-                        :disabled="serviceReportStore.isLastPage">
-                        »
-                    </button>
-                </div>
-                <select v-model="pageSize" @change="handlePageSizeChange" class="select select-bordered">
-                    <option :value="10">10 รายการ/หน้า</option>
-                    <option :value="20">20 รายการ/หน้า</option>
-                    <option :value="50">50 รายการ/หน้า</option>
-                </select>
-            </div>
-
-            <!-- แสดงจำนวนรายการ -->
-            <div class="text-sm text-gray-600 mt-2">
-                แสดง {{ displayedItemsCount }} จาก {{ totalItems }} รายการ
-            </div>
-
+            <Pagination 
+                v-if="serviceReportStore.data.length > 0" 
+                :current-page="serviceReportStore.currentPage"
+                :is-first-page="serviceReportStore.isFirstPage" 
+                :is-last-page="serviceReportStore.isLastPage"
+                :page-size="pageSize" 
+                :displayed-items-count="displayedItemsCount" 
+                :total-items="totalItems"
+                @previous="serviceReportStore.previousPage()" 
+                @next="serviceReportStore.nextPage()"
+                @update:page-size="handlePageSizeChange" 
+            />
 
         </div>
 
-        
+
     </UserLayout>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, inject } from 'vue'
+import { ref, computed, onMounted, inject, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import UserLayout from '@/layouts/userLayout.vue'
 import { useServiceReportStore } from '@/stores/serviceReportStore'
-import UserAvatar from '../../components/UserAvatar.vue'
+import ServiceReportTable from '@/components/ServiceReportTable.vue'
+import Pagination from '@/components/Pagination.vue' // นำเข้า Pagination component
+
 const router = useRouter()
 const serviceReportStore = useServiceReportStore()
+serviceReportStore.pageSize = 10
 const formatDate = inject('formatDate') as (date: string) => string
 
 const searchQuery = ref('')
@@ -209,8 +120,9 @@ const sortBy = (field: string) => {
     serviceReportStore.fetchAll(1)
 }
 
-const handlePageSizeChange = () => {
-    serviceReportStore.pageSize = pageSize.value
+const handlePageSizeChange = (newSize: number) => {
+    pageSize.value = newSize
+    serviceReportStore.pageSize = newSize
     serviceReportStore.fetchAll(1)
 }
 
@@ -227,8 +139,13 @@ const applyFiltersAndRefresh = () => {
 }
 
 const viewDocument = (docName: string) => {
-  location.href = `/app/smo-service-report/${docName}?from_page=service_report`
+    location.href = `/app/smo-service-report/${docName}?from_page=service_report`
 }
+
+// เพิ่ม watch เพื่อติดตามการเปลี่ยนแปลงของ pageSize
+watch(pageSize, (newSize) => {
+    console.log('Page size changed to:', newSize)
+})
 </script>
 
 <style scoped>

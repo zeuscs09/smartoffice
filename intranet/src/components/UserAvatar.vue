@@ -1,18 +1,23 @@
 <template>
   <div v-if="emails.length > 1" class="avatar-group -space-x-6 rtl:space-x-reverse">
     <div v-for="(email, index) in emails" :key="index" class="avatar">
-      <div :class="sizeClass">
-        <img v-if="imageUrls[index]" :src="imageUrls[index]" :alt="email" class="rounded-full" />
-        <div v-else class="placeholder rounded-full bg-gray-200 flex items-center justify-center text-gray-600">
-          <span class="text-center">{{ getInitials(email) }}</span>
+      <div :class="[sizeClass, 'flex items-center justify-center overflow-hidden']">
+        <img v-if="imageUrls[index]" :src="imageUrls[index]" :alt="email" class="rounded-full w-full h-full object-cover" />
+        <div v-else class="placeholder rounded-full bg-gray-200 w-full h-full flex items-center justify-center text-gray-600 p-2">
+          <span>{{ getInitials(email) }}</span>
         </div>
       </div>
     </div>
   </div>
-  <div v-else class="avatar" :class="sizeClass">
-    <img v-if="imageUrls[0]" :src="imageUrls[0]" :alt="emails[0]" class="rounded-full" />
-    <div v-else class="placeholder rounded-full bg-gray-200 flex items-center justify-center text-gray-600">
-      <span class="text-center">{{ getInitials(emails[0]) }}</span>
+  <div v-else-if="emails.length === 1" :class="[sizeClass, 'avatar flex items-center justify-center overflow-hidden']">
+    <img v-if="imageUrls[0]" :src="imageUrls[0]" :alt="emails[0]" class="rounded-full w-full h-full object-cover" />
+    <div v-else class="placeholder rounded-full bg-gray-200 w-full h-full flex items-center justify-center text-gray-600 p-2">
+      <span>{{ getInitials(emails[0]) }}</span>
+    </div>
+  </div>
+  <div v-else :class="[sizeClass, 'avatar flex items-center justify-center overflow-hidden']">
+    <div class="placeholder rounded-full bg-gray-200 w-full h-full flex items-center justify-center text-gray-600 p-2">
+      <span>N/A</span>
     </div>
   </div>
 </template>
@@ -22,11 +27,14 @@ import { ref, computed, watch } from 'vue'
 import { createResource } from 'frappe-ui'
 
 const props = defineProps<{
-  email: string
+  email: string | undefined
   size?: 'sm' | 'md' | 'lg'
 }>()
 
-const emails = computed(() => props.email.split(',').map(e => e.trim()).filter(Boolean))
+const emails = computed(() => {
+  if (!props.email) return []
+  return props.email.split(',').map(e => e.trim()).filter(Boolean)
+})
 const imageUrls = ref<string[]>([])
 
 const getInitials = (email: string) => {
@@ -50,7 +58,12 @@ const CACHE_EXPIRATION = 2 * 24 * 60 * 60 * 1000 // 2 วันในหน่�
 
 const fetchUserImages = async () => {
   imageUrls.value = []
+  if (!emails.value.length) return
   for (const email of emails.value) {
+    if (!email) {
+      imageUrls.value.push('')
+      continue
+    }
     try {
       // ตรวจสอบ cache ก่อน
       const cachedData = localStorage.getItem(`avatar_${email}`)

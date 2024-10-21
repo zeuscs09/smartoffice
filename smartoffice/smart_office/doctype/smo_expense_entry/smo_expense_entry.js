@@ -3,6 +3,9 @@
 
 frappe.ui.form.on("SMO Expense Entry", {
   onload(frm) {
+  
+   
+   
     frm.set_query("input_expense_types", "expense_item", function (doc, cdt, cdn) {
         console.log(frm.customer);
         return {
@@ -13,10 +16,19 @@ frappe.ui.form.on("SMO Expense Entry", {
       });
   },
   refresh(frm) {
+    if(frappe.utils.get_query_params().from){
+      frappe.breadcrumbs.add("");
+    }
+    frm.add_custom_button(__('Back'), function() {
+      
+      history.back();
+    });
+
     frappe.call({
       method: "smartoffice.api.setting.get_taxi", // API ที่สร้างไว้
       args: {},
       callback: function (r) {
+
         if (r.message) {
           let config = r.message;
           if (frm.doc.config_taxi_rate == 0) {

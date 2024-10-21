@@ -1,27 +1,62 @@
 <template>
   <div>
-    <div v-if="loading" class="flex justify-center items-center h-40">
-      <span class="loading loading-spinner loading-lg"></span>
-    </div>
-    <div v-else-if="error" class="text-center py-8">
-      <p class="text-error">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
-    </div>
-    <div v-else>
+    <div class="hidden md:block">
       <table class="table table-zebra w-full">
         <thead>
           <tr>
-            <th>เลขที่เอกสาร</th>
-            <th>วันที่</th>
-            <th>สถานะ</th>
-            <th>ผู้รับผิดชอบ</th>
+            <th class="cursor-pointer" @click="$emit('sort', 'name')">
+              No.
+              <span class="ml-1" v-if="sortable">
+                <span :class="{ 'text-primary': sortField === 'name' }">
+                  {{ sortField === 'name' && sortOrder === 'asc' ? '▲' : '△' }}
+                </span>
+                <span :class="{ 'text-primary': sortField === 'name' }">
+                  {{ sortField === 'name' && sortOrder === 'desc' ? '▼' : '▽' }}
+                </span>
+              </span>
+            </th>
+            <th class="cursor-pointer" @click="$emit('sort', 'job_start_on')">
+              Date
+              <span class="ml-1" v-if="sortable">
+                <span :class="{ 'text-primary': sortField === 'job_start_on' }">
+                  {{ sortField === 'job_start_on' && sortOrder === 'asc' ? '▲' : '△' }}
+                </span>
+                <span :class="{ 'text-primary': sortField === 'job_start_on' }">
+                  {{ sortField === 'job_start_on' && sortOrder === 'desc' ? '▼' : '▽' }}
+                </span>
+              </span>
+            </th>
+            <th class="cursor-pointer" @click="$emit('sort', 'workflow_state')">
+              Status
+              <span class="ml-1" v-if="sortable">
+                <span :class="{ 'text-primary': sortField === 'workflow_state' }">
+                  {{ sortField === 'workflow_state' && sortOrder === 'asc' ? '▲' : '△' }}
+                </span>
+                <span :class="{ 'text-primary': sortField === 'workflow_state' }">
+                  {{ sortField === 'workflow_state' && sortOrder === 'desc' ? '▼' : '▽' }}
+                </span>
+              </span>
+            </th>
+            <th>Responsible</th>
           </tr>
         </thead>
-        <tbody>
-          <tr v-for="doc in data" :key="doc.name">
+        <tbody v-if="loading">
+          <tr >
+            <td colspan="4" >
+              <SkeletonTable />
+            </td>
+          </tr>
+        </tbody>
+        <tbody v-else-if="sortedData.length > 0">
+          <tr v-for="doc in sortedData" :key="doc.name">
             <td>
-              {{ doc.task_name }}
-              <br>
-              <span class="text-xs text-gray-500 cursor-pointer" @click="viewDocument(doc.name)">{{ doc.name }}</span>
+              <div class="cursor-pointer" @click="viewDocument(doc.name)">
+
+                {{ doc.name }}
+                <br>
+                <span class="text-xs text-gray-500 " > {{ doc.task_name
+                  }}</span>
+              </div>
             </td>
             <td>{{ formatDate(doc.job_start_on) }}</td>
             <td>
@@ -32,18 +67,51 @@
             </td>
           </tr>
         </tbody>
+        <tbody v-else>
+          <tr >
+            <td colspan="4" >
+              <NoDataFoundTable />
+            </td>
+          </tr>
+        </tbody>
       </table>
-      <div class="text-right">
-        <button class="btn btn-link" @click="router.push({ name: 'ServiceReportList' })">ดูทั้งหมด</button>
+    </div>
+
+    <div class="md:hidden">
+      <div v-if="loading">
+        <SkeletonCard />
+      </div>
+      <div v-else-if="sortedData.length > 0" class="space-y-4">
+        <div v-for="doc in sortedData" :key="doc.name" class="card bg-base-100 shadow-xl">
+          <div class="card-body">
+            <h2 class="card-title cursor-pointer" @click="viewDocument(doc.name)">
+              {{ doc.name }}
+            </h2>
+            <p class="text-sm text-gray-500">{{ doc.task_name }}</p>
+            <p>Date: {{ formatDate(doc.job_start_on) }}</p>
+            <p>Status: <span :class="getStatusClass(doc.workflow_state)">{{ doc.workflow_state }}</span></p>
+            <div class="card-actions justify-end">
+              <UserAvatar :email="doc.teams" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div v-else>
+        <NoDataFoundCard />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, inject } from 'vue'
+import { defineProps, defineEmits, inject, computed } from 'vue'
 import UserAvatar from './UserAvatar.vue';
 import { useRouter } from 'vue-router';
+import SkeletonTable from '@/components/SkeletonTable.vue'
+import NoDataFoundTable from '@/components/NoDataFoundTable.vue'
+import SkeletonCard from '@/components/SkeletonCard.vue'
+import NoDataFoundCard from '@/components/NoDataFoundCard.vue'
+
 const props = defineProps({
   data: {
     type: Array,
@@ -56,21 +124,47 @@ const props = defineProps({
   error: {
     type: Boolean,
     default: false
+  },
+  sortField: {
+    type: String,
+    default: ''
+  },
+  sortOrder: {
+    type: String,
+    default: 'asc'
+  },
+  sortable: {
+    type: Boolean,
+    default: true
   }
 })
 
-// ใช้ inject เพื่อเรียกใช้ formatDate
-const formatDate = inject('formatDate') as (date: string) => string
+const emit = defineEmits(['sort'])
 
+const formatDate = inject('formatDate') as (date: string) => string
 const router = useRouter()
 
 const getStatusClass = (status: string) => {
   switch (status.toLowerCase()) {
-    case 'draft': return 'badge badge-warning'
-    case 'submitted': return 'badge badge-success'
-    case 'cancelled': return 'badge badge-error'
+    case 'customer review': return 'badge badge-warning'
+    case 'customer approve': return 'badge badge-success'
+    case 'rejected': return 'badge badge-error'
     default: return 'badge'
   }
+}
+
+const sortedData = computed(() => {
+  if (!props.sortable || !props.sortField) return props.data
+  return [...props.data].sort((a, b) => {
+    if (a[props.sortField] < b[props.sortField]) return props.sortOrder === 'asc' ? -1 : 1
+    if (a[props.sortField] > b[props.sortField]) return props.sortOrder === 'asc' ? 1 : -1
+    return 0
+  })
+})
+
+const toggleSort = (field: string) => {
+  if (!props.sortable) return
+  emit('sort', field)
 }
 
 const viewDocument = (docName: string) => {
@@ -81,5 +175,11 @@ const viewDocument = (docName: string) => {
 <style scoped>
 .badge {
   @apply px-2 py-1 rounded-full text-xs font-semibold;
+}
+
+@media (max-width: 768px) {
+  .card {
+    @apply w-full;
+  }
 }
 </style>

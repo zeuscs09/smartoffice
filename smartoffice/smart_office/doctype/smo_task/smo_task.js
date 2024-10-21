@@ -3,6 +3,13 @@
 
 frappe.ui.form.on("SMO Task", {
   refresh(frm) {
+    if(frappe.utils.get_query_params().from){
+      frappe.breadcrumbs.add("");
+    }
+    frm.add_custom_button(__('Back'), function() {
+      
+      history.back();
+    });
     if (
       frm.doc.status === "Completed" ||
       frm.doc.status === "Cancel" ||

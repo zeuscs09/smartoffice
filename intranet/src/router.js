@@ -43,6 +43,16 @@ const routes = [
     path: '/advance-request',
     component: () => import('@/pages/AdvanceRequest/AdvanceRequestList.vue'),
   },
+  {
+    name: 'MailBoxList',
+    path: '/mailbox',
+    component: () => import('@/pages/Mailbox/MailBoxList.vue'),
+  },
+  {
+    name:'WorkLoad',
+    path:'/workload',
+    component:()=>import('@/pages/Team/WorkLoad.vue')
+  }
 ]
 
 let router = createRouter({

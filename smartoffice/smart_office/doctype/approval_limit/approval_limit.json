@@ -7,6 +7,7 @@
  "field_order": [
   "employee_grade",
   "approval_limit",
+  "flow_type",
   "description"
  ],
  "fields": [
@@ -29,11 +30,18 @@
    "fieldname": "description",
    "fieldtype": "Small Text",
    "label": "Description"
+  },
+  {
+   "fieldname": "flow_type",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Flow Type",
+   "options": "Expense Request\nExpense Entry"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-14 09:54:56.944549",
+ "modified": "2024-10-19 13:08:02.617342",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "Approval Limit",

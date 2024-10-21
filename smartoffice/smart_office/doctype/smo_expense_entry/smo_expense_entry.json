@@ -13,8 +13,10 @@
   "over_night",
   "holiday_description",
   "customer",
+  "customer_name",
   "customer_site",
   "project",
+  "project_name",
   "column_break_xeie",
   "working_hour",
   "ot_rate",
@@ -26,6 +28,8 @@
   "total_amount",
   "expense_item_section",
   "expense_item",
+  "section_break_nfeq",
+  "approver",
   "section_break_fvul",
   "amended_from",
   "is_request"
@@ -195,13 +199,36 @@
    "fieldtype": "Float",
    "label": "Overnight Rate",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_nfeq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "approver",
+   "fieldtype": "Data",
+   "label": "Approver"
+  },
+  {
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Customer Name"
+  },
+  {
+   "fetch_from": "project.project_name",
+   "fieldname": "project_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Project Name"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-09-30 11:54:35.164654",
+ "modified": "2024-10-19 21:18:08.969761",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Entry",
@@ -231,6 +258,72 @@
    "report": 1,
    "role": "Engineer Staff",
    "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "VP",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "EVP",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "SVP",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "CEO",
+   "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],
