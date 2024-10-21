@@ -42,6 +42,14 @@ frappe.ui.form.on("SMO Expense Request", {
     }
   },
   refresh(frm) {
+    if(frappe.utils.get_query_params().from){
+      frappe.breadcrumbs.add("");
+    }
+    frm.add_custom_button(__('Back'), function() {
+      
+      history.back();
+    });
+    
     if (frm.doc.expense_request_item) {
       let msg = [];
 

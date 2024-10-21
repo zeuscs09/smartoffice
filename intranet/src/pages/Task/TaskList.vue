@@ -10,47 +10,43 @@
                 </div>
                 <div class="flex gap-2">
                     <!-- ปุ่ม + -->
-                    <button class="btn btn-primary btn-sm">
+                    <button @click="newTask" class="btn btn-ghost btn-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
-                        เพิ่ม
+
                     </button>
                     <!-- ปุ่ม Filter -->
-                    <button 
-                      class="btn btn-sm" 
-                      :class="{ 'btn-ghost': !showFilter }" 
-                      @click="toggleFilter"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                      </svg>
-                      {{ showFilter ? 'ซ่อนตัวกรอง' : 'ตัวกรอง' }}
+                    <button class="btn btn-sm" :class="{ 'btn-ghost': !showFilter }" @click="toggleFilter">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                        </svg>
+                        <!-- {{ showFilter ? 'ซ่อนตัวกรอง' : 'ตัวกรอง' }} -->
                     </button>
                 </div>
             </div>
 
             <!-- ส่วนค้นหาและกรอง -->
             <div v-if="showFilter" class="flex flex-wrap gap-4 mb-4">
-                <input type="text" placeholder="No.,Task,Customer,Responsible"
-                    class="input input-bordered input-sm flex-grow" v-model="searchQuery" @input="handleSearch" />
-                <select class="select select-bordered select-sm w-full max-w-xs" v-model="statusFilter"
+                <input type="text" placeholder="Search..."
+                    class="input input-bordered flex-grow" v-model="searchQuery" @input="handleSearch" />
+                <select class="select select-bordered w-full max-w-xs" v-model="statusFilter"
                     @change="handleFilter">
                     <option value="">ทุกสถานะ</option>
                     <option value="Open">เปิด</option>
                     <option value="Closed">ปิด</option>
                     <option value="Cancelled">ยกเลิก</option>
                 </select>
-                <input type="date" class="input input-bordered input-sm" v-model="startDate" @change="handleFilter" />
-                <input type="date" class="input input-bordered input-sm" v-model="endDate" @change="handleFilter" />
+                <input type="date" class="input input-bordered " v-model="startDate" @change="handleFilter" />
+                <input type="date" class="input input-bordered " v-model="endDate" @change="handleFilter" />
             </div>
 
 
-            <!-- ตารางแสดงข้อมูล -->
-            <div class="overflow-x-auto mt-4">
+            <!-- ตารางสำหรับหน้าจอขนาดกลางขึ้นไป -->
+            <div class="hidden md:block overflow-x-auto mt-4">
                 <table class="table table-zebra w-full">
                     <thead>
                         <tr>
@@ -61,13 +57,13 @@
                                         :class="{ 'text-primary': serviceReportStore.sortField === 'reference_name' }">
                                         {{ serviceReportStore.sortField === 'reference_name' &&
                                             serviceReportStore.sortOrder ===
-                                        'asc' ? '▲' : '△' }}
+                                            'asc' ? '▲' : '△' }}
                                     </span>
                                     <span
                                         :class="{ 'text-primary': serviceReportStore.sortField === 'reference_name' }">
                                         {{ serviceReportStore.sortField === 'reference_name' &&
                                             serviceReportStore.sortOrder ===
-                                        'desc' ? '▼' : '▽' }}
+                                            'desc' ? '▼' : '▽' }}
                                     </span>
                                 </span>
                             </th>
@@ -102,18 +98,25 @@
                             <th>Responsible</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody v-if ="serviceReportStore.documentsResource.loading">
+                        <tr >
+                            <td colspan="5" >
+                                <SkeletonTable />
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tbody v-if="serviceReportStore.data.length > 0">
                         <tr v-for="report in serviceReportStore.data" :key="report.name">
                             <td>
-                                <span class="cursor-pointer" @click="router.push({ name: 'TaskDetail', params: { id: report.reference_name } })">
+                                <span class="cursor-pointer"
+                                    @click="router.push({ name: 'TaskDetail', params: { id: report.reference_name }, query: { todo: report.name } })">
                                     {{ report.reference_name }}
                                 </span>
                             </td>
                             <td>
                                 <!-- router.push({ name: 'TaskDetail', params: { id: todo.reference_name }, query: { todo: todo.name } }) -->
                                 <span class="cursor-pointer"
-                                    @click="router.push({ name: 'TaskDetail', params: { id: report.reference_name } })"
-                                >
+                                    @click="router.push({ name: 'TaskDetail', params: { id: report.reference_name } })">
                                     {{ report.description }}
                                 </span>
                                 <br />
@@ -137,7 +140,63 @@
                             </td>
                         </tr>
                     </tbody>
+                    <tbody v-else>
+                        <tr >
+                            <td colspan="5" >
+                               <NoDataFoundTable />
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
+            </div>
+
+            <!-- การ์ดสำหรับหน้าจอขนาดเล็ก -->
+            <div class="md:hidden space-y-4 mt-4">
+                <div v-if="serviceReportStore.documentsResource.loading">
+                    <div class="card bg-base-100 shadow-xl animate-pulse">
+                        <div class="card-body">
+                            <div class="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
+                            <div class="h-4 bg-gray-300 rounded w-1/2 mb-2"></div>
+                            <div class="h-4 bg-gray-300 rounded w-1/4"></div>
+                        </div>
+                    </div>
+                </div>
+                <div v-else-if="serviceReportStore.data.length > 0">
+                    <div v-for="report in serviceReportStore.data" :key="report.name" class="card bg-base-100 shadow-xl mb-4">
+                        <div class="card-body p-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <h2 class="card-title text-base cursor-pointer" @click="router.push({ name: 'TaskDetail', params: { id: report.reference_name }, query: { todo: report.name } })">
+                                    {{ report.reference_name }}
+                                </h2>
+                                <span class="badge badge-sm" :class="{
+                                    'badge-primary': report.status === 'Open',
+                                    'badge-success': report.status === 'Closed',
+                                    'badge-error': report.status === 'Cancelled'
+                                }">{{ report.status }}</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-2">{{ report.description }}</p>
+                            <div class="text-sm">
+                                <p><span class="font-semibold">Job Date:</span> {{ formatDate(report.due_date) }}</p>
+                                <p><span class="font-semibold">Customer:</span> {{ report.contact_person }}</p>
+                                <p class="text-xs text-gray-500">{{ report.contact_email }}</p>
+                                <p class="mt-1"><span class="badge badge-sm badge-ghost">{{ report.project }}</span></p>
+                            </div>
+                            <div class="flex justify-end mt-2">
+                                <div>
+                                    <p class="text-xs text-gray-500 mb-1">Responsible:</p>
+                                    <UserAvatar :email="report.assign_to" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div v-else>
+                    <div class="card bg-base-100 shadow-xl">
+                        <div class="card-body">
+                            <p class="text-center">No Data Found</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Pagination -->
@@ -180,8 +239,11 @@ import { useRouter } from 'vue-router'
 import UserLayout from '@/layouts/userLayout.vue'
 import { useSmoTaskStore } from '@/stores/taskStore'
 import UserAvatar from '../../components/UserAvatar.vue'
+import SkeletonTable from '@/components/SkeletonTable.vue'
+import NoDataFoundTable from '@/components/NoDataFoundTable.vue'
 const router = useRouter()
 const serviceReportStore = useSmoTaskStore()
+
 const formatDate = inject('formatDate') as (date: string) => string
 
 const searchQuery = ref('')
@@ -195,7 +257,8 @@ const displayedItemsCount = computed(() => serviceReportStore.data.length)
 const totalItems = computed(() => serviceReportStore.documentsResource.data?.total || 0)
 
 onMounted(() => {
-    serviceReportStore.fetchAll(1)
+    serviceReportStore.pageSize = 10
+    handleFilter()
 })
 
 const toggleFilter = () => {
@@ -242,7 +305,10 @@ const applyFiltersAndRefresh = () => {
 }
 
 const viewDocument = (docName: string) => {
-    location.href = `/app/smo-service-report/${docName}?from_page=service_report`
+    location.href = `/app/smo-service-report/${docName}?from_page=service_report&from=front_end`
+}
+const newTask = () => {
+    window.location.href = '/app/smo-task/new?from=front_end'
 }
 </script>
 
@@ -255,5 +321,21 @@ const viewDocument = (docName: string) => {
 .fade-enter-from,
 .fade-leave-to {
     opacity: 0;
+}
+
+.badge {
+  @apply px-2 py-1 rounded-full text-xs font-semibold;
+}
+
+.card {
+  @apply w-full;
+}
+
+.card-body {
+  @apply p-4;
+}
+
+.card-title {
+  @apply text-base mb-1;
 }
 </style>

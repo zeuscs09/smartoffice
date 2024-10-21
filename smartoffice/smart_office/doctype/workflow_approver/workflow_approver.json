@@ -20,7 +20,7 @@
  "fields": [
   {
    "fieldname": "approver",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Approver",
    "options": "Employee",
@@ -82,7 +82,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-10-14 13:31:31.387041",
+ "modified": "2024-10-19 16:23:09.510968",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "Workflow Approver",

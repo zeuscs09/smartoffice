@@ -5,7 +5,6 @@ export const useServiceReportStore = defineStore('serviceReport', {
   state: () => ({
     currentPage: 1,
     pageSize: 10,
-    totalPages: 1,
     documentsResource: createResource({
       url: 'smartoffice.api.servicereport.get_user_service_reports',
       auto: false,
@@ -32,7 +31,6 @@ export const useServiceReportStore = defineStore('serviceReport', {
         sort_order: this.sortOrder,
       })
 
-      this.totalPages = this.documentsResource.data?.total_pages || 1
       return this.documentsResource
     },
     setSearchQuery(query: string) {
@@ -86,5 +84,8 @@ export const useServiceReportStore = defineStore('serviceReport', {
     isLastPage(): boolean {
       return this.currentPage === this.totalPages
     },
+    totalPages(): number {
+      return this.documentsResource.data?.total_pages || 1
+    }
   }
 })

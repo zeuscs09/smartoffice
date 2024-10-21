@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "format:ER-{YYYY}-{MM}-{#####}",
  "creation": "2024-09-16 22:25:12.155404",
+ "description": "Expense Request",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -133,11 +134,13 @@
   {
    "fieldname": "approver_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Approver"
   },
   {
    "fieldname": "workflow_description",
    "fieldtype": "Small Text",
+   "hidden": 1,
    "label": "Workflow Description"
   },
   {
@@ -148,6 +151,7 @@
   {
    "fieldname": "max_level",
    "fieldtype": "Int",
+   "hidden": 1,
    "label": "Final Approve",
    "read_only": 1
   },
@@ -161,7 +165,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-14 15:38:23.423364",
+ "modified": "2024-10-21 12:56:46.868918",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Request",

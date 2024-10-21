@@ -6,7 +6,6 @@ export const useSmoTaskStore = defineStore('smoTask', {
   state: () => ({
     currentPage: 1,
     pageSize: 10,
-    totalPages: 1,
     documentsResource: createResource({
       url: 'smartoffice.api.task.get_todos_with_smo_tasks',
       auto: false,
@@ -33,7 +32,6 @@ export const useSmoTaskStore = defineStore('smoTask', {
         sort_order: this.sortOrder,
       })
 
-      this.totalPages = this.documentsResource.data?.total_pages || 1
       return this.documentsResource
     },
     setSearchQuery(query: string) {
@@ -87,5 +85,11 @@ export const useSmoTaskStore = defineStore('smoTask', {
     isLastPage(): boolean {
       return this.currentPage === this.totalPages
     },
+    totalRecords(): number {
+      return this.documentsResource.data?.total || 0
+    },
+    totalPages(): number {
+      return this.documentsResource.data?.total_pages || 1
+    }
   }
 })

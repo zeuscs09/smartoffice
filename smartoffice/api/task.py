@@ -67,7 +67,7 @@ def get_todos_with_smo_tasks(page=1, page_size=10, search=None, status=None, sta
         COUNT(*) OVER () as ttl_records
     FROM 
         `tabToDo` t
-    LEFT JOIN 
+    Inner JOIN 
         `tabSMO Task` s ON t.reference_name = s.name
     LEFT JOIN
         `tabSMO Customer Site` cs ON s.site = cs.name
@@ -93,3 +93,4 @@ def get_todos_with_smo_tasks(page=1, page_size=10, search=None, status=None, sta
         "page_size": page_size,
         "total_pages": -(-total_count // page_size)  # การหารปัดขึ้น
     }
+
