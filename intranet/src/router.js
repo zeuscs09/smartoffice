@@ -46,7 +46,7 @@ const routes = [
   {
     name: 'MailBoxList',
     path: '/mailbox',
-    component: () => import('@/pages/Mailbox/MailBoxList.vue'),
+    component: () => import('@/pages/Mailbox/MailBoxList.vue'),//update git 
   },
   {
     name:'WorkLoad',
