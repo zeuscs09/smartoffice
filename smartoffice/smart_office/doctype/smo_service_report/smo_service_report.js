@@ -3,25 +3,18 @@
 
 frappe.ui.form.on("SMO Service Report", {
   refresh(frm) {
+
     if(frappe.utils.get_query_params().from){
       frappe.breadcrumbs.add("");
     }
     // เพิ่มปุ่มย้อนกลับ
     frm.add_custom_button(__('Back'), function() {
-      // ตรวจสอบว่ามี from_page หรือไม่
-      // if (frm.doc.from_page) {
-      //  location.href = frm.doc.from_page;
-      // } else {
-      //   // ถ้าไม่มี from_page ให้ย้อนกลับไปหน้า List View
-      //   frappe.set_route("List", "SMO Service Report");
-      // }
+     
       history.back();
     });
 
-    if (frm.doc.workflow_state === "Customer Review" && frm.doc.from_page) {
-      // frappe.set_route("/" + frm.doc.from_page);
-      //location.href = "/" + frm.doc.from_page;
-      
+    if (frm.doc.workflow_state && frm.doc.workflow_state !== "Draft") {
+      frm.disable_form();
     }
   },
   before_save: function(frm) {
@@ -68,7 +61,7 @@ frappe.ui.form.on("SMO Service Report", {
                      console.log(d.full_name)
                      let row = frm.add_child('team');
                      console.log("row",row);
-                    
+                     row.employee = d.employee;
                      row.user = d.user;  // แทนที่ด้วยฟิลด์จริงใน child table
                      row.email = d.email;  // แทนที่ด้วยฟิลด์จริงใน child table
                      

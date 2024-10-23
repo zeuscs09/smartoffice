@@ -19,9 +19,18 @@ frappe.ui.form.on("SMO Expense Entry", {
     if(frappe.utils.get_query_params().from){
       frappe.breadcrumbs.add("");
     }
-    frm.add_custom_button(__('Back'), function() {
-      
-      history.back();
+    
+    // เพิ่มการตรวจสอบว่าสามารถใช้ history.back() ได้หรือไม่
+    const canGoBack = window.history.length > 1;
+    
+    frm.add_custom_button(__(canGoBack ? 'Back' : 'Close'), function() {
+      if (canGoBack) {
+        history.back();
+      } else {
+        // ดำเนินการเมื่อไม่สามารถย้อนกลับได้
+        // ตัวอย่างเช่น ปิดหน้าต่างหรือนำทางไปยังหน้าหลัก
+       window.close();
+      }
     });
 
     frappe.call({

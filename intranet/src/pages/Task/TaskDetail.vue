@@ -17,7 +17,7 @@
                     </div>
                     <div class="flex items-center space-x-4">
                         <button v-if="canCreateServiceReport" @click="createServiceReport"
-                            class="btn btn-neutral btn-sm">
+                            class="btn btn-ghost btn-sm">
                             <span>&#10133;</span> New Service Report
                         </button>
                         <button @click="goBack" class="btn btn-ghost btn-sm">

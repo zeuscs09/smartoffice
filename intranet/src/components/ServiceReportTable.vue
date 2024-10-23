@@ -53,18 +53,23 @@
               <div class="cursor-pointer" @click="viewDocument(doc.name)">
 
                 {{ doc.name }}
-                <br>
+                <br/>
                 <span class="text-xs text-gray-500 " > {{ doc.task_name
                   }}</span>
-              </div>
+                  </div>
             </td>
             <td>{{ formatDate(doc.job_start_on) }}</td>
             <td>
-              <span :class="getStatusClass(doc.workflow_state)">{{ doc.workflow_state }}</span>
+              <div :class="getStatusClass(doc.workflow_state)">{{ doc.workflow_state }}</div>
+              <br/>
+              <button class="btn btn-neutral btn-xs mt-1" @click="openExpenseEntry(doc.name)">
+                + Expense
+              </button>
             </td>
             <td>
               <UserAvatar :email="doc.teams" />
             </td>
+            
           </tr>
         </tbody>
         <tbody v-else>
@@ -91,7 +96,15 @@
             <p>Date: {{ formatDate(doc.job_start_on) }}</p>
             <p>Status: <span :class="getStatusClass(doc.workflow_state)">{{ doc.workflow_state }}</span></p>
             <div class="card-actions justify-end">
-              <UserAvatar :email="doc.teams" />
+              <div class="flex justify-between items-center w-full">
+                <button class="btn btn-neutral btn-sm" @click="openExpenseEntry(doc.name)">
+                  
+               
+                  <span class="ml-1 text-xs">+ Expense</span>
+                </button>
+                <UserAvatar :email="doc.teams" />
+              </div>
+              
             </div>
           </div>
         </div>
@@ -169,6 +182,10 @@ const toggleSort = (field: string) => {
 
 const viewDocument = (docName: string) => {
   location.href = `/app/smo-service-report/${docName}`
+}
+
+const openExpenseEntry = (docName: string) => {
+  window.open(`/app/smo-expense-entry/new?service_report=${docName}`, '_blank')
 }
 </script>
 

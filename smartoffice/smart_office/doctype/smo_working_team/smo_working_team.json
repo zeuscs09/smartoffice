@@ -6,9 +6,10 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "user",
+  "employee",
   "full_name",
   "column_break_fkmw",
+  "user",
   "email",
   "overlapping_job_on_date",
   "filter",
@@ -16,15 +17,16 @@
  ],
  "fields": [
   {
+   "fetch_from": "employee.user_id",
    "fieldname": "user",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "User",
+   "label": "Email",
    "options": "User",
    "reqd": 1
   },
   {
-   "fetch_from": "user.full_name",
+   "fetch_from": "employee.employee_name",
    "fieldname": "full_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -36,8 +38,10 @@
   },
   {
    "fetch_from": "user.email",
+   "fetch_if_empty": 1,
    "fieldname": "email",
    "fieldtype": "Data",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Email"
   },
@@ -60,12 +64,21 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Filter"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "User",
+   "link_filters": "[[\"Employee\",\"designation\",\"=\",\"Engineer\"]]",
+   "options": "Employee",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-09-27 07:41:16.663733",
+ "modified": "2024-10-23 15:31:23.674943",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Working Team",

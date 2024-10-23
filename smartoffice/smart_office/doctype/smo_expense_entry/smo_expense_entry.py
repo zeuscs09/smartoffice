@@ -25,8 +25,12 @@ class SMOExpenseEntry(Document):
 		
 		if total_cost != self.total_amount:
 			frappe.throw("Total cost is not equal to total amount")
+		# frappe.throw(self.workflow_state)
 		if self.workflow_state == "Draft":
 			self.set_approvers()
+			# self.check_service_report_status()
+		if self.workflow_state == "Approval Review":
+			self.check_service_report_status()
 	def before_save(self):
 		if self.workflow_state != "Draft":
 			for item in self.expense_item:
@@ -129,3 +133,9 @@ class SMOExpenseEntry(Document):
 			},
 			user=user_id
 		)
+
+	def check_service_report_status(self):
+		if self.service_report:
+			service_report_status = frappe.db.get_value("SMO Service Report", self.service_report, "workflow_state")
+			if service_report_status != "Customer Approve":
+				frappe.throw(_("ไม่สามารถส่งรายการค่าใช้จ่ายได้ เนื่องจากลูกค้ายังไม่อนุมัติ Service Report"))

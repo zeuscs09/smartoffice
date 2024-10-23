@@ -145,10 +145,10 @@ const getDayName = (day: number) => {
 const engineers = computed(() => workloadResource.data)
 
 const statusColors = {
-    available: 'bg-green-200',
-    unavailable: 'bg-red-200',
-    holiday: 'bg-gray-200',
-    work_on_holiday: 'bg-red-500',
+    available: 'bg-green-500',
+    unavailable: 'bg-red-500',
+    holiday: 'bg-gray-500',
+    work_on_holiday: 'bg-red-900',
     default: 'bg-white'
 };
 

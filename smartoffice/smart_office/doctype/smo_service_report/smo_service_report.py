@@ -20,15 +20,11 @@ class SMOServiceReport(Document):
 		pass
 	
 	def on_submit(self):
-		self._update_task_status("Completed")
+		
 		self.create_timesheet()
   
-		# Close ToDo
-		if self.from_todo:
-			todo = frappe.get_doc("ToDo", self.from_todo)
-			todo.status = "Closed"
-			todo.flags.ignore_permissions = True
-			todo.save()
+		# ปิด ToDo ที่เชื่อมโยงกับ SMO Task
+		
 		
 		# Redirect logic will be handled in JavaScript
 	
@@ -40,6 +36,7 @@ class SMOServiceReport(Document):
 				todo.status = "Closed"
 				todo.flags.ignore_permissions = True
 				todo.save()
+			self._update_task_status()
 			self.notify_customer()
 
 	def on_cancel(self):
@@ -78,9 +75,22 @@ class SMOServiceReport(Document):
 		finish_date = getdate(self.finish_date_input)
 		self.over_night = (finish_date - start_date).days > 0
 
-	def _update_task_status(self, status):
-		# frappe.db.set_value("SMO Task", self.task, "status", status)
-		pass
+	def _update_task_status(self):
+		if self.task:
+			todos = frappe.get_all("ToDo", 
+				filters={
+					"reference_type": "SMO Task",
+					"reference_name": self.task,
+					"status": ["=", "Open"]
+				},
+				pluck="name"
+			)
+			frappe.errprint(f"Todos: {todos}")
+			for todo_name in todos:
+				todo = frappe.get_doc("ToDo", todo_name)
+				todo.status = "Closed"
+				todo.flags.ignore_permissions = True
+				todo.save()
 
 	def create_timesheet(self):
 		for item in self.team:

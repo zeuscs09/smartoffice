@@ -67,6 +67,7 @@ def fetch_task_data(task):
     
     return [
         {
+            'employee': item.employee,
             'user': item.user,
             'email': item.email,
             'full_name': item.full_name,
