@@ -100,7 +100,7 @@ import UserLayout from '@/layouts/userLayout.vue'
 import { useExpenseEntryStore } from '@/stores/expenseEntryStore'
 import Pagination from '@/components/Pagination.vue'
 
-import Timeline from '@/components/Timeline.vue'
+import Timeline from '@/components/TimeLine.vue'
 import ExpenseEntryTable from '@/components/ExpenseEntryTable.vue'
 const router = useRouter()
 const serviceReportStore = useExpenseEntryStore()
