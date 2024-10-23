@@ -185,7 +185,7 @@ import { defineProps, defineEmits, inject, ref, computed } from 'vue'
 import UserAvatar from './UserAvatar.vue';
 import { useRouter } from 'vue-router';
 import { createDocumentResource } from 'frappe-ui'
-import Timeline from './Timeline.vue'
+import Timeline from './TimeLine.vue'
 
 const props = defineProps({
   data: {

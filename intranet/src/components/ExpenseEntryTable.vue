@@ -146,7 +146,7 @@
 import { ref, computed } from 'vue'
 import { defineProps, defineEmits, inject } from 'vue'
 import UserAvatar from './UserAvatar.vue'
-import Timeline from './Timeline.vue'
+import Timeline from './TimeLine.vue'
 import { createDocumentResource } from 'frappe-ui'
 import SkeletonTable from '@/components/SkeletonTable.vue'
 import NoDataFoundTable from '@/components/NoDataFoundTable.vue'
