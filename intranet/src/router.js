@@ -16,12 +16,12 @@ const routes = [
   {
     name: 'TaskList',
     path: '/tasks/',
-    component: () => import('@/pages/task/TaskList.vue'),
+    component: () => import('@/pages/Task/TaskList.vue'),//update git
   },
   {
     name: 'TaskDetail',
     path: '/tasks/:id',
-    component: () => import('@/pages/task/TaskDetail.vue'),
+    component: () => import('@/pages/Task/TaskDetail.vue'),
   },
   {
     name: 'ExpenseEntryList',
