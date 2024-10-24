@@ -15,14 +15,14 @@
                 </span>
               </span>
             </th>
-            <th class="cursor-pointer" @click="$emit('sort', 'job_start_on')">
-              Date
+            <th class="cursor-pointer" @click="$emit('sort', 'customer_name')">
+              Customer
               <span class="ml-1" v-if="sortable">
-                <span :class="{ 'text-primary': sortField === 'job_start_on' }">
-                  {{ sortField === 'job_start_on' && sortOrder === 'asc' ? '▲' : '△' }}
+                <span :class="{ 'text-primary': sortField === 'customer_name' }">
+                  {{ sortField === 'customer_name' && sortOrder === 'asc' ? '▲' : '△' }}
                 </span>
-                <span :class="{ 'text-primary': sortField === 'job_start_on' }">
-                  {{ sortField === 'job_start_on' && sortOrder === 'desc' ? '▼' : '▽' }}
+                <span :class="{ 'text-primary': sortField === 'customer_name' }">
+                  {{ sortField === 'customer_name' && sortOrder === 'desc' ? '▼' : '▽' }}
                 </span>
               </span>
             </th>
@@ -54,11 +54,16 @@
 
                 {{ doc.name }}
                 <br/>
-                <span class="text-xs text-gray-500 " > {{ doc.task_name
-                  }}</span>
+                <span class="text-xs text-gray-500 " > {{ formatDate(doc.job_start_on) }}</span>
                   </div>
             </td>
-            <td>{{ formatDate(doc.job_start_on) }}</td>
+            <td>
+              {{ doc.customer_name }}
+              <br/>
+              <span class="text-xs text-gray-500 " >
+                {{ doc.task_name }}
+                </span>
+            </td>
             <td>
               <div :class="getStatusClass(doc.workflow_state)">{{ doc.workflow_state }}</div>
               <br/>
@@ -88,12 +93,12 @@
       </div>
       <div v-else-if="sortedData.length > 0" class="space-y-4">
         <div v-for="doc in sortedData" :key="doc.name" class="card bg-base-100 shadow-xl">
-          <div class="card-body">
-            <h2 class="card-title cursor-pointer" @click="viewDocument(doc.name)">
-              {{ doc.name }}
+          <div class="card-body" @click="viewDocument(doc.name)">
+            <h2 class="card-title cursor-pointer">
+              {{ doc.customer_name }}
             </h2>
-            <p class="text-sm text-gray-500">{{ doc.task_name }}</p>
-            <p>Date: {{ formatDate(doc.job_start_on) }}</p>
+            <p class="text-sm text-gray-500">{{ doc.task_name }} {{ formatDate(doc.job_start_on) }}</p>
+            <p>{{ doc.name }}</p>
             <p>Status: <span :class="getStatusClass(doc.workflow_state)">{{ doc.workflow_state }}</span></p>
             <div class="card-actions justify-end">
               <div class="flex justify-between items-center w-full">
@@ -181,11 +186,11 @@ const toggleSort = (field: string) => {
 }
 
 const viewDocument = (docName: string) => {
-  location.href = `/app/smo-service-report/${docName}`
+  location.href = `/app/smo-service-report/${docName}?from=frontend`
 }
 
 const openExpenseEntry = (docName: string) => {
-  window.open(`/app/smo-expense-entry/new?service_report=${docName}`, '_blank')
+  window.open(`/app/smo-expense-entry/new?service_report=${docName}&from=frontend`, '_blank')
 }
 </script>
 

@@ -60,10 +60,23 @@ def get_todos_with_smo_tasks(page=1, page_size=10, search=None, status=None, sta
     
     query = f"""
     SELECT 
-        t.name, t.description, t.status, t.allocated_to, t.reference_name,
-        s.project_name project, s.site, s.contact_name contact_person, s.contact_mobile as contact_phone, s.contact_email,
-        s.start_date, s.finish_date, s.job_type, t.priority,
-        cs.site_name, t.date due_date,s.assign_to ,
+        t.name,
+        t.description, 
+        t.status, 
+        t.allocated_to, 
+        t.reference_name,
+        s.project_name project, 
+        s.site, 
+        s.contact_name contact_person, 
+        s.contact_mobile as contact_phone, 
+        s.contact_email,
+        s.start_date, 
+        s.finish_date, 
+        s.job_type, 
+        t.priority,
+        cs.site_name, 
+        t.date due_date,s.assign_to ,
+        s.customer_name,
         COUNT(*) OVER () as ttl_records
     FROM 
         `tabToDo` t
@@ -71,6 +84,7 @@ def get_todos_with_smo_tasks(page=1, page_size=10, search=None, status=None, sta
         `tabSMO Task` s ON t.reference_name = s.name
     LEFT JOIN
         `tabSMO Customer Site` cs ON s.site = cs.name
+   
     WHERE 
         {where_clause}
     {sort_clause}

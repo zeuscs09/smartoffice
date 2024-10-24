@@ -23,6 +23,7 @@
   "expense_item",
   "section_break_fabx",
   "amended_from",
+  "from_page",
   "summary_tab",
   "html_summary"
  ],
@@ -142,12 +143,18 @@
    "fieldname": "details_tab",
    "fieldtype": "Tab Break",
    "label": "Details"
+  },
+  {
+   "fieldname": "from_page",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "From Page"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-09-30 14:21:42.599988",
+ "modified": "2024-10-24 18:04:11.605439",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Advance Entry",

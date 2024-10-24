@@ -3,9 +3,6 @@
 
 frappe.ui.form.on("SMO Expense Entry", {
   onload(frm) {
-  
-   
-   
     frm.set_query("input_expense_types", "expense_item", function (doc, cdt, cdn) {
         console.log(frm.customer);
         return {
@@ -16,8 +13,20 @@ frappe.ui.form.on("SMO Expense Entry", {
       });
   },
   refresh(frm) {
+
+    
     if(frappe.utils.get_query_params().from){
+      $('.navbar').hide();
+      $('.menu-btn-group').hide();
+      $('.page-icon-group').hide();
+      // $('.standard-actions').hide();
+      // $('.next-doc').hide();
+    }
+    if(frm.doc.from_page) {
       frappe.breadcrumbs.add("");
+      $('.navbar').hide();
+      $('.menu-btn-group').hide();
+      $('.page-icon-group').hide();
     }
     
     // เพิ่มการตรวจสอบว่าสามารถใช้ history.back() ได้หรือไม่
@@ -85,6 +94,38 @@ frappe.ui.form.on("SMO Expense Entry", {
       }
     } else {
       frm.set_value("ot_rate", 0);
+    }
+  },
+  before_workflow_action: function(frm) {
+    if (frm.selected_workflow_action === "Reject") {
+      // ยกเลิก default action
+      frappe.validated = false;
+      
+      // แสดง dialog เพื่อขอเหตุผล
+      frappe.prompt([
+        {
+          label: 'เหตุผลในการ Reject',
+          fieldname: 'reject_reason',
+          fieldtype: 'Small Text',
+          reqd: 1
+        }
+      ],
+      function(values){
+        // เมื่อได้เหตุผลแล้ว
+        frm.set_value('reject_reason', values.reject_reason);
+        
+        // ดำเนินการ workflow action ต่อ
+        frm.selected_workflow_action = "Reject";
+        //frm.workflow_action_dialog.hide();
+        frm.save('Update');
+        //window.history.back();
+        frm.refresh();
+      },
+      __('ระบุเหตุผลในการ Reject'),
+      __('ยืนยัน')
+      );
+      
+      return false; // ป้องกันการดำเนินการ workflow action ทันที
     }
   },
 });

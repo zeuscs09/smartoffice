@@ -268,7 +268,8 @@ const showTimeline = async (docName: string) => {
     status: approver.status,
     action: approver.status,
     approve_role: approver.approver_role,
-    by: approver.user_id
+    by: approver.user_id,
+    remark: approver.comment
   }));
 
   timelineEvents.value.unshift({
@@ -276,7 +277,8 @@ const showTimeline = async (docName: string) => {
     action: 'Submit Request',
     status: 'Approved',
     approve_role: 'Requestor',
-    by: expenseRequest.doc.owner
+    by: expenseRequest.doc.owner,
+    remark: ""
   });
 
   timelineModal.value?.showModal();

@@ -212,6 +212,7 @@
    "default": "0",
    "fieldname": "is_holiday",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Is Holiday",
    "read_only": 1
   },
@@ -296,6 +297,7 @@
    "default": "0",
    "fieldname": "over_night",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Over Night ?",
    "read_only": 1
   },
@@ -363,7 +365,7 @@
    "link_fieldname": "service_report"
   }
  ],
- "modified": "2024-10-18 07:20:07.533197",
+ "modified": "2024-10-24 18:02:13.351914",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Service Report",

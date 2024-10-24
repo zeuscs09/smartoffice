@@ -5,11 +5,35 @@ frappe.ui.form.on("SMO Task", {
   refresh(frm) {
     if(frappe.utils.get_query_params().from){
       frappe.breadcrumbs.add("");
+      $('.navbar').hide();
+      $('.standard-actions').hide();
+      // $('.next-doc').hide();
     }
-    frm.add_custom_button(__('Back'), function() {
-      
-      history.back();
+    if(frappe.utils.get_query_params().action){
+      frm.copy_doc();
+    }
+    if(frm.doc.from_page) {
+      frappe.breadcrumbs.add("");
+      $('.navbar').hide();
+      $('.menu-btn-group').hide();
+      $('.page-icon-group').hide();
+    }
+    
+    // เพิ่มการตรวจสอบว่าสามารถใช้ history.back() ได้หรือไม่
+    const canGoBack = window.history.length > 1;
+    if(frm.doc.from_page == "copy"){
+      canGoBack = false;
+    }
+    frm.add_custom_button(__(canGoBack ? 'Back' : 'Close'), function() {
+      if (canGoBack) {
+        history.back();
+      } else {
+        // ดำเนินการเมื่อไม่สามารถย้อนกลับได้
+        // ตัวอย่างเช่น ปิดหน้าต่างหรือนำทางไปยังหน้าหลัก
+       window.close();
+      }
     });
+
     if (
       frm.doc.status === "Completed" ||
       frm.doc.status === "Cancel" ||

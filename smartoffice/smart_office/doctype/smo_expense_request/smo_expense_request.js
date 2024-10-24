@@ -42,12 +42,34 @@ frappe.ui.form.on("SMO Expense Request", {
     }
   },
   refresh(frm) {
+    
     if(frappe.utils.get_query_params().from){
-      frappe.breadcrumbs.add("");
+      $('.navbar').hide();
+      $('.menu-btn-group').hide();
+      $('.page-icon-group').hide();
+      // $('.standard-actions').hide();
+      // $('.next-doc').hide();
     }
-    frm.add_custom_button(__('Back'), function() {
+    if(frm.doc.from_page) {
       
-      history.back();
+      $('.app-logo').hide();
+      $("#navbar-search").hide();
+      $("#navbar-breadcrumbs").hide();
+      // $('.menu-btn-group').hide();
+      //$('.page-icon-group').hide();
+    }
+    
+    // เพิ่มการตรวจสอบว่าสามารถใช้ history.back() ได้หรือไม่
+    const canGoBack = window.history.length > 1;
+    
+    frm.add_custom_button(__(canGoBack ? 'Back' : 'Close'), function() {
+      if (canGoBack) {
+        history.back();
+      } else {
+        // ดำเนินการเมื่อไม่สามารถย้อนกลับได้
+        // ตัวอย่างเช่น ปิดหน้าต่างหรือนำทางไปยังหน้าหลัก
+       window.close();
+      }
     });
     
     if (frm.doc.expense_request_item) {
@@ -129,6 +151,46 @@ frappe.ui.form.on("SMO Expense Request", {
         frappe.msgprint("เกิดข้อผิดพลาดในการโหลดข้อมูล: " + error);
       }
     });
+  },
+  before_workflow_action: function(frm) {
+    if (frm.selected_workflow_action === "Reject") {
+      frappe.validated = false;
+      
+      frappe.prompt([
+        {
+          label: 'เหตุผลในการ Reject',
+          fieldname: 'reject_reason',
+          fieldtype: 'Small Text',
+          reqd: 1
+        }
+      ],
+      function(values){
+        // หาแถวของผู้อนุมัติปัจจุบัน
+        let current_approver = frm.doc.approvers.find(a => a.user_id === frappe.session.user);
+        if (current_approver) {
+          current_approver.comment = values.reject_reason;
+          current_approver.status = "Rejected";
+          frm.refresh_field('approvers');
+          console.log("current_approver",current_approver);
+        }
+        frm.doc.next_action = "";
+        // บันทึกการเปลี่ยนแปลงก่อนที่จะดำเนินการ workflow
+        frm.save('Update', () => {
+          // หลังจากบันทึกสำเร็จ ดำเนินการ workflow ต่อ
+          frm.selected_workflow_action = "Reject";
+          //frm.workflow_action_dialog.hide();
+          frm.save('Update', () => {
+            frm.refresh();
+            
+          });
+        });
+      },
+      'ระบุเหตุผลในการ Reject',
+      'ยืนยัน'
+      );
+      
+      return false;
+    }
   },
 });
 
@@ -271,3 +333,4 @@ function formatDate(date) {
   const day = String(d.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
+

@@ -26,7 +26,8 @@
   "next_action",
   "section_break_snwq",
   "amended_from",
-  "workflow_description"
+  "workflow_description",
+  "from_page"
  ],
  "fields": [
   {
@@ -134,7 +135,6 @@
   {
    "fieldname": "approver_section",
    "fieldtype": "Section Break",
-   "hidden": 1,
    "label": "Approver"
   },
   {
@@ -144,6 +144,7 @@
    "label": "Workflow Description"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "approvers",
    "fieldtype": "Table",
    "options": "Workflow Approver"
@@ -156,16 +157,23 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "next_action",
    "fieldtype": "Data",
    "label": "Next Action"
+  },
+  {
+   "fieldname": "from_page",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "From Page"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-21 12:56:46.868918",
+ "modified": "2024-10-24 22:17:22.700160",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Request",

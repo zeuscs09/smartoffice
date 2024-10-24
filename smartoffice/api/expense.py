@@ -138,7 +138,7 @@ def get_expense_request_by_user(page=1, page_size=10, search=None, status=None, 
         er.workflow_state, er.creation, er.workflow_description,
         COUNT(*) OVER () as ttl_records,
         approver.users as approvers,
-        CASE WHEN er.workflow_state = 'Approved' THEN '' ELSE er.next_action END AS next_action
+        CASE WHEN er.workflow_state in ('Approved','Rejected') THEN '' ELSE er.next_action END AS next_action
     FROM 
         `tabSMO Expense Request` er inner join
         (SELECT parent, 

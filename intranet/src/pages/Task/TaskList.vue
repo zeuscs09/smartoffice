@@ -35,10 +35,10 @@
                     class="input input-bordered flex-grow" v-model="searchQuery" @input="handleSearch" />
                 <select class="select select-bordered w-full max-w-xs" v-model="statusFilter"
                     @change="handleFilter">
-                    <option value="">ทุกสถานะ</option>
-                    <option value="Open">เปิด</option>
-                    <option value="Closed">ปิด</option>
-                    <option value="Cancelled">ยกเลิก</option>
+                    <option value="">All Status</option>
+                    <option value="Open">Open</option>
+                    <option value="Closed">Closed</option>
+                    <option value="Cancelled">Cancelled</option>
                 </select>
                 <input type="date" class="input input-bordered " v-model="startDate" @change="handleFilter" />
                 <input type="date" class="input input-bordered " v-model="endDate" @change="handleFilter" />
@@ -81,20 +81,20 @@
                                 </span>
                             </th>
                             <th class="cursor-pointer" @click="sortBy('due_date')">
-                                Job Date
+                                Customer
                                 <span class="ml-1">
-                                    <span :class="{ 'text-primary': serviceReportStore.sortField === 'due_date' }">
-                                        {{ serviceReportStore.sortField === 'due_date' &&
+                                    <span :class="{ 'text-primary': serviceReportStore.sortField === 'customer_name' }">
+                                        {{ serviceReportStore.sortField === 'customer_name' &&
                                             serviceReportStore.sortOrder === 'asc' ? '▲' : '△' }}
                                     </span>
-                                    <span :class="{ 'text-primary': serviceReportStore.sortField === 'due_date' }">
-                                        {{ serviceReportStore.sortField === 'due_date' &&
+                                    <span :class="{ 'text-primary': serviceReportStore.sortField === 'customer_name' }">
+                                        {{ serviceReportStore.sortField === 'customer_name' &&
                                             serviceReportStore.sortOrder === 'desc' ? '▼' : '▽' }}
                                     </span>
                                 </span>
                             </th>
 
-                            <th>Customer</th>
+                            <th>Contact Person</th>
                             <th>Responsible</th>
                         </tr>
                     </thead>
@@ -105,12 +105,14 @@
                             </td>
                         </tr>
                     </tbody>
-                    <tbody v-if="serviceReportStore.data.length > 0">
+                    <tbody v-else-if="serviceReportStore.data.length > 0">
                         <tr v-for="report in serviceReportStore.data" :key="report.name">
                             <td>
                                 <span class="cursor-pointer"
                                     @click="router.push({ name: 'TaskDetail', params: { id: report.reference_name }, query: { todo: report.name } })">
                                     {{ report.reference_name }}
+                                    <br/>
+                                    <span class="text-xs text-gray-500">{{ formatDate(report.due_date) }}</span>
                                 </span>
                             </td>
                             <td>
@@ -127,10 +129,13 @@
                                     'badge-error': report.status === 'Cancelled'
                                 }">{{ report.status }}</span>
                             </td>
-                            <td>{{ formatDate(report.due_date) }}</td>
-
-                            <td> {{ report.contact_person }} - {{ report.contact_email }} <br />
+                            <td>{{ report.customer_name }}
+                                <br />
                                 <span class="badge badge-sm badge-ghost">{{ report.project }}</span>
+
+                            </td>
+
+                            <td> {{ report.contact_person }} - {{ report.contact_email }} 
 
                             </td>
                             <td>
@@ -166,7 +171,7 @@
                         <div class="card-body p-4">
                             <div class="flex justify-between items-start mb-2">
                                 <h2 class="card-title text-base cursor-pointer" @click="router.push({ name: 'TaskDetail', params: { id: report.reference_name }, query: { todo: report.name } })">
-                                    {{ report.reference_name }}
+                                    {{ report.customer_name }}
                                 </h2>
                                 <span class="badge badge-sm" :class="{
                                     'badge-primary': report.status === 'Open',
@@ -174,12 +179,13 @@
                                     'badge-error': report.status === 'Cancelled'
                                 }">{{ report.status }}</span>
                             </div>
+                            <p class="text-sm text-gray-500 mb-2">{{ report.reference_name }}</p>
                             <p class="text-sm text-gray-600 mb-2">{{ report.description }}</p>
                             <div class="text-sm">
                                 <p><span class="font-semibold">Job Date:</span> {{ formatDate(report.due_date) }}</p>
-                                <p><span class="font-semibold">Customer:</span> {{ report.contact_person }}</p>
+                                <p><span class="font-semibold"></span> {{ report.contact_person }}</p>
                                 <p class="text-xs text-gray-500">{{ report.contact_email }}</p>
-                                <p class="mt-1"><span class="badge badge-sm badge-ghost">{{ report.project }}</span></p>
+                                <p class="mt-1"><span class="text-xs text-gray-500">{{ report.project }}</span></p>
                             </div>
                             <div class="flex justify-end mt-2">
                                 <div>
@@ -308,7 +314,7 @@ const viewDocument = (docName: string) => {
     location.href = `/app/smo-service-report/${docName}?from_page=service_report&from=front_end`
 }
 const newTask = () => {
-    window.location.href = '/app/smo-task/new?from=front_end'
+    window.location.href = '/app/smo-task/new?from=front_end&from_page=intranet'
 }
 </script>
 

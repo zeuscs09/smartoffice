@@ -336,7 +336,7 @@ const toggleHeatmap = () => {
 }
 
 const newTask = () => {
-  window.location.href = '/app/smo-task/new?from=front_end'
+  window.location.href = '/app/smo-task/new?from=front_end&from_page=intranet'
 }
 
 

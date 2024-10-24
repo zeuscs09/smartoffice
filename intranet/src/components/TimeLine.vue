@@ -12,6 +12,9 @@
             <div class="text-sm">
               {{ event.approve_role }}
             </div>
+            <div v-if="event.remark" class="text-xs text-gray-500 italic border-l-4 border-gray-300 pl-2">
+              "{{ event.remark }}"
+            </div>
             <div class="badge badge-sm" :class="{
               'badge-success': event.status === 'Approved',
               'badge-error': event.status === 'Rejected',
@@ -59,6 +62,8 @@ interface TimelineEvent {
   status: string
   approve_role: string
   by: string
+  remark?: string
+  doc_status?: string
 }
 
 defineProps<{

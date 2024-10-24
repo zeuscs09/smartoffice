@@ -30,9 +30,11 @@
   "expense_item",
   "section_break_nfeq",
   "approver",
+  "reject_reason",
   "section_break_fvul",
   "amended_from",
-  "is_request"
+  "is_request",
+  "from_page"
  ],
  "fields": [
   {
@@ -159,6 +161,7 @@
    "fetch_from": "service_report.is_holiday",
    "fieldname": "is_holiday",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Is Holiday",
    "read_only": 1
   },
@@ -189,6 +192,7 @@
    "fetch_from": "service_report.over_night",
    "fieldname": "over_night",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Over Night",
    "read_only": 1
   },
@@ -207,6 +211,7 @@
   {
    "fieldname": "approver",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Approver"
   },
   {
@@ -222,13 +227,25 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Project Name"
+  },
+  {
+   "fieldname": "from_page",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "From Page"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "reject_reason",
+   "fieldtype": "Data",
+   "label": "Reject Reason"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-19 21:18:08.969761",
+ "modified": "2024-10-24 21:26:57.065164",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Entry",

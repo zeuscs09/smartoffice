@@ -10,7 +10,7 @@
                 </div>
                 <div class="flex gap-2">
                     <!-- ปุ่ม + -->
-                    <button class="btn btn-neutral btn-sm" @click="createExpenseRequest">
+                    <button class="btn btn-ghost btn-sm tooltip tooltip-bottom" data-tip="Create Expense Request" @click="createExpenseRequest">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -161,7 +161,7 @@ const handlePageSizeChange = (newSize: number) => {
     serviceReportStore.fetchAll(1)
 }
 const createExpenseRequest = () => {
-    location.href='/app/smo-expense-request/new'
+    location.href='/app/smo-expense-request/new?from_page=intranet'
 }
 
 const timelineModal = ref<HTMLDialogElement | null>(null)

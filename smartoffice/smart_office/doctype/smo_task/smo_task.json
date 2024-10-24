@@ -32,7 +32,9 @@
   "team",
   "assign_to",
   "detail",
-  "amended_from"
+  "amended_from",
+  "section_break_slmw",
+  "from_page"
  ],
  "fields": [
   {
@@ -223,6 +225,16 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Contact Name"
+  },
+  {
+   "fieldname": "section_break_slmw",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "from_page",
+   "fieldtype": "Data",
+   "label": "From Page"
   }
  ],
  "hide_toolbar": 1,
@@ -234,7 +246,7 @@
    "link_fieldname": "task"
   }
  ],
- "modified": "2024-10-15 01:51:55.203050",
+ "modified": "2024-10-24 17:59:42.743434",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Task",

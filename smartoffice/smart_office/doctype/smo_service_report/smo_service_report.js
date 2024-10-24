@@ -3,14 +3,30 @@
 
 frappe.ui.form.on("SMO Service Report", {
   refresh(frm) {
-
     if(frappe.utils.get_query_params().from){
       frappe.breadcrumbs.add("");
+      $('.navbar').hide();
+      $('.standard-actions').hide();
+      // $('.next-doc').hide();
     }
-    // เพิ่มปุ่มย้อนกลับ
-    frm.add_custom_button(__('Back'), function() {
-     
-      history.back();
+    if(frm.doc.from_page) {
+      frappe.breadcrumbs.add("");
+      $('.navbar').hide();
+      $('.menu-btn-group').hide();
+      $('.page-icon-group').hide();
+    }
+    
+    // เพิ่มการตรวจสอบว่าสามารถใช้ history.back() ได้หรือไม่
+    const canGoBack = window.history.length > 1;
+    
+    frm.add_custom_button(__(canGoBack ? 'Back' : 'Close'), function() {
+      if (canGoBack) {
+        history.back();
+      } else {
+        // ดำเนินการเมื่อไม่สามารถย้อนกลับได้
+        // ตัวอย่างเช่น ปิดหน้าต่างหรือนำทางไปยังหน้าหลัก
+       window.close();
+      }
     });
 
     if (frm.doc.workflow_state && frm.doc.workflow_state !== "Draft") {
@@ -84,6 +100,12 @@ frappe.ui.form.on("SMO Service Report", {
         },
       };
     });
+  },
+  from_page(frm) {
+    if(frm.doc.from_page) {
+      $('.navbar').hide();
+      $('.standard-actions').hide();
+    }
   },
   start_date_input: function(frm) {
     if(frm.doc.start_date_input) {

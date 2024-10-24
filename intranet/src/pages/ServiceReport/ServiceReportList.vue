@@ -22,7 +22,7 @@
             <!-- ส่วนค้นหาและกรอง -->
             <div v-if="showFilter" class="flex flex-wrap gap-4 mb-4">
                 <input type="text" placeholder="Search..."
-                    class="input input-bordered flex-grow" v-model="searchQuery" @input="handleSearch" />
+                    class="input  input-bordered flex-grow" v-model="searchQuery" @input="handleSearch" />
                 <select class="select select-bordered w-full max-w-xs" v-model="statusFilter"
                     @change="handleFilter">
                     <option value="">All Status</option>

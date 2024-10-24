@@ -10,7 +10,7 @@
     </div>
   </div>
   <div v-else-if="emails.length === 1" :class="[sizeClass, 'avatar flex items-center justify-center overflow-hidden']">
-    <img v-if="imageUrls[0]" :src="imageUrls[0]" :alt="emails[0]" class="rounded-full w-full h-full object-cover" />
+    <img v-if="imageUrls[0]" :src="imageUrls[0]" :alt="emails[0]" class="rounded-full w-full h-full object-cover tooltip tooltip-bottom" :data-tip="emails[0]" />
     <div v-else class="placeholder rounded-full bg-gray-200 w-full h-full flex items-center justify-center text-gray-600 p-2">
       <span>{{ getInitials(emails[0]) }}</span>
     </div>
