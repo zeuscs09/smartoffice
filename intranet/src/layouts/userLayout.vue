@@ -37,6 +37,7 @@
                                     </div>
                                 </button>
                                 <button class="btn btn-ghost btn-circle tooltip tooltip-bottom" data-tip="Expense Entry" @click="router.push({ name: 'ExpenseEntryList' })">
+                                    <div class="indicator">
                                     <svg class="h-6" viewBox="0 0 76 76" xmlns="http://www.w3.org/2000/svg"
                                         xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full"
                                         enable-background="new 0 0 76.00 76.00" xml:space="preserve" fill="#000000">
@@ -47,7 +48,8 @@
                                                 d="M 15.8333,23.75L 40.7708,23.75L 36.0208,28.5L 17.4166,28.5L 17.4166,47.5L 58.5833,47.5L 58.5833,28.5L 50.2708,28.5L 55.0208,23.75L 60.1667,23.75C 61.9156,23.75 63.3333,25.1678 63.3333,26.9167L 63.3333,49.0833C 63.3333,50.8322 61.9156,52.25 60.1667,52.25L 15.8333,52.25C 14.0844,52.25 12.6667,50.8322 12.6667,49.0833L 12.6667,26.9167C 12.6667,25.1678 14.0844,23.75 15.8333,23.75 Z M 31.2708,57L 44.7291,57L 37.9999,63.7292L 31.2708,57 Z M 55.0621,16.1879C 55.5053,16.6596 55.727,17.1679 55.727,17.7128L 55.5562,18.515L 55.0621,19.2378L 45.5648,28.735L 43.1676,31.1322L 40.868,33.4318L 38.8094,35.4905L 37.0954,37.1954L 35.8663,38.4153L 35.2563,39.0253L 34.2651,39.9311L 32.8621,41.0382L 31.3281,41.9714C 30.8076,42.2317 30.344,42.3618 29.9373,42.3618C 29.6201,42.3618 29.366,42.2663 29.1749,42.0751C 28.9837,41.884 28.8882,41.6238 28.8882,41.2944C 28.8882,40.8877 29.0183,40.4272 29.2786,39.9128L 30.2118,38.3787L 31.3098,36.9758L 32.2064,35.9937L 52.0122,16.1879L 52.735,15.6938L 53.5372,15.523C 54.0821,15.523 54.5904,15.7447 55.0621,16.1879 Z M 27.6499,42.0751L 29.1749,43.6001L 26.125,45.125L 27.6499,42.0751 Z ">
                                             </path>
                                         </g>
-                                    </svg>
+                                        </svg>
+                                    </div>
                                 </button>
                                 <button class="btn btn-ghost btn-circle tooltip tooltip-bottom" data-tip="Expense Request" @click="router.push({ name: 'ExpenseRequestList' })">
                                     <div class="indicator">
@@ -109,11 +111,13 @@
                         </div>
                     </button>
                     <button class="btn btn-ghost btn-circle tooltip tooltip-bottom" data-tip="Work Load" @click="router.push({ name: 'WorkLoad' })">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        <div class="indicator"> 
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
+                        </div>
                     </button>
                     <button class="btn btn-ghost btn-circle tooltip tooltip-bottom" data-tip="Mail Box" @click="router.push({ name: 'MailBoxList' })">
                         <div class="indicator">
