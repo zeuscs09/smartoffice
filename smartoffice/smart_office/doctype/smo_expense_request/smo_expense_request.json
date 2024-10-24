@@ -135,6 +135,7 @@
   {
    "fieldname": "approver_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Approver"
   },
   {
@@ -173,7 +174,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-24 22:17:22.700160",
+ "modified": "2024-10-24 22:28:42.095882",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Request",

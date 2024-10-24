@@ -262,15 +262,20 @@ const showTimeline = async (docName: string) => {
 
   await expenseRequest.reload();
   console.log(expenseRequest.doc.approvers);
+  
+  // ตรวจสอบว่ามีรายการที่ rejected หรือไม่
+  const hasRejected = expenseRequest.doc.approvers.some(approver => approver.status.toLowerCase() === 'rejected');
 
-  timelineEvents.value = expenseRequest.doc.approvers.map(approver => ({
-    date: approver.action_date,
-    status: approver.status,
-    action: approver.status,
-    approve_role: approver.approver_role,
-    by: approver.user_id,
-    remark: approver.comment
-  }));
+  timelineEvents.value = expenseRequest.doc.approvers
+    .filter(approver => !hasRejected || approver.status.toLowerCase() !== 'pending')
+    .map(approver => ({
+      date: approver.action_date,
+      status: approver.status,
+      action: approver.status,
+      approve_role: approver.approver_role,
+      by: approver.user_id,
+      remark: approver.comment
+    }));
 
   timelineEvents.value.unshift({
     date: expenseRequest.doc.creation,

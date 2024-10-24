@@ -80,20 +80,6 @@
 
     </UserLayout>
 
-    <!-- Modal for timeline -->
-    <dialog id="timeline_modal" class="modal" ref="timelineModal">
-        <div class="modal-box w-11/12 max-w-5xl">
-            <h3 class="font-bold text-lg mb-4">ประวัติการอนุมัติ</h3>
-
-            <Timeline :events="timelineEvents" />
-
-            <div class="modal-action">
-                <form method="dialog">
-                    <button class="btn">ปิด</button>
-                </form>
-            </div>
-        </div>
-    </dialog>
 
 </template>
 
