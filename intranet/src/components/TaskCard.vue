@@ -1,47 +1,52 @@
 <template>
-  <div class="bg-base-100 p-4 rounded-sm shadow-xl hover:shadow-md transition-shadow duration-300 border border-base-100 relative">
-    <!-- เพิ่ม icon แสดง priority -->
-   
-    <div class="flex justify-between items-start mb-2 mt-4">
-      <h3 class="text-base font-medium">
-        <span v-if="todo.priority === 'Low'" class="text-green-500 text-xl" title="ความสำคัญต่ำ">&#9679; </span>
-        <span v-else-if="todo.priority === 'Medium'" class="text-yellow-500 text-xl" title="ความสำคัญปานกลาง">&#9679;</span>
-        <span v-else-if="todo.priority === 'High'" class="text-red-500 text-xl" title="ความสำคัญสูง">&#9679;</span>
-        <span class="pl-2">{{ todo.description }}</span>
-      </h3>
-      <div class="flex space-x-2">
-        <button 
-          @click="viewTask(todo)"
-          class="btn btn-ghost btn-sm tooltip tooltip-bottom" 
-          data-tip="ดูรายละเอียด"
-        >
-          <span>&#128065;</span>
-        </button>
-        <button 
-          class="btn btn-ghost btn-sm tooltip tooltip-bottom" 
-          data-tip="สร้าง Service Report" 
-          @click="createServiceReport(todo)"
-        >
-          <span>&#10133;</span>
-        </button>
+  <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+    <!-- ส่วนหัวของการ์ด -->
+    <div class="bg-gray-100 p-4 border-b border-gray-200">
+      <div class="flex justify-between items-center">
+        <h3 class="text-lg font-semibold text-gray-800 truncate max-w-[70%]">
+          <span v-if="todo.priority === 'Low'" class="text-green-500 mr-2" title="ความสำคัญต่ำ">&#9679;</span>
+          <span v-else-if="todo.priority === 'Medium'" class="text-yellow-500 mr-2" title="ความสำคัญปานกลาง">&#9679;</span>
+          <span v-else-if="todo.priority === 'High'" class="text-red-500 mr-2" title="ความสำคัญสูง">&#9679;</span>
+          {{ todo.customer_name }}
+        </h3>
+        <div class="flex space-x-2">
+          <button 
+            @click="viewTask(todo)"
+            class="btn btn-ghost btn-sm tooltip tooltip-bottom" 
+            data-tip="View Task"
+          >
+            <span class="text-xl">&#128065;</span>
+          </button>
+          <button 
+            @click="createServiceReport(todo)"
+            class="btn btn-ghost btn-sm tooltip tooltip-bottom" 
+            data-tip="Create Service Report"
+          >
+            <span class="text-xl">&#10133;</span>
+          </button>
+        </div>
       </div>
     </div>
-    <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-      <div class="flex items-center">
-        <span class="mr-2 text-gray-500">&#128197;</span>
-        <span>{{ formatDate(todo.due_date) }}</span>
-      </div>
-      <div class="flex items-center">
-        <span class="mr-2 text-gray-500">&#128193;</span>
-        <span>{{ todo.project }}</span>
-      </div>
-      <div class="flex items-center">
-        <span class="mr-2 text-gray-500">&#128205;</span>
-        <span>{{ todo.site_name }}</span>
-      </div>
-      <div class="flex items-center">
-        <span class="mr-2 text-gray-500">&#128100;</span>
-        <span>{{ todo.contact_person }}</span>
+    
+    <!-- เนื้อหาของการ์ด -->
+    <div class="p-4">
+      <div class="grid grid-cols-1 gap-2 text-sm">
+        <div class="flex items-center">
+          <span class="mr-2 text-gray-500 text-lg">&#128197;</span>
+          <span class="text-gray-700">{{ formatDate(todo.due_date) }}</span>
+        </div>
+        <div class="flex items-center">
+          <span class="mr-2 text-gray-500 text-lg">&#128221;</span>
+          <span class="text-gray-700 truncate">{{ todo.description }}</span>
+        </div>
+        <div class="flex items-center">
+          <span class="mr-2 text-gray-500 text-lg">&#128205;</span>
+          <span class="text-gray-700">{{ todo.site_name }}</span>
+        </div>
+        <div class="flex items-center">
+          <span class="mr-2 text-gray-500 text-lg">&#128100;</span>
+          <span class="text-gray-700">{{ todo.contact_person }}</span>
+        </div>
       </div>
     </div>
   </div>
@@ -59,6 +64,7 @@ interface Todo {
   project: string
   site_name: string
   contact_person: string
+  customer_name: string
 }
 
 defineProps<{

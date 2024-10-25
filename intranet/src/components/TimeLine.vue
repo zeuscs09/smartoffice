@@ -78,18 +78,24 @@ defineProps<{
   events: TimelineEvent[]
 }>()
 
-// เพิ่มฟังก์ชันสำหรับจัดรูปแบบระยะเวลา
+// ฟังก์ชันสำหรับจัดรูปแบบระยะเวลา รวมถึงวัน เดือน ปี
 function formatDuration(duration: number): string {
-  const hours = Math.floor(duration / 3600)
-  const minutes = Math.floor((duration % 3600) / 60)
   const seconds = Math.floor(duration % 60)
+  const minutes = Math.floor((duration / 60) % 60)
+  const hours = Math.floor((duration / 3600) % 24)
+  const days = Math.floor((duration / 86400) % 30)
+  const months = Math.floor((duration / 2592000) % 12)
+  const years = Math.floor(duration / 31536000)
   
-  let result = ''
-  if (hours > 0) result += `${hours} hours `
-  if (minutes > 0) result += `${minutes} minutes `
-  if (seconds > 0) result += `${seconds} seconds`
+  let result = []
+  if (years > 0) result.push(`${years} years`)
+  if (months > 0) result.push(`${months} months`)
+  if (days > 0) result.push(`${days} days`)
+  if (hours > 0) result.push(`${hours} hours`)
+  if (minutes > 0) result.push(`${minutes} minutes`)
+  if (seconds > 0) result.push(`${seconds} seconds`)
   
-  return result.trim()
+  return result.length > 0 ? result.join(' ') : '0 seconds'
 }
 </script>
 

@@ -23,10 +23,39 @@
       </div>
 
       <!-- Dashboard and Tasks Section -->
-      <div class="grid grid-cols-1" :class="{ 'lg:grid-cols-3': todos.length > 0 }">
-        <!-- Dashboard Section -->
-        <div :class="{ 'lg:col-span-2': todos.length > 0, 'lg:col-span-3': todos.length === 0 }" class="space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Tasks List -->
+        <div class="lg:col-span-1">
           <div class="bg-base-100 p-6 rounded-lg shadow">
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-xl font-bold">Task</h2>
+              <button @click="newTask" class="btn btn-circle btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
+            </div>
+            <div v-if="taskStore.documentsResource.loading" class="flex justify-center items-center h-40">
+              <span class="loading loading-spinner loading-lg"></span>
+            </div>
+            <div v-else-if="taskStore.documentsResource.error" class="text-center py-8">
+              <p class="text-error">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
+            </div>
+            <div v-else-if="todos.length === 0" class="text-center py-8">
+              <p class="text-gray-500">ไม่พบงานในขณะนี้</p>
+            </div>
+            <div v-else class="space-y-4">
+              
+              <TaskCard v-for="todo in todos" :key="todo.name" :todo="todo" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div class="lg:col-span-2 space-y-6">
+          <!-- Dashboard Cards - แสดงเฉพาะบนจอขนาดใหญ่ -->
+          <div class="hidden lg:block bg-base-100 p-6 rounded-lg shadow">
             <h2 class="text-2xl font-bold mb-4">แดชบอร์ด</h2>
             <!-- Display Current Period -->
             <div class="text-sm text-gray-500 mb-4" v-if="dashboardData.period">
@@ -59,12 +88,13 @@
             </div>
           </div>
 
+          <!-- Tabs Section - แสดงทั้งบนจอเล็กและใหญ่ -->
           <div class="bg-base-100 p-6 rounded-lg shadow">
             <div role="tablist" class="tabs tabs-bordered mb-4">
               <a v-for="tab in tabs" :key="tab.value" role="tab" class="tab"
                 :class="{ 'tab-active': activeTab === tab.value }" @click="activeTab = tab.value">
                 <span class="hidden md:inline">{{ tab.label }}</span>
-                <span class="md:hidden" v-html="tab.icon" ></span>
+                <span class="md:hidden" v-html="tab.icon"></span>
               </a>
             </div>
 
@@ -106,34 +136,6 @@
               <div class="text-right">
                 <button class="btn btn-link" @click="router.push({ name: 'AdvanceRequestList' })">View All</button>
               </div>
-            </div>
-          </div>
-        </div> 
-       
-        <!-- Tasks List -->
-        <div class="lg:col-span-1 lg:ml-4 mt-4 lg:mt-0" v-if="todos.length > 0">
-          <div class="bg-base-100 p-6 rounded-lg shadow">
-            <div class="flex justify-between items-center mb-4">
-              <h2 class="text-xl font-bold">Task</h2>
-              <button @click="newTask" class="btn btn-circle btn-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-              </button>
-            </div>
-            <div v-if="taskStore.documentsResource.loading" class="flex justify-center items-center h-40">
-              <span class="loading loading-spinner loading-lg"></span>
-            </div>
-            <div v-else-if="taskStore.documentsResource.error" class="text-center py-8">
-              <p class="text-error">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
-            </div>
-            <div v-else-if="todos.length === 0" class="text-center py-8">
-              <p class="text-gray-500">ไม่พบงานในขณะนี้</p>
-            </div>
-            <div v-else class="space-y-4">
-             
-              <TaskCard v-for="todo in todos" :key="todo.name" :todo="todo" />
             </div>
           </div>
         </div>
@@ -195,6 +197,7 @@ interface Todo {
   allocated_to: string
   reference_name: string
   project: string
+  company_name: string
   site_name: string
   contact_person: string
   contact_phone: string
@@ -300,7 +303,7 @@ const fetchDashboardData = () => {
       dashboardData.value = response
     })
     .catch((error) => {
-      console.error('เกิดข้อผิดพลาดในการดึงข้อมูล Dashboard:', error)
+      console.error('เกิดข้อ��ิดพลาดในการดึงข้อมูล Dashboard:', error)
     })
 }
 
@@ -480,3 +483,5 @@ canvas {
   @apply px-2 py-1 rounded-full text-xs font-semibold;
 }
 </style>
+
+

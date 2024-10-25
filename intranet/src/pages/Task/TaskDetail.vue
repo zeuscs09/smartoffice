@@ -4,9 +4,9 @@
         <div v-if="!isLoading" class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
 
             <div v-if="task.doc">
-                <div class="bg-gray-100 p-4 flex justify-between items-center">
-                    <div class="flex items-center space-x-4">
-                        <h1 class="text-2xl font-bold text-gray-800">
+                <div class="bg-gray-100 p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 mb-4 sm:mb-0">
+                        <h1 class="text-xl sm:text-2xl font-bold text-gray-800">
                             {{ task.doc.task_name }}
                             <span v-if="todo?.doc?.status">
                                 <span :class="getStatusBadgeClass(todo?.doc?.status)" class="ml-2">
@@ -15,11 +15,11 @@
                             </span>
                         </h1>
                     </div>
-                    <div class="flex items-center space-x-4">
-                        <button v-if="canCreateServiceReport" @click="createServiceReport" class="btn btn-ghost btn-sm">
-                            <span>&#10133;</span> New Service Report
+                    <div class="flex flex-wrap items-center space-x-2 space-y-2 sm:space-y-0">
+                        <button v-if="canCreateServiceReport" @click="createServiceReport" class="btn btn-ghost btn-sm tooltip tooltip-bottom" data-tip="Create Service Report">
+                            <span>&#10133;</span> 
                         </button>
-                        <button @click="copyTask" class="btn btn-ghost btn-sm">
+                        <button @click="copyTask" class="btn btn-ghost btn-sm tooltip tooltip-bottom" data-tip="Copy Task">
                             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                                 <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
@@ -30,16 +30,15 @@
                                 </g>
                             </svg>
 
-                            Copy Task
                         </button>
-                        <button @click="goBack" class="btn btn-ghost btn-sm">
-                            <span class="mr-2">←</span> Back
+                        <button @click="goBack" class="btn btn-ghost btn-sm tooltip tooltip-bottom" data-tip="Back">
+                            <span class="mr-2">←</span> 
                         </button>
                     </div>
                 </div>
 
-                <div class="p-6">
-                    <div class="grid md:grid-cols-2 gap-6">
+                <div class="p-4 sm:p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-4">
                             <h2 class="text-xl font-semibold text-gray-700 mb-3">ข้อมูลงาน</h2>
                             <InfoItem label="ประเภทงาน" :value="task.doc.job_type" />
@@ -72,7 +71,7 @@
 
                     <div class="mt-8">
                         <h2 class="text-xl font-semibold text-gray-700 mb-3">ทีมงาน</h2>
-                        <div v-if="task.doc.team && task.doc.team.length > 0" class="grid md:grid-cols-2 gap-4">
+                        <div v-if="task.doc.team && task.doc.team.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div v-for="member in task.doc.team" :key="member.name"
                                 class="flex items-center space-x-4 bg-gray-50 p-4 rounded-lg">
                                 <UserAvatar :email="member.email" size="lg" />
