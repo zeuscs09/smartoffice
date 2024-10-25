@@ -16,7 +16,7 @@
                 </span>
               </span>
             </th>
-          
+
             <th class="cursor-pointer" @click="$emit('sort', 'creation')">
               Request Date
               <span class="ml-1" v-if="sortable">
@@ -44,8 +44,8 @@
           </tr>
         </thead>
         <tbody v-if="loading">
-          <tr >
-            <td colspan="5" >
+          <tr>
+            <td colspan="5">
               <SkeletonTable />
             </td>
           </tr>
@@ -55,15 +55,15 @@
             <td>
               <div class="cursor-pointer" @click="viewDocument(report.name)">
                 {{ report.name }}
-                <br/>
-               <span class="text-xs text-gray-500">{{ formatDate(report.creation)  }}</span>
+                <br />
+                <span class="text-xs text-gray-500">{{ formatDate(report.creation) }}</span>
               </div>
-              
+
             </td>
             <td>
               {{ report.customer_name }}
-              <br/>
-              <span class="text-xs text-gray-500">{{ formatCurrency(report.total_amount)}}</span>
+              <br />
+              <span class="text-xs text-gray-500">{{ formatCurrency(report.total_amount) }}</span>
             </td>
             <td>
               <div class="badge badge-sm" :class="{
@@ -72,7 +72,7 @@
                 'badge-error': report.workflow_state === 'Rejected'
               }">{{ report.workflow_state }}</div>
             </td>
-            
+
             <td>
               <UserAvatar :email="report.owner" />
             </td>
@@ -84,8 +84,8 @@
           </tr>
         </tbody>
         <tbody v-else>
-          <tr >
-            <td colspan="5" >
+          <tr>
+            <td colspan="5">
               <NoDataFoundTable />
             </td>
           </tr>
@@ -99,28 +99,32 @@
         <SkeletonCard />
       </div>
       <div v-else-if="data.length > 0">
-        <div v-for="report in data" :key="report.name" class="card bg-base-100 shadow-xl mt-2" @click="viewDocument(report.name)">
+        <div v-for="report in data" :key="report.name" class="card bg-base-100 shadow-xl mt-2">
           <div class="card-body">
-            <h2 class="card-title" >
-          
-              {{ report.customer_name }} 
-            </h2>
-            <p class="text-sm text-gray-500">
-              Service Date: {{ formatDate(report.service_date) }}
-              <br/>
-              # {{ report.name }}
-            </p>
-            <p class="text-sm text-gray-500">{{ formatCurrency(report.total_amount) }}   <span class="badge badge-sm" :class="{
-                  'badge-primary': report.workflow_state === 'Approved',
-                  'badge-warning': report.workflow_state === 'Approval Review',
-                  'badge-error': report.workflow_state === 'Rejected'
-                }">{{ report.workflow_state }}</span></p>
-           
+
+            <div class="cursor-pointer" @click="viewDocument(report.name)">
+              <h2 class="card-title">
+
+                {{ report.customer_name }}
+              </h2>
+              <p class="text-sm text-gray-500">
+                Service Date: {{ formatDate(report.service_date) }}
+                <br />
+                # {{ report.name }}
+              </p>
+              <p class="text-sm text-gray-500">{{ formatCurrency(report.total_amount) }} <span class="badge badge-sm"
+                  :class="{
+                    'badge-primary': report.workflow_state === 'Approved',
+                    'badge-warning': report.workflow_state === 'Approval Review',
+                    'badge-error': report.workflow_state === 'Rejected'
+                  }">{{ report.workflow_state }}</span>
+              </p>
+            </div>
             <div class="grid grid-cols-1 gap-2 mt-2">
-             
+
               <div class="flex items-center gap-2">
                 <UserAvatar :email="report.owner" />
-               <span class="text-xs text-gray-500"> Request Date {{ formatDate(report.creation) }}</span>
+                <span class="text-xs text-gray-500"> Request Date {{ formatDate(report.creation) }}</span>
               </div>
               <div class="flex justify-between items-center">
                 <p class="font-semibold">Approver:</p>
@@ -230,7 +234,7 @@ const showTimeline = async (docName: string) => {
     status: 'Approved',
     approve_role: 'Requestor',
     by: expenseRequest.doc.owner,
-    
+
   });
 
   timelineEvents.value.push({

@@ -7,6 +7,8 @@ from frappe.model.document import Document
 
 class SMOAdvanceEntry(Document):
 	def validate(self):
+		if self.workflow_state == "Rejected" and not self.reject_reason:
+			frappe.throw(_("กรุณาระบุเหตุผลในการ Reject"))
 		
 		total_cost = 0
 		seen_expense = set()

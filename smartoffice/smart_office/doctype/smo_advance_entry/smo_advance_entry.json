@@ -7,11 +7,14 @@
  "engine": "InnoDB",
  "field_order": [
   "details_tab",
+  "doc_detail_section",
   "naming_series",
   "service_date",
   "customer",
+  "customer_name",
   "customer_site",
   "project",
+  "project_name",
   "column_break_ifjs",
   "distance_depart",
   "distance_return",
@@ -21,10 +24,12 @@
   "expense_item_section",
   "reference_code",
   "expense_item",
+  "approve_by",
+  "approver",
   "section_break_fabx",
   "amended_from",
   "from_page",
-  "summary_tab",
+  "reject_reason",
   "html_summary"
  ],
  "fields": [
@@ -74,6 +79,7 @@
    "fieldname": "distance_depart",
    "fieldtype": "Float",
    "label": "Distance Depart",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -81,6 +87,7 @@
    "fieldname": "distance_return",
    "fieldtype": "Float",
    "label": "Distance Return",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -106,6 +113,7 @@
    "label": "Series",
    "no_copy": 1,
    "options": "ADV-.YYYY.-.MM.-.####.",
+   "print_hide": 1,
    "set_only_once": 1
   },
   {
@@ -114,6 +122,7 @@
    "fieldname": "config_taxi_init",
    "fieldtype": "Float",
    "label": "Taxi Initial",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -121,6 +130,7 @@
    "fieldname": "config_taxi_rate",
    "fieldtype": "Float",
    "label": "Taxi Rate",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -129,11 +139,6 @@
    "in_list_view": 1,
    "label": "Reference Code",
    "reqd": 1
-  },
-  {
-   "fieldname": "summary_tab",
-   "fieldtype": "Tab Break",
-   "label": "Summary"
   },
   {
    "fieldname": "html_summary",
@@ -149,12 +154,56 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "From Page"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "reject_reason",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "label": "Reject Reason",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "approve_by",
+   "fieldtype": "Link",
+   "label": "Approve By",
+   "link_filters": "[[\"Employee\",\"grade\",\"=\",\"220 - Finance Staff\"]]",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "approve_by.user_id",
+   "fieldname": "approver",
+   "fieldtype": "Data",
+   "label": "Approver",
+   "print_hide": 1
+  },
+  {
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Customer Name",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "doc_detail_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "project.project_name",
+   "fieldname": "project_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Project Name",
+   "print_hide": 1
   }
  ],
+ "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-24 18:04:11.605439",
+ "modified": "2024-10-25 16:07:53.995115",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Advance Entry",
@@ -170,6 +219,19 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
    "share": 1,
    "submit": 1,
    "write": 1

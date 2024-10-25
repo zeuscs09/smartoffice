@@ -88,15 +88,23 @@
               </div>
             </div>
             <div v-if="activeTab == 'expense_request'" class="overflow-x-auto">
-              <ExpenseRequestTable :data="expenseRequestStore.data" :loading="expenseRequestStore.documentsResource.loading"
-                :error="expenseRequestStore.documentsResource.error" :sortable="false" />
+              <ExpenseRequestTable 
+                :data="expenseRequestStore.data" 
+                :loading="expenseRequestStore.documentsResource.loading"
+                :error="expenseRequestStore.documentsResource.error" 
+                :sortable="false" />
               <div class="text-right">
                 <button class="btn btn-link" @click="router.push({ name: 'ExpenseRequestList' })">View All</button>
               </div>
             </div>
             <div v-if="activeTab == 'advance_request'" class="overflow-x-auto">
-              <div class="flex justify-center items-center min-h-[500px]">
-                advance request
+              <AdvanceEntryTable 
+                :data="advanceEntryStore.data" 
+                :loading="advanceEntryStore.documentsResource.loading"
+                :error="advanceEntryStore.documentsResource.error" 
+                :sortable="false" />
+              <div class="text-right">
+                <button class="btn btn-link" @click="router.push({ name: 'AdvanceRequestList' })">View All</button>
               </div>
             </div>
           </div>
@@ -148,10 +156,13 @@ import { useServiceReportStore } from "@/stores/serviceReportStore"
 import { useExpenseEntryStore } from "@/stores/expenseEntryStore"
 import { useExpenseRequestStore } from "@/stores/expenseRequestStore"
 import { useSmoTaskStore } from "@/stores/taskStore"
+import { useAdvanceEntryStore } from "@/stores/advanceEntryStore"
 import { storeToRefs } from 'pinia'
+
 import ServiceReportTable from '@/components/ServiceReportTable.vue'
 import ExpenseRequestTable from '@/components/ExpenseRequestTable.vue'
 import ExpenseEntryTable from '@/components/ExpenseEntryTable.vue'
+import AdvanceEntryTable from '@/components/AdvanceEntryTable.vue'
 import { useRouter } from 'vue-router'
 // 2. การตั้งค่า
 Chart.register(...registerables)
@@ -163,6 +174,8 @@ const expenseEntryStore = useExpenseEntryStore()
 expenseEntryStore.pageSize = 5
 const expenseRequestStore = useExpenseRequestStore()
 expenseRequestStore.pageSize = 5
+const advanceEntryStore = useAdvanceEntryStore()
+advanceEntryStore.pageSize = 5
 
 const taskStore = useSmoTaskStore()
 taskStore.pageSize = 999
@@ -296,6 +309,7 @@ const fetchDocuments = () => {
   load_service_report()
   load_expense_request()
   load_expense_entry()
+  load_advance_entry()
   taskStore.pageSize = 999
   taskStore.fetchAll(1)
   
@@ -321,6 +335,11 @@ const load_expense_entry = async () => {
   await expenseEntryStore.fetchAll(1)
 
 
+}
+
+const load_advance_entry = async () => {
+  advanceEntryStore.pageSize = 5;
+  await advanceEntryStore.fetchAll(1)
 }
 
 const formatChangeDescription = (change: number | undefined) => {

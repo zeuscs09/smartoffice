@@ -11,6 +11,10 @@
   </div>
   <div v-else-if="emails.length === 1" :class="[sizeClass, 'avatar flex items-center justify-center overflow-hidden']">
     <img v-if="imageUrls[0]" :src="imageUrls[0]" :alt="emails[0]" class="rounded-full w-full h-full object-cover tooltip tooltip-bottom" :data-tip="emails[0]" />
+    <div v-else-if="isLoading" class="placeholder rounded-full bg-gray-100 w-full h-full flex items-center justify-center">
+      <!-- เพิ่ม loading indicator -->
+      <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-300"></div>
+    </div>
     <div v-else class="placeholder rounded-full bg-gray-200 w-full h-full flex items-center justify-center text-gray-600 p-2">
       <span>{{ getInitials(emails[0]) }}</span>
     </div>
@@ -23,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, watchEffect } from 'vue'
 import { createResource } from 'frappe-ui'
 
 const props = defineProps<{
@@ -36,6 +40,7 @@ const emails = computed(() => {
   return props.email.split(',').map(e => e.trim()).filter(Boolean)
 })
 const imageUrls = ref<string[]>([])
+const isLoading = ref(false)
 
 const getInitials = (email: string) => {
   return email.split('@')[0].slice(0, 2).toUpperCase()
@@ -57,8 +62,12 @@ const userResource = createResource({
 const CACHE_EXPIRATION = 2 * 24 * 60 * 60 * 1000 // 2 วันในหน่วยมิลลิวินาที
 
 const fetchUserImages = async () => {
+  isLoading.value = true
   imageUrls.value = []
-  if (!emails.value.length) return
+  if (!emails.value.length) {
+    isLoading.value = false
+    return
+  }
   for (const email of emails.value) {
     if (!email) {
       imageUrls.value.push('')
@@ -71,26 +80,29 @@ const fetchUserImages = async () => {
         const { image, timestamp } = JSON.parse(cachedData)
         if (Date.now() - timestamp < CACHE_EXPIRATION) {
           imageUrls.value.push(image)
-          continue
+          continue // ใช้ข้อมูลจาก cache และข้ามการเรียก API
         }
       }
 
+      // ดึงข้อมูลจากเซิร์ฟเวอร์
       const userData = await userResource.submit({
         doctype: 'User',
         name: email,
       })
       const userImage = userData.user_image || ''
+
       imageUrls.value.push(userImage)
-      // บันทึกลงใน cache พร้อมเวลาปัจจุบัน
+      // อัปเดต cache ด้วยข้อมูลใหม่
       localStorage.setItem(`avatar_${email}`, JSON.stringify({
         image: userImage,
         timestamp: Date.now()
       }))
     } catch (error) {
-      console.error('Error fetching user image:', error)
+      console.error('เกิดข้อผิดพลาดในการดึงรูปภาพผู้ใช้:', error)
       imageUrls.value.push('')
     }
   }
+  isLoading.value = false
 }
 
 // ฟังก์ชันสำหรับล้าง cache ที่หมดอายุ
@@ -111,7 +123,12 @@ const clearExpiredCache = () => {
 // เรียกใช้ฟังก์ชันล้าง cache ที่หมดอายุเมื่อคอมโพเนนต์ถูกโหลด
 clearExpiredCache()
 
-watch(() => props.email, fetchUserImages, { immediate: true })
+// เปลี่ยนเป็น watchEffect เพื่อให้ทำงานเมื่อ emails เปลี่ยนแปลง
+watchEffect(() => {
+  if (emails.value.length > 0) {
+    fetchUserImages()
+  }
+})
 </script>
 
 <style scoped>

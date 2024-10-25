@@ -40,8 +40,8 @@ const routes = [
   },
   {
     name: 'AdvanceRequestList',
-    path: '/advance-request',
-    component: () => import('@/pages/AdvanceRequest/AdvanceRequestList.vue'),
+    path: '/advance-entry',
+    component: () => import('@/pages/AdvanceEntry/AdvanceEntryList.vue'),
   },
   {
     name: 'MailBoxList',

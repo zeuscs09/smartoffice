@@ -7,6 +7,7 @@
  "field_order": [
   "expense_type",
   "input_expense_types",
+  "expense_type_name",
   "taxi_initial",
   "rate_per_km",
   "description",
@@ -72,7 +73,8 @@
    "fieldtype": "Select",
    "label": "Fuel Detail",
    "mandatory_depends_on": "eval:doc.expense_type=='EP008'",
-   "options": "\n\u0e40\u0e1a\u0e19\u0e0b\u0e34\u0e19\n\u0e14\u0e35\u0e40\u0e0b\u0e25"
+   "options": "\n\u0e40\u0e1a\u0e19\u0e0b\u0e34\u0e19\n\u0e14\u0e35\u0e40\u0e0b\u0e25",
+   "print_hide": 1
   },
   {
    "default": "0",
@@ -100,7 +102,8 @@
    "label": "Distance (km)",
    "mandatory_depends_on": "eval:doc.expense_type=='EP001'",
    "non_negative": 1,
-   "precision": "2"
+   "precision": "2",
+   "print_hide": 1
   },
   {
    "fieldname": "column_break_zhiq",
@@ -110,7 +113,8 @@
    "fieldname": "taxi_return_distance",
    "fieldtype": "Float",
    "label": "Distance (km)",
-   "mandatory_depends_on": "eval:doc.expense_type=='EP002'"
+   "mandatory_depends_on": "eval:doc.expense_type=='EP002'",
+   "print_hide": 1
   },
   {
    "depends_on": "eval:doc.expense_type=='EP008'",
@@ -122,7 +126,8 @@
    "fieldname": "fuel_liter",
    "fieldtype": "Float",
    "label": "Liter",
-   "mandatory_depends_on": "eval:doc.expense_type=='EP008'"
+   "mandatory_depends_on": "eval:doc.expense_type=='EP008'",
+   "print_hide": 1
   },
   {
    "fieldname": "system_reminder",
@@ -148,7 +153,8 @@
    "fieldname": "hotel_name",
    "fieldtype": "Data",
    "label": "Hotel Name",
-   "mandatory_depends_on": "eval:doc.expense_type==\"EP005\""
+   "mandatory_depends_on": "eval:doc.expense_type==\"EP005\"",
+   "print_hide": 1
   },
   {
    "fieldname": "column_break_hiom",
@@ -159,7 +165,8 @@
    "fieldname": "total_day",
    "fieldtype": "Int",
    "label": "Total (day)",
-   "mandatory_depends_on": "eval:doc.expense_type==\"EP005\""
+   "mandatory_depends_on": "eval:doc.expense_type==\"EP005\"",
+   "print_hide": 1
   },
   {
    "depends_on": "eval:doc.paid_by==\"\u0e40\u0e07\u0e34\u0e19\u0e17\u0e14\u0e23\u0e2d\u0e07\"",
@@ -171,12 +178,14 @@
   {
    "fieldname": "from_date",
    "fieldtype": "Date",
-   "label": "From Date"
+   "label": "From Date",
+   "print_hide": 1
   },
   {
    "fieldname": "to_date",
    "fieldtype": "Date",
-   "label": "To Date"
+   "label": "To Date",
+   "print_hide": 1
   },
   {
    "depends_on": "eval:doc.expense_type == 'EP001' || doc.expense_type == 'EP002'",
@@ -192,7 +201,8 @@
    "hidden": 1,
    "label": "Expense Type",
    "link_filters": "[]",
-   "options": "SMO Expense Type"
+   "options": "SMO Expense Type",
+   "print_hide": 1
   },
   {
    "fieldname": "input_expense_types",
@@ -201,12 +211,20 @@
    "label": "Expense Type",
    "options": "SMO Expense Type",
    "reqd": 1
+  },
+  {
+   "fetch_from": "input_expense_types.description",
+   "fieldname": "expense_type_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Expense Type Name",
+   "print_hide": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-09-30 11:57:01.321580",
+ "modified": "2024-10-25 12:11:38.124296",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Item",

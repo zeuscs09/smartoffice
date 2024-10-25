@@ -42,36 +42,34 @@ frappe.ui.form.on("SMO Expense Request", {
     }
   },
   refresh(frm) {
-    
-    if(frappe.utils.get_query_params().from){
-      $('.navbar').hide();
-      $('.menu-btn-group').hide();
-      $('.page-icon-group').hide();
+    if (frappe.utils.get_query_params().from) {
+      $(".navbar").hide();
+      $(".menu-btn-group").hide();
+      $(".page-icon-group").hide();
       // $('.standard-actions').hide();
       // $('.next-doc').hide();
     }
-    if(frm.doc.from_page) {
-      
-      $('.app-logo').hide();
+    if (frm.doc.from_page) {
+      $(".app-logo").hide();
       $("#navbar-search").hide();
       $("#navbar-breadcrumbs").hide();
       // $('.menu-btn-group').hide();
       //$('.page-icon-group').hide();
     }
-    
+
     // เพิ่มการตรวจสอบว่าสามารถใช้ history.back() ได้หรือไม่
     const canGoBack = window.history.length > 1;
-    
-    frm.add_custom_button(__(canGoBack ? 'Back' : 'Close'), function() {
+
+    frm.add_custom_button(__(canGoBack ? "Back" : "Close"), function () {
       if (canGoBack) {
         history.back();
       } else {
         // ดำเนินการเมื่อไม่สามารถย้อนกลับได้
         // ตัวอย่างเช่น ปิดหน้าต่างหรือนำทางไปยังหน้าหลัก
-       window.close();
+        window.close();
       }
     });
-    
+
     if (frm.doc.expense_request_item) {
       let msg = [];
 
@@ -106,7 +104,7 @@ frappe.ui.form.on("SMO Expense Request", {
       "September",
       "October",
       "November",
-      "December"
+      "December",
     ];
 
     frappe.call({
@@ -123,14 +121,14 @@ frappe.ui.form.on("SMO Expense Request", {
           let total = 0;
           let others = 0;
           let advance = 0;
-          
+
           $.each(r.message, function (i, d) {
             let row = frm.add_child("expense_request_item");
             row.expense = d.expense_entry_id;
             row.expense_item = d.expense_item;
             row.object_data = JSON.stringify(d);
             total += d.total_cost;
-       
+
             if (d.paid_by == "เงินทดรอง") advance += d.total_cost;
             else others += d.total_cost;
           });
@@ -146,52 +144,162 @@ frappe.ui.form.on("SMO Expense Request", {
           frappe.dom.unfreeze();
         }
       },
-      error: function(xhr, status, error) {
+      error: function (xhr, status, error) {
         frappe.dom.unfreeze();
         frappe.msgprint("เกิดข้อผิดพลาดในการโหลดข้อมูล: " + error);
-      }
+      },
     });
   },
-  before_workflow_action: function(frm) {
+  // before_workflow_action: function(frm) {
+  //   if (frm.selected_workflow_action === "Reject") {
+  //     frappe.validated = false;
+
+  //     frappe.prompt([
+  //       {
+  //         label: 'เหตุผลในการ Reject',
+  //         fieldname: 'reject_reason',
+  //         fieldtype: 'Small Text',
+  //         reqd: 1
+  //       }
+  //     ],
+  //     function(values){
+  //       // หาแถวของผู้อนุมัติปัจจุบัน
+  //       let current_approver = frm.doc.approvers.find(a => a.user_id === frappe.session.user);
+  //       if (current_approver) {
+  //         current_approver.comment = values.reject_reason;
+  //         current_approver.status = "Rejected";
+  //         frm.refresh_field('approvers');
+  //         console.log("current_approver",current_approver);
+  //       }
+  //       frm.set_value("next_action", "");
+  //       frm.set_value('reject_reason', values.reject_reason);
+  //         frm.save("Update", () => {
+  //           var negative = "frappe.validated = false";
+  //           resolve(negative);
+  //           frm.refresh();
+  //         });
+  //     },
+  //     'ระบุเหตุผลในการ Reject',
+  //     'ยืนยัน'
+  //     );
+
+  //     return false;
+  //   }
+  // },
+  before_workflow_action: function (frm) {
     if (frm.selected_workflow_action === "Reject") {
-      frappe.validated = false;
-      
-      frappe.prompt([
-        {
-          label: 'เหตุผลในการ Reject',
-          fieldname: 'reject_reason',
-          fieldtype: 'Small Text',
-          reqd: 1
-        }
-      ],
-      function(values){
-        // หาแถวของผู้อนุมัติปัจจุบัน
-        let current_approver = frm.doc.approvers.find(a => a.user_id === frappe.session.user);
-        if (current_approver) {
-          current_approver.comment = values.reject_reason;
-          current_approver.status = "Rejected";
-          frm.refresh_field('approvers');
-          console.log("current_approver",current_approver);
-        }
-        frm.doc.next_action = "";
-        // บันทึกการเปลี่ยนแปลงก่อนที่จะดำเนินการ workflow
-        frm.save('Update', () => {
-          // หลังจากบันทึกสำเร็จ ดำเนินการ workflow ต่อ
-          frm.selected_workflow_action = "Reject";
-          //frm.workflow_action_dialog.hide();
-          frm.save('Update', () => {
-            frm.refresh();
+      return new Promise(function (resolve, reject) {
+        // This will cancel save
+        // frappe.validated = false;
+        // reject();
+
+        // This will continue to save
+        // var negative = 'frappe.validated = false';
+        // resolve(negative);
+
+        // If you comment all of it
+        // Save button will be disabled (like it still processing)
+        frappe.dom.unfreeze();
+
+        frappe.prompt(
+          [
+            {
+              label: "เหตุผลในการ Reject",
+              fieldname: "reject_reason",
+              fieldtype: "Small Text",
+              reqd: 1,
+            },
+          ],
+          function (values) {
+            // หาแถวของผู้อนุมัติปัจจุบัน
+            // let current_approver = frm.doc.approvers.find(
+            //   (a) => a.user_id === frappe.session.user
+            // );
             
-          });
-        });
-      },
-      'ระบุเหตุผลในการ Reject',
-      'ยืนยัน'
-      );
-      
-      return false;
+            // if (current_approver) {
+            //   console.log("comment", values.reject_reason);
+              
+              // ใช้ frappe.model.set_value เพื่อบันทึกค่า comment ลงใน child table
+              // frappe.model.set_value(
+              //   current_approver.doctype,
+              //   current_approver.name,
+              //   'comment',
+              //   values.reject_reason
+              // );
+              
+              // frappe.model.set_value(
+              //   current_approver.doctype,
+              //   current_approver.name,
+              //   'status',
+              //   'Rejected'
+              // );
+
+              //frm.refresh_field("approvers");
+            //}
+            // console.log("current_approver_after_set_value", current_approver);
+            // frm.doc.next_action = "";
+
+            // frm.set_value('reject_reason', "ssss ok save");
+
+            // บันทึกการเปลี่ยนแปลงก่อนที่จะดำเนินการ workflow
+            frm.set_value("reject_reason", values.reject_reason);
+            //frm.set_value("next_action", "");
+            frm.save("Update", () => {
+              var negative = "frappe.validated = false";
+              resolve(negative);
+            });
+            // var negative = "frappe.validated = false";
+            // resolve(negative);
+            
+          },
+          "ระบุเหตุผลในการ Reject",
+          "ยืนยัน"
+        );
+      });
     }
   },
+  // before_workflow_action: function(frm) {
+  //   if (frm.selected_workflow_action === "Reject") {
+  //     // ยกเลิก default action
+  //     return new Promise(function (resolve, reject) {
+  //       // This will cancel save
+  //         // frappe.validated = false;
+  //         // reject();
+
+  //       // This will continue to save
+  //         // var negative = 'frappe.validated = false';
+  //         // resolve(negative);
+
+  //       // If you comment all of it
+  //       // Save button will be disabled (like it still processing)
+  //       frappe.dom.unfreeze();
+  //       frappe.prompt([
+  //         {
+  //           label: 'เหตุผลในการ Reject',
+  //           fieldname: 'reject_reason',
+  //           fieldtype: 'Small Text',
+  //           reqd: 1
+  //         }
+  //       ],
+  //       function(values){
+  //         // เมื่อได้เหตุผลแล้ว
+  //         frm.set_value('reject_reason', values.reject_reason);
+
+  //         // ดำเนินการ workflow action ต่อ
+  //         frm.selected_workflow_action = "Reject";
+  //         //frm.save('Update');
+  //         console.log(frm.doc);
+
+  //         var negative = 'frappe.validated = false';
+  //         resolve(negative);
+  //       },
+  //       __('ระบุเหตุผลในการ Reject'),
+  //       __('ยืนยัน')
+  //       );
+  //     })
+
+  //   }
+  // },
 });
 
 function render_summary(data, callback) {
@@ -293,7 +401,10 @@ function render_summary(data, callback) {
           <th colspan="4">Grand Total</th>
           ${expenseTypes
             .map(
-              (type) => `<th style="text-align: right">${grandTotals[type.desc].toLocaleString()}</th>`
+              (type) =>
+                `<th style="text-align: right">${grandTotals[
+                  type.desc
+                ].toLocaleString()}</th>`
             )
             .join("")}
           <th style="text-align: right">${grandTotalOverall.toLocaleString()}</th>
@@ -301,7 +412,7 @@ function render_summary(data, callback) {
       </tfoot>
     </table>
   `;
-   
+
     return callback(html);
   });
 }

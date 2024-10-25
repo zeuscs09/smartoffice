@@ -99,33 +99,47 @@ frappe.ui.form.on("SMO Expense Entry", {
   before_workflow_action: function(frm) {
     if (frm.selected_workflow_action === "Reject") {
       // ยกเลิก default action
-      frappe.validated = false;
-      
-      // แสดง dialog เพื่อขอเหตุผล
-      frappe.prompt([
-        {
-          label: 'เหตุผลในการ Reject',
-          fieldname: 'reject_reason',
-          fieldtype: 'Small Text',
-          reqd: 1
-        }
-      ],
-      function(values){
-        // เมื่อได้เหตุผลแล้ว
-        frm.set_value('reject_reason', values.reject_reason);
+      return new Promise(function (resolve, reject) {
+        // This will cancel save
+          // frappe.validated = false;
+          // reject();
         
-        // ดำเนินการ workflow action ต่อ
-        frm.selected_workflow_action = "Reject";
-        //frm.workflow_action_dialog.hide();
-        frm.save('Update');
-        //window.history.back();
-        frm.refresh();
-      },
-      __('ระบุเหตุผลในการ Reject'),
-      __('ยืนยัน')
-      );
+        // This will continue to save
+          // var negative = 'frappe.validated = false';
+          // resolve(negative);
+  
+        // If you comment all of it
+        // Save button will be disabled (like it still processing)
+        frappe.dom.unfreeze();
+        frappe.prompt([
+          {
+            label: 'เหตุผลในการ Reject',
+            fieldname: 'reject_reason',
+            fieldtype: 'Small Text',
+            reqd: 1
+          }
+        ],
+        function(values){
+          // เมื่อได้เหตุผลแล้ว
+          frm.set_value('reject_reason', values.reject_reason);
+          frm.save("Update", () => {
+            var negative = "frappe.validated = false";
+            resolve(negative);
+          });
+          // ดำเนินการ workflow action ต่อ
+          // frm.selected_workflow_action = "Reject";
+          // //frm.save('Update');
+          // console.log(frm.doc);
+
+          // var negative = 'frappe.validated = false';
+          // resolve(negative);
+        },
+        __('ระบุเหตุผลในการ Reject'),
+        __('ยืนยัน')
+        );
+      })
+     
       
-      return false; // ป้องกันการดำเนินการ workflow action ทันที
     }
   },
 });

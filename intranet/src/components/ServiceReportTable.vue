@@ -93,13 +93,15 @@
       </div>
       <div v-else-if="sortedData.length > 0" class="space-y-4">
         <div v-for="doc in sortedData" :key="doc.name" class="card bg-base-100 shadow-xl">
-          <div class="card-body" @click="viewDocument(doc.name)">
+          <div class="card-body" >
+            <div class="cursor-pointer" @click="viewDocument(doc.name)">
             <h2 class="card-title cursor-pointer">
               {{ doc.customer_name }}
             </h2>
             <p class="text-sm text-gray-500">{{ doc.task_name }} {{ formatDate(doc.job_start_on) }}</p>
             <p>{{ doc.name }}</p>
             <p>Status: <span :class="getStatusClass(doc.workflow_state)">{{ doc.workflow_state }}</span></p>
+           </div>
             <div class="card-actions justify-end">
               <div class="flex justify-between items-center w-full">
                 <button class="btn btn-neutral btn-sm" @click="openExpenseEntry(doc.name)">

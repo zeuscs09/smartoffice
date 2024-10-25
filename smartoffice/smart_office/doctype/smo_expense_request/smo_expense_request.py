@@ -57,6 +57,7 @@ class SMOExpenseRequest(Document):
 						"user_id": current_employee.user_id,
 						"approver_level": approver_level,
 						"approver_role": current_employee.designation,
+						"comment": "",
 						"status": "Pending"
 					})
 					

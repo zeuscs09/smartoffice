@@ -118,7 +118,10 @@
       <div v-else-if="sortedData.length > 0">
         <div v-for="doc in sortedData" :key="doc.name" class="card bg-base-100 shadow-xl">
           <div class="card-body">
-            <h2 class="card-title cursor-pointer" @click="viewDocument(doc.name)">
+
+            <div class="cursor-pointer" @click="viewDocument(doc.name)">
+
+              <h2 class="card-title cursor-pointer" >
               {{ doc.name }}
              
             </h2>
@@ -139,6 +142,9 @@
                 </p>
               </div>
             </div>
+            </div>
+        
+            
             <div class="flex justify-between mt-2">
               <div>
                 <p class="font-semibold">Next Action:</p>
@@ -156,11 +162,7 @@
         </div>
       </div>
       <div v-else>
-        <div class="card bg-base-100 shadow-xl">
-          <div class="card-body">
-            <p class="text-center">No Data Found</p>
-          </div>
-        </div>
+        <NoDataFoundCard />
       </div>
     </div>
 
@@ -185,6 +187,7 @@ import { defineProps, defineEmits, inject, ref, computed } from 'vue'
 import UserAvatar from './UserAvatar.vue';
 import { useRouter } from 'vue-router';
 import { createDocumentResource } from 'frappe-ui'
+import NoDataFoundCard from './NoDataFoundCard.vue'
 import Timeline from './TimeLine.vue'
 
 const props = defineProps({
