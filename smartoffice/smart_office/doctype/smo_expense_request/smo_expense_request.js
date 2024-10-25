@@ -212,21 +212,21 @@ frappe.ui.form.on("SMO Expense Request", {
           ],
           function (values) {
             // หาแถวของผู้อนุมัติปัจจุบัน
-            // let current_approver = frm.doc.approvers.find(
-            //   (a) => a.user_id === frappe.session.user
-            // );
-            
-            // if (current_approver) {
-            //   console.log("comment", values.reject_reason);
-              
+            let current_approver = frm.doc.approvers.find(
+              (a) => a.user_id === frappe.session.user
+            );
+
+            if (current_approver) {
+              //   console.log("comment", values.reject_reason);
+
               // ใช้ frappe.model.set_value เพื่อบันทึกค่า comment ลงใน child table
-              // frappe.model.set_value(
-              //   current_approver.doctype,
-              //   current_approver.name,
-              //   'comment',
-              //   values.reject_reason
-              // );
-              
+              frappe.model.set_value(
+                current_approver.doctype,
+                current_approver.name,
+                "comment",
+                values.reject_reason
+              );
+
               // frappe.model.set_value(
               //   current_approver.doctype,
               //   current_approver.name,
@@ -234,8 +234,8 @@ frappe.ui.form.on("SMO Expense Request", {
               //   'Rejected'
               // );
 
-              //frm.refresh_field("approvers");
-            //}
+              frm.refresh_field("approvers");
+            }
             // console.log("current_approver_after_set_value", current_approver);
             // frm.doc.next_action = "";
 
@@ -243,14 +243,17 @@ frappe.ui.form.on("SMO Expense Request", {
 
             // บันทึกการเปลี่ยนแปลงก่อนที่จะดำเนินการ workflow
             frm.set_value("reject_reason", values.reject_reason);
+            frm.set_value("workflow_state", "Rejected");
             //frm.set_value("next_action", "");
             frm.save("Update", () => {
-              var negative = "frappe.validated = false";
-              resolve(negative);
+              // var negative = "frappe.validated = false";
+              // resolve(negative);
+              //frappe.workflow.apply(frm, "Reject");
+              //resolve();
+              frm.refresh();
             });
             // var negative = "frappe.validated = false";
             // resolve(negative);
-            
           },
           "ระบุเหตุผลในการ Reject",
           "ยืนยัน"
@@ -444,4 +447,3 @@ function formatDate(date) {
   const day = String(d.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
-

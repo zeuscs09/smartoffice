@@ -224,7 +224,13 @@
   
     await expenseRequest.reload();
     console.log(expenseRequest.doc);
-  
+    const creationDate = new Date(expenseRequest.doc.creation);
+    const modifiedDate = new Date(expenseRequest.doc.modified);
+
+    // คำนวณความแตกต่างในมิลลิวินาที
+    const duration = modifiedDate.getTime() - creationDate.getTime();
+    // แปลงมิลลิวินาทีเป็นวินาที
+    const durationInSeconds = Math.floor(duration / 1000);
     // เพิ่มเหตุการณ์ "สร้างคำขอ" ที่ด้านบนสุดของ timeline
     timelineEvents.value.push({
       date: expenseRequest.doc.creation,
@@ -236,12 +242,13 @@
     });
   
     timelineEvents.value.push({
-      date: expenseRequest.doc.creation,
+      date: expenseRequest.doc.modified,
       action: expenseRequest.doc.workflow_state,
       status: expenseRequest.doc.workflow_state,
       approve_role: 'Finance',
       by: expenseRequest.doc.approver,
-      remark: expenseRequest.doc.reject_reason
+      remark: expenseRequest.doc.reject_reason,
+      duration: durationInSeconds
     });
   
     timelineModal.value?.showModal();

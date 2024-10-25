@@ -277,7 +277,8 @@ const showTimeline = async (docName: string) => {
       action: approver.status,
       approve_role: approver.approver_role,
       by: approver.user_id,
-      remark: approver.comment
+      remark: approver.comment,
+      duration: approver.duration
     }));
 
   timelineEvents.value.unshift({

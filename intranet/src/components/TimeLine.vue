@@ -44,6 +44,13 @@
         index % 2 === 0 ? 'timeline-end' : 'timeline-start',
       ]">
         {{ event.date ? formatDate(event.date) : '' }}
+       
+        <div v-if="event.duration" class="text-xs text-gray-500 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-1">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          {{ formatDuration(event.duration) }}
+        </div>
       </div>
       <hr :class="{ 'bg-green-500': event.status === 'Approved', 'bg-red-500': event.status === 'Rejected' }" />
     </li>
@@ -64,10 +71,25 @@ interface TimelineEvent {
   by: string
   remark?: string
   doc_status?: string
+  duration?: number // เพิ่ม duration เป็นตัวเลือก
 }
 
 defineProps<{
   events: TimelineEvent[]
 }>()
+
+// เพิ่มฟังก์ชันสำหรับจัดรูปแบบระยะเวลา
+function formatDuration(duration: number): string {
+  const hours = Math.floor(duration / 3600)
+  const minutes = Math.floor((duration % 3600) / 60)
+  const seconds = Math.floor(duration % 60)
+  
+  let result = ''
+  if (hours > 0) result += `${hours} hours `
+  if (minutes > 0) result += `${minutes} minutes `
+  if (seconds > 0) result += `${seconds} seconds`
+  
+  return result.trim()
+}
 </script>
 
