@@ -9,8 +9,8 @@ frappe.ui.form.on("SMO Task", {
     //   $('.standard-actions').hide();
     //   // $('.next-doc').hide();
     // }
-    if (frm.doc.from_page) {
-      $(".navbar").css('visibility', 'hidden');
+    if (frm.doc.from_page || frappe.utils.get_query_params().from_page) {
+      $(".navbar").css("visibility", "hidden");
       $(".menu-btn-group").hide();
       $(".page-icon-group").hide();
 

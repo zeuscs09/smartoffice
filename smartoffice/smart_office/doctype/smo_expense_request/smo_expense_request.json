@@ -18,6 +18,7 @@
   "get_data",
   "department",
   "section_break_erng",
+  "from_page",
   "html_data",
   "section_break_obtr",
   "expense_request_item",
@@ -29,8 +30,7 @@
   "reject_reason",
   "section_break_snwq",
   "amended_from",
-  "workflow_description",
-  "from_page"
+  "workflow_description"
  ],
  "fields": [
   {
@@ -171,6 +171,7 @@
    "no_copy": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "from_page",
    "fieldtype": "Data",
    "hidden": 1,
@@ -202,7 +203,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-29 20:53:34.510480",
+ "modified": "2024-10-29 22:02:55.465606",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Request",

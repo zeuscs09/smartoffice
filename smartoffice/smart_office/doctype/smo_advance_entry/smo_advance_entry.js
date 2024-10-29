@@ -17,7 +17,7 @@ frappe.ui.form.on("SMO Advance Entry", {
     );
   },
   refresh(frm) {
-    if (frm.doc.from_page) {
+    if (frm.doc.from_page || frappe.utils.get_query_params().from_page) {
       $(".navbar").css("visibility", "hidden");
       $(".menu-btn-group").hide();
       $(".page-icon-group").hide();

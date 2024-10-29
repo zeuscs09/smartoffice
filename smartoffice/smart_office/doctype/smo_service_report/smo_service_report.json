@@ -358,8 +358,10 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Naming Series",
-   "options": "SR-.YYYY.-.MM.-.####."
+   "options": "SR-.YYYY.-.MM.-.####.",
+   "print_hide": 1
   }
  ],
  "hide_toolbar": 1,
@@ -372,7 +374,7 @@
    "link_fieldname": "service_report"
   }
  ],
- "modified": "2024-10-29 21:30:50.111500",
+ "modified": "2024-10-29 21:44:39.722827",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Service Report",
