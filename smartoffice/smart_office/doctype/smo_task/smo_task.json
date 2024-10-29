@@ -240,8 +240,10 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Naming Series",
-   "options": "Task-.YYYY.-.MM.-.####."
+   "options": "Task-.YYYY.-.MM.-.####.",
+   "print_hide": 1
   }
  ],
  "hide_toolbar": 1,
@@ -253,7 +255,7 @@
    "link_fieldname": "task"
   }
  ],
- "modified": "2024-10-29 21:02:09.016182",
+ "modified": "2024-10-29 21:31:40.530492",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Task",
