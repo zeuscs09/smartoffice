@@ -42,33 +42,42 @@ frappe.ui.form.on("SMO Expense Request", {
     }
   },
   refresh(frm) {
-    if (frappe.utils.get_query_params().from) {
-      $(".navbar").hide();
+    if (frm.doc.from_page) {
+      $(".navbar").css('visibility', 'hidden');
       $(".menu-btn-group").hide();
       $(".page-icon-group").hide();
-      // $('.standard-actions').hide();
-      // $('.next-doc').hide();
-    }
-    if (frm.doc.from_page) {
-      $(".app-logo").hide();
-      $("#navbar-search").hide();
-      $("#navbar-breadcrumbs").hide();
-      // $('.menu-btn-group').hide();
-      //$('.page-icon-group').hide();
-    }
 
-    // เพิ่มการตรวจสอบว่าสามารถใช้ history.back() ได้หรือไม่
-    const canGoBack = window.history.length > 1;
-
-    frm.add_custom_button(__(canGoBack ? "Back" : "Close"), function () {
-      if (canGoBack) {
-        history.back();
-      } else {
-        // ดำเนินการเมื่อไม่สามารถย้อนกลับได้
-        // ตัวอย่างเช่น ปิดหน้าต่างหรือนำทางไปยังหน้าหลัก
+      frm.add_custom_button(__("Close"), function () {
         window.close();
-      }
-    });
+      });
+    }
+    // if (frappe.utils.get_query_params().from) {
+    //   $(".navbar").hide();
+    //   $(".menu-btn-group").hide();
+    //   $(".page-icon-group").hide();
+    //   // $('.standard-actions').hide();
+    //   // $('.next-doc').hide();
+    // }
+    // if (frm.doc.from_page) {
+    //   $(".app-logo").hide();
+    //   $("#navbar-search").hide();
+    //   $("#navbar-breadcrumbs").hide();
+    //   // $('.menu-btn-group').hide();
+    //   //$('.page-icon-group').hide();
+    // }
+
+    // // เพิ่มการตรวจสอบว่าสามารถใช้ history.back() ได้หรือไม่
+    // const canGoBack = window.history.length > 1;
+
+    // frm.add_custom_button(__(canGoBack ? "Back" : "Close"), function () {
+    //   if (canGoBack) {
+    //     history.back();
+    //   } else {
+    //     // ดำเนินการเมื่อไม่สามารถย้อนกลับได้
+    //     // ตัวอย่างเช่น ปิดหน้าต่างหรือนำทางไปยังหน้าหลัก
+    //     window.close();
+    //   }
+    // });
 
     if (frm.doc.expense_request_item) {
       let msg = [];

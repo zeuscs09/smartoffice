@@ -249,7 +249,7 @@ const toggleSort = (field: string) => {
 }
 
 const viewDocument = (docName: string) => {
-  location.href = `/app/smo-expense-request/${docName}?from=frontend`
+  window.open(`/app/smo-expense-request/${docName}?from_page=/intranet/expense-request`, '_blank')
 }
 
 const timelineModal = ref<HTMLDialogElement | null>(null)

@@ -213,7 +213,7 @@ const toggleSort = (field: string) => {
 }
 
 const viewDocument = (docName: string) => {
-  location.href = `/app/smo-expense-entry/${docName}?from=frontend`
+  window.open(`/app/smo-expense-entry/${docName}?from_page=/intranet/expense-entry`, '_blank')
 }
 
 const showTimeline = async (docName: string) => {
@@ -246,10 +246,6 @@ const showTimeline = async (docName: string) => {
 
   // แปลงมิลลิวินาทีเป็นวินาที
   const durationInSeconds = Math.floor(duration / 1000);
-
-  console.log('Creation:', creationDate);
-  console.log('Modified:', modifiedDate);
-  console.log('Duration (seconds):', durationInSeconds);
 
   timelineEvents.value.push({
     date: expenseRequest.doc.modified,

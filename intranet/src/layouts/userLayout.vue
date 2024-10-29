@@ -154,8 +154,8 @@
                         </label>
                         <ul tabindex="0"
                             class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-                            <li><a :href="`/app/user/${session.user}`">Profile</a></li>
-                            <li><a href="/app">Desk</a></li>
+                            <li><a :href="`/app/user/${session.user}?from_page=/intranet`" target="_blank">Profile</a></li>
+                            <!-- <li><a href="/app">Desk</a></li> -->
                             <li><a @click="handleLogout">Logout</a></li>
                         </ul>
                     </div>

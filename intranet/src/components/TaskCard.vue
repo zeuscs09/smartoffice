@@ -83,7 +83,6 @@ const viewTask = (todo: Todo): void => {
 }
 
 const createServiceReport = (todo: Todo): void => {
-  location.href = `/app/smo-service-report/new?from_todo=${todo.name}&from_page=/&task=${todo.reference_name}` 
-  
+  window.open(`/app/smo-service-report/new?from_todo=${todo.name}&from_page=/intranet/tasks&task=${todo.reference_name}&from=frontend`, '_blank')
 }
 </script>

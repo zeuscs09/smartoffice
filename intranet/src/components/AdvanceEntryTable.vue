@@ -211,7 +211,8 @@
   }
   
   const viewDocument = (docName: string) => {
-    location.href = `/app/smo-advance-entry/${docName}?from=frontend`
+    window.open(`/app/smo-advance-entry/${docName}?from_page=/intranet/advance-entry`, '_blank')
+
   }
   
   const showTimeline = async (docName: string) => {

@@ -238,6 +238,7 @@
    "allow_on_submit": 1,
    "fieldname": "reject_reason",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Reject Reason",
    "no_copy": 1
   }
@@ -246,7 +247,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-25 16:09:37.524365",
+ "modified": "2024-10-29 16:42:12.243799",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Entry",

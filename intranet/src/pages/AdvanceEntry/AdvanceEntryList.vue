@@ -170,7 +170,7 @@ const handlePageSizeChange = (newSize: number) => {
 
 
 const newAdvanceEntry = () => {
-    location.href = '/app/smo-advance-entry/new?from_page=frontend'
+    window.open('/app/smo-advance-entry/new?from_page=/intranet', '_blank')
 }
 
 const timelineModal = ref<HTMLDialogElement | null>(null)

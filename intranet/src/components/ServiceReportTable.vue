@@ -188,11 +188,11 @@ const toggleSort = (field: string) => {
 }
 
 const viewDocument = (docName: string) => {
-  location.href = `/app/smo-service-report/${docName}?from=frontend`
+  window.open(`/app/smo-service-report/${docName}?from_page=/intranet`, '_blank')
 }
 
 const openExpenseEntry = (docName: string) => {
-  window.open(`/app/smo-expense-entry/new?service_report=${docName}&from=frontend`, '_blank')
+  window.open(`/app/smo-expense-entry/new?service_report=${docName}&from_page=/intranet/service-report`, '_blank')
 }
 </script>
 

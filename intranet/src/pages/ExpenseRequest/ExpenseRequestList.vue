@@ -147,7 +147,8 @@ const handlePageSizeChange = (newSize: number) => {
     serviceReportStore.fetchAll(1)
 }
 const createExpenseRequest = () => {
-    location.href='/app/smo-expense-request/new?from_page=intranet'
+    window.open('/app/smo-expense-request/new?from_page=/intranet', '_blank')
+
 }
 
 const timelineModal = ref<HTMLDialogElement | null>(null)

@@ -152,11 +152,11 @@ const goBack = () => {
 
 const createServiceReport = () => {
     if (task.doc.name && todoId) {
-        location.href = `/app/smo-service-report/new?from_todo=${todoId}&from_page=${route.fullPath}&task=${task.doc.name}&from=frontend`
+        window.open(`/app/smo-service-report/new?from_todo=${todoId}&from_page=/intranet/tasks&task=${task.doc.name}&from=frontend`, '_blank')
     }
 }
 const copyTask = () => {
-    window.open(`/app/smo-task/${taskId}?action=copy&from_page=copy`, '_blank')
+    window.open(`/app/smo-task/${taskId}?action=copy&from_page=/intranet/tasks`, '_blank')
 }
 const getStatusBadgeClass = (status: string | undefined) => {
     const baseClasses = 'badge text-xs font-semibold px-2 py-1'

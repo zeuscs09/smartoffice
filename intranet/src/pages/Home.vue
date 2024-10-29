@@ -358,7 +358,8 @@ const toggleHeatmap = () => {
 }
 
 const newTask = () => {
-  window.location.href = '/app/smo-task/new?from=front_end&from_page=intranet'
+  // window.location.href = '/app/smo-task/new?from=front_end&from_page=intranet'
+  window.open('/app/smo-task/new?from=front_end&from_page=/intranet', '_blank');
 }
 
 

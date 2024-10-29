@@ -3,31 +3,34 @@
 
 frappe.ui.form.on("SMO Service Report", {
   refresh(frm) {
-    if(frappe.utils.get_query_params().from){
-      frappe.breadcrumbs.add("");
-      $('.navbar').hide();
-      $('.standard-actions').hide();
-      // $('.next-doc').hide();
-    }
-    if(frm.doc.from_page) {
-      frappe.breadcrumbs.add("");
-      $('.navbar').hide();
-      $('.menu-btn-group').hide();
-      $('.page-icon-group').hide();
+    // if(frappe.utils.get_query_params().from){
+    //   frappe.breadcrumbs.add("");
+    //   $('.navbar').hide();
+    //   $('.standard-actions').hide();
+    //   // $('.next-doc').hide();
+    // }
+    if (frm.doc.from_page) {
+      $(".navbar").css('visibility', 'hidden');
+      $(".menu-btn-group").hide();
+      $(".page-icon-group").hide();
+
+      frm.add_custom_button(__("Close"), function () {
+        window.close();
+      });
     }
     
     // เพิ่มการตรวจสอบว่าสามารถใช้ history.back() ได้หรือไม่
-    const canGoBack = window.history.length > 1;
+    // const canGoBack = window.history.length > 1;
     
-    frm.add_custom_button(__(canGoBack ? 'Back' : 'Close'), function() {
-      if (canGoBack) {
-        history.back();
-      } else {
-        // ดำเนินการเมื่อไม่สามารถย้อนกลับได้
-        // ตัวอย่างเช่น ปิดหน้าต่างหรือนำทางไปยังหน้าหลัก
-       window.close();
-      }
-    });
+    // frm.add_custom_button(__(canGoBack ? 'Back' : 'Close'), function() {
+    //   if (canGoBack) {
+    //     history.back();
+    //   } else {
+    //     // ดำเนินการเมื่อไม่สามารถย้อนกลับได้
+    //     // ตัวอย่างเช่น ปิดหน้าต่างหรือนำทางไปยังหน้าหลัก
+    //    window.close();
+    //   }
+    // });
 
     if (frm.doc.workflow_state && frm.doc.workflow_state !== "Draft") {
       frm.disable_form();
