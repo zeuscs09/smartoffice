@@ -311,10 +311,10 @@ const applyFiltersAndRefresh = () => {
 }
 
 const viewDocument = (docName: string) => {
-    location.href = `/app/smo-service-report/${docName}?from_page=service_report&from=front_end`
+    window.open(`/app/smo-service-report/${docName}?from_page=/intranet/service-report&from=front_end`, '_blank')
 }
 const newTask = () => {
-    window.location.href = '/app/smo-task/new?from=front_end&from_page=intranet'
+    window.open('/app/smo-task/new?from_page=/intranet', '_blank')
 }
 </script>
 

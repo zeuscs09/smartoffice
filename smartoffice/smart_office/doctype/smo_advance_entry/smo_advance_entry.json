@@ -110,6 +110,7 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "no_copy": 1,
    "options": "ADV-.YYYY.-.MM.-.####.",
@@ -203,7 +204,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-25 16:07:53.995115",
+ "modified": "2024-10-29 20:47:07.140573",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Advance Entry",

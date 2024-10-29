@@ -1,13 +1,14 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:SR-{YYYY}-{MM}-{#####}",
+ "autoname": "naming_series:",
  "creation": "2024-09-16 09:32:33.586778",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "workflow_state",
   "task_detail_section",
+  "naming_series",
   "task",
   "task_name",
   "job_type",
@@ -353,6 +354,12 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "contact_name"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "SR-.YYYY.-.MM.-.####."
   }
  ],
  "hide_toolbar": 1,
@@ -365,11 +372,11 @@
    "link_fieldname": "service_report"
   }
  ],
- "modified": "2024-10-24 18:02:13.351914",
+ "modified": "2024-10-29 20:57:21.511949",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Service Report",
- "naming_rule": "Expression",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

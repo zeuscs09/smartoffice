@@ -1,11 +1,12 @@
 {
  "actions": [],
- "autoname": "format:ER-{YYYY}-{MM}-{#####}",
+ "autoname": "naming_series:",
  "creation": "2024-09-16 22:25:12.155404",
  "description": "Expense Request",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "naming_series",
   "request_by",
   "year",
   "month",
@@ -187,17 +188,25 @@
    "fieldname": "column_break_qgsv",
    "fieldtype": "Column Break",
    "no_copy": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "ER-.YYYY.-.MM.-.####.",
+   "print_hide": 1
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-29 16:52:54.410161",
+ "modified": "2024-10-29 20:53:34.510480",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Request",
- "naming_rule": "Expression",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

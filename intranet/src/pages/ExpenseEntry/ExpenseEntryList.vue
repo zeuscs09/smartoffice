@@ -212,7 +212,8 @@ const showTimeline = async (docName: string) => {
 }
 
 const newExpenseEntry = () => {
-    location.href = '/app/smo-expense-entry/new?from=frontend'
+    window.open('/app/smo-expense-entry/new?from_page=/intranet', '_blank')
+
 }
 
 const timelineModal = ref<HTMLDialogElement | null>(null)
