@@ -56,7 +56,7 @@ def get_todos_with_smo_tasks(page=1, page_size=10, search=None, status=None, sta
     
     where_clause = " AND ".join(conditions)
     
-    sort_clause = f"ORDER BY {sort_field} {sort_order}" if sort_field and sort_order else "ORDER BY t.date ASC"
+    sort_clause = f"ORDER BY {sort_field} {sort_order}" if sort_field and sort_order else "ORDER BY t.creation desc"
     
     query = f"""
     SELECT 
@@ -77,6 +77,7 @@ def get_todos_with_smo_tasks(page=1, page_size=10, search=None, status=None, sta
         cs.site_name, 
         t.date due_date,s.assign_to ,
         s.customer_name,
+        t.creation,
         COUNT(*) OVER () as ttl_records
     FROM 
         `tabToDo` t

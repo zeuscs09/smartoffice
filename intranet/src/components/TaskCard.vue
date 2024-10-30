@@ -47,6 +47,10 @@
           <span class="mr-2 text-gray-500 text-lg">&#128100;</span>
           <span class="text-gray-700">{{ todo.contact_person }}</span>
         </div>
+        <div class="flex items-center">
+          <span class="mr-2 text-gray-500 text-lg">&#128190;</span>
+          <span class="text-gray-700">{{ formatDate(todo.creation) }}</span>
+        </div>
       </div>
     </div>
   </div>

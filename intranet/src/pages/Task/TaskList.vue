@@ -50,7 +50,7 @@
                 <table class="table table-zebra w-full">
                     <thead>
                         <tr>
-                            <th class="cursor-pointer" @click="sortBy('reference_name')">
+                            <th class="cursor-pointer w-3/12" @click="sortBy('reference_name')">
                                 No.
                                 <span class="ml-1">
                                     <span
@@ -112,7 +112,9 @@
                                     @click="router.push({ name: 'TaskDetail', params: { id: report.reference_name }, query: { todo: report.name } })">
                                     {{ report.reference_name }}
                                     <br/>
-                                    <span class="text-xs text-gray-500">{{ formatDate(report.due_date) }}</span>
+                                    <span class="text-xs text-gray-500 tooltip tooltip-bottom" data-tip="Due Date">&#128197; &nbsp;{{ formatDate(report.due_date) }}</span>
+                                    &nbsp;
+                                    <span class="text-xs text-gray-500 tooltip tooltip-bottom" data-tip="Created Date">&#128190; &nbsp;{{ formatDate(report.creation) }}</span>
                                 </span>
                             </td>
                             <td>
