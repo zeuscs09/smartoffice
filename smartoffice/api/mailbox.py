@@ -1,4 +1,5 @@
 import frappe
+
 @frappe.whitelist()
 def get_mail_box(page=1, page_size=10, search=None, status=None, start_date=None, end_date=None, sort_field=None, sort_order=None):
     user = frappe.session.user
@@ -6,7 +7,7 @@ def get_mail_box(page=1, page_size=10, search=None, status=None, start_date=None
     page = int(page)
     page_size = int(page_size)
     offset = (page - 1) * page_size
-
+    frappe.errprint(user)
     conditions = ["for_user = %s", "type = 'Alert'"]
     params = [user]
 
@@ -28,7 +29,7 @@ def get_mail_box(page=1, page_size=10, search=None, status=None, start_date=None
 
     sort_clause = f"ORDER BY {sort_field} {sort_order}" if sort_field and sort_order else "ORDER BY creation DESC"
 
-    query = f"""
+    query = """
     SELECT
         tnl.name,
         document_type,
@@ -44,15 +45,25 @@ def get_mail_box(page=1, page_size=10, search=None, status=None, start_date=None
         tu.full_name
     FROM
         `tabNotification Log` tnl left join
-	(select name,full_name from `tabUser`) tu on tnl.owner =tu.name
+        (select name,full_name from `tabUser`) tu on tnl.owner = tu.name
     WHERE
-        {" AND ".join(conditions)}
-    {sort_clause}
+        {}
+    {}
     LIMIT %s OFFSET %s
-    """
+    """.format(" AND ".join(conditions), sort_clause)
 
     params.extend([page_size, offset])
-
+    
+    # Debug: แสดง query และ parameters
+    # frappe.errprint("=== DEBUG SQL QUERY ===")
+    # frappe.errprint(f"Query: {query}")
+    # frappe.errprint(f"Parameters: {params}")
+    
+    # Debug: แสดง query ที่มีการแทนค่า parameters แล้ว
+    # final_query = frappe.db.mogrify(query, tuple(params))
+    # frappe.errprint(f"Final Query: {final_query}")
+    # frappe.errprint("=====================")
+    
     result = frappe.db.sql(query, tuple(params), as_dict=True)
 
     total_count = result[0].total_count if result else 0
@@ -72,6 +83,7 @@ def get_mail_box(page=1, page_size=10, search=None, status=None, start_date=None
         "page_size": page_size,
         "total_pages": -(-total_count // page_size)  # การหารปัดขึ้น
     }
+    # return query
 
 @frappe.whitelist()
 def update_notification_read(name):

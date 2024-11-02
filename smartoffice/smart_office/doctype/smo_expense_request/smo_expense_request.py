@@ -13,14 +13,27 @@ class SMOExpenseRequest(Document):
             self.set_approvers()
             self.reject_reason = None
     def on_submit(self):
+        """ไม่ได้ใช้เพราะใช้ Workflow"""
+        frappe.errprint("=== on_submit triggered ===")
         self.update_approver_status()
-        self.create_initial_notification()
+       
 
     def on_update(self):
-        self.update_approver_status()
-
+        """สำหรับ Draft state"""
+        frappe.errprint("=== on_update triggered ===")
+        # ไม่ต้องทำอะไรใน Draft
+        pass
+    
     def on_update_after_submit(self):
+        """จัดการทุก state changes จาก Workflow"""
+        frappe.errprint("=== on_update_after_submit triggered ===")
+        frappe.errprint(f"Current workflow state: {self.workflow_state}")
         self.update_approver_status()
+       
+        if self.workflow_state == "Rejected":
+            self.create_notification(self.owner, f"คำขอเบิกค่าใช้จ่ายของคุณถูกปฏิเสธ: {self.name}")
+        elif self.workflow_state == "Approved":
+            self.create_notification(self.owner, f"คำขอเบิกค่าใช้จ่ายของคุณได้รับการอนุมัติแล้ว: {self.name}")
 
     def on_cancel(self):
         if self.workflow_state != "Rejected":
@@ -132,18 +145,24 @@ class SMOExpenseRequest(Document):
         self.workflow_description = "ขั้นตอนการอนุมัติ:\n" + "\n".join(workflow_steps)
 
     def update_approver_status(self):
+        frappe.errprint(f"=== Start update_approver_status ===")
+        frappe.errprint(f"workflow_state: {self.workflow_state}")
+        frappe.errprint(f"docname: {self.name}")
+        
         current_user = frappe.session.user
         current_time = now_datetime()
         last_action_date = None
         current_approver = None
         next_approver = None
-  
+
+        frappe.errprint(f"Current user: {current_user}")
+        
         for approver in self.approvers:
             if approver.user_id == current_user:
+                frappe.errprint(f"Found current approver: {approver.user_id}")
                 approver.action_date = current_time
                 approver.status = "Rejected" if self.workflow_state == "Rejected" else "Approved"
                 
-                # คำนวณ duration
                 if approver.receive_date:
                     duration_seconds = time_diff_in_seconds(approver.action_date, approver.receive_date)
                     approver.duration = duration_seconds
@@ -151,22 +170,23 @@ class SMOExpenseRequest(Document):
                 approver.db_update()
                 last_action_date = current_time
                 current_approver = approver
-                # ดึง next_approver
                 
-            
         if current_approver:
             next_approver = next((a for a in self.approvers if a.approver_level > current_approver.approver_level and a.status == "Pending"), None)
         
         if not next_approver:
             next_approver = next((a for a in self.approvers if a.status == "Pending" and a.approver_level == 1), None)
-   
-        frappe.errprint(next_approver)
-        if next_approver:
-            next_approver.receive_date = current_time
-            next_approver.db_update()
-            self.create_notification(next_approver.user_id)
-            self.next_action = next_approver.user_id
-            self.db_update()
+            
+        if self.workflow_state != "Rejected":
+            if next_approver:
+                frappe.errprint(f"Found next approver: {next_approver.user_id}")
+                next_approver.receive_date = current_time
+                next_approver.db_update()
+                self.create_notification(next_approver.user_id)
+                self.next_action = next_approver.user_id
+                self.db_update()
+        
+        frappe.errprint(f"=== End update_approver_status ===")
 
     def start_approval_process(self):
         if self.workflow_state == "Pending Approval" and self.approvers:
@@ -188,10 +208,15 @@ class SMOExpenseRequest(Document):
         pending_approver = next((approver for approver in self.approvers if approver.status == "Pending"), None)
         return pending_approver.user_id if pending_approver else ""
 
-    def create_notification(self, user_id):
+    def create_notification(self, user_id, message=None):
+        frappe.errprint(f"=== Start create_notification ===")
+        frappe.errprint(f"Creating notification for user: {user_id}")
+        frappe.errprint(f"Document name: {self.name}")
+        frappe.errprint(f"Workflow state: {self.workflow_state}")
+        
         notification = frappe.get_doc({
-            "doctype": "Notification Log",
-            "subject": f"คำขอเบิกค่าใช้จ่ายใหม่รอการอนุมัติ: {self.name}",
+            "doctype": "Notification Log", 
+            "subject": message or f"คำขอเบิกค่าใช้จ่ายใหม่รอการอนุมัติ: {self.name}",
             "for_user": user_id,
             "type": "Alert",
             "document_type": self.doctype,
@@ -199,8 +224,4 @@ class SMOExpenseRequest(Document):
             "read": 0,
         })
         notification.insert(ignore_permissions=True)
-
-    def create_initial_notification(self):
-        first_approver = next((a for a in self.approvers if a.status == "Pending"), None)
-        if first_approver:
-            self.create_notification(first_approver.user_id)
+        frappe.errprint(f"=== End create_notification ===")

@@ -33,13 +33,18 @@ class SMOAdvanceEntry(Document):
 			self.reject_reason = None
 
 	def on_update(self):
-		"""Send notifications based on workflow state"""
+		"""สำหรับ Draft และ Approval Review"""
+		# frappe.logger().debug(f"on_update triggered: {self.workflow_state}")
 		if self.workflow_state == "Approval Review":
 			self.create_notification(
 				self.approver, 
 				f"มีคำขอเบิกเงินทดรองใหม่รอการอนุมัติ: {self.name}"
 			)
-		elif self.workflow_state == "Rejected":
+
+	def on_update_after_submit(self):
+		"""สำหรับการเปลี่ยนแปลงหลัง submit"""
+		# frappe.logger().debug(f"on_update_after_submit triggered: {self.workflow_state}")
+		if self.workflow_state == "Rejected":
 			reject_message = f"คำขอเบิกเงินทดรองของคุณถูกปฏิเสธ: {self.name}"
 			if self.reject_reason:
 				reject_message += f"\nเหตุผล: {self.reject_reason}"
@@ -48,6 +53,15 @@ class SMOAdvanceEntry(Document):
 			self.create_notification(
 				self.owner,
 				f"คำขอเบิกเงินทดรองของคุณได้รับการอนุมัติแล้ว: {self.name}"
+			)
+
+	def on_submit(self):
+		"""เมื่อ submit เอกสาร"""
+		frappe.logger().debug(f"on_submit triggered: {self.workflow_state}")
+		if self.workflow_state == "Approved":
+			self.create_notification(
+				self.owner,
+				f"คำขอเบิกเงินทดรองของคุณได้รับการอนุมัติและบันทึกแล้ว: {self.name}"
 			)
 
 	def create_notification(self, user_id, message):
@@ -63,12 +77,14 @@ class SMOAdvanceEntry(Document):
 		})
 		notification.insert(ignore_permissions=True)
 
-		# Send realtime notification
+		# ส่ง realtime notification พร้อมระบุ user
 		frappe.publish_realtime(
 			event='notification',
 			message={
 				'type': 'Alert',
-				'message': message
+				'message': message,
+				'user': user_id  # เพิ่ม user_id เข้าไปใน message
 			},
-			user=user_id
+			user=user_id  # ระบุ user ที่จะรับ notification
 		)
+		frappe.msgprint("Notification sent to user: " + user_id)

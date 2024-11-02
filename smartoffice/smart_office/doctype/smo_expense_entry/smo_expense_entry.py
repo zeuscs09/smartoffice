@@ -58,11 +58,25 @@ class SMOExpenseEntry(Document):
 			
 			
 	def on_update(self):
-		
+		"""สำหรับ Draft และ Approval Review"""
 		if self.workflow_state == "Approval Review":
-			self.create_notification(self.approver)
-		elif self.workflow_state == "Rejected":
-			self.create_notification(self.owner, "ค่าใช้จ่ายของคุณถูกปฏิเสธ")
+			self.create_notification(
+				self.approver, 
+				f"มีคำขอเบิกค่าใช้จ่ายใหม่รอการอนุมัติ: {self.name}"
+			)
+
+	def on_update_after_submit(self):
+		"""สำหรับการเปลี่ยนแปลงหลัง submit"""
+		if self.workflow_state == "Rejected":
+			reject_message = f"คำขอเบิกค่าใช้จ่ายของคุณถูกปฏิเสธ: {self.name}"
+			if self.reject_reason:
+				reject_message += f"\nเหตุผล: {self.reject_reason}"
+			self.create_notification(self.owner, reject_message)
+		elif self.workflow_state == "Approved":
+			self.create_notification(
+				self.owner,
+				f"คำขอเบิกค่าใช้จ่ายของคุณได้รับการอนุมัติแล้ว: {self.name}"
+			)
 
 	def set_approvers(self):
 		# เคลียร์ข้อมูลผู้อนุมัติเดิม
