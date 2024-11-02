@@ -237,9 +237,9 @@
   },
   {
    "allow_on_submit": 1,
+   "depends_on": "reject_reason",
    "fieldname": "reject_reason",
-   "fieldtype": "Data",
-   "hidden": 1,
+   "fieldtype": "Small Text",
    "label": "Reject Reason",
    "no_copy": 1
   },
@@ -256,7 +256,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-29 20:55:01.273230",
+ "modified": "2024-11-02 09:43:27.152856",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Entry",
@@ -289,15 +289,22 @@
    "write": 1
   },
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
+   "if_owner": 1,
    "read": 1,
    "report": 1,
    "role": "Employee",
-   "share": 1,
+   "select": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Employee",
+   "select": 1,
    "submit": 1,
    "write": 1
   },

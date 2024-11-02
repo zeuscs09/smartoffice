@@ -9,6 +9,7 @@ from frappe import _
 class SMOExpenseEntry(Document):
 
 	def validate(self):
+
 		
 		total_cost = 0
 		seen_expense = set()
@@ -28,6 +29,7 @@ class SMOExpenseEntry(Document):
 		# frappe.throw(self.workflow_state)
 		if self.workflow_state == "Draft":
 			self.set_approvers()
+			self.reject_reason = None
 			# self.check_service_report_status()
 		if self.workflow_state == "Approval Review":
 			self.check_service_report_status()
@@ -59,7 +61,9 @@ class SMOExpenseEntry(Document):
 		
 		if self.workflow_state == "Approval Review":
 			self.create_notification(self.approver)
-		
+		elif self.workflow_state == "Rejected":
+			self.create_notification(self.owner, "ค่าใช้จ่ายของคุณถูกปฏิเสธ")
+
 	def set_approvers(self):
 		# เคลียร์ข้อมูลผู้อนุมัติเดิม
 		employee = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, ["name", "grade", "reports_to"], as_dict=True)
@@ -111,11 +115,12 @@ class SMOExpenseEntry(Document):
 		if not self.approver:
 			frappe.throw("Not found approver")
 
-	def create_notification(self, user_id):
+	def create_notification(self, user_id, custom_message=None):
+		message = custom_message or f"มีคำขอเบิกค่าใช้จ่ายใหม่รอการอนุมัติ: {self.name}"
 		
 		notification = frappe.get_doc({
 			"doctype": "Notification Log",
-			"subject": f"มีคำขอเบิกค่าใช้จ่ายใหม่รอการอนุมัติ: {self.name}",
+			"subject": message,
 			"for_user": user_id,
 			"type": "Alert",
 			"document_type": self.doctype,
@@ -129,7 +134,7 @@ class SMOExpenseEntry(Document):
 			event='notification',
 			message={
 				'type': 'Alert',
-				'message': f"มีคำขอเบิกค่าใช้จ่ายใหม่รอการอนุมัติ: {self.name}"
+				'message': message
 			},
 			user=user_id
 		)
@@ -139,3 +144,7 @@ class SMOExpenseEntry(Document):
 			service_report_status = frappe.db.get_value("SMO Service Report", self.service_report, "workflow_state")
 			if service_report_status != "Customer Approve":
 				frappe.throw(_("ไม่สามารถส่งรายการค่าใช้จ่ายได้ เนื่องจากลูกค้ายังไม่อนุมัติ Service Report"))
+
+	def before_cancel(self):
+		if self.workflow_state != "Rejected":
+			frappe.throw("สามารถยกเลิกเอกสารได้เฉพาะกรณีที่ถูกปฏิเสธ (Rejected) เท่านั้น")

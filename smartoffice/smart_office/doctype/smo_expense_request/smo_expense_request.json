@@ -17,6 +17,7 @@
   "total",
   "get_data",
   "department",
+  "reject_reason",
   "section_break_erng",
   "from_page",
   "html_data",
@@ -27,7 +28,6 @@
   "approvers",
   "max_level",
   "next_action",
-  "reject_reason",
   "section_break_snwq",
   "amended_from",
   "workflow_description"
@@ -179,9 +179,9 @@
   },
   {
    "allow_on_submit": 1,
+   "depends_on": "reject_reason",
    "fieldname": "reject_reason",
-   "fieldtype": "Data",
-   "hidden": 1,
+   "fieldtype": "Small Text",
    "label": "Reject Reason",
    "no_copy": 1
   },
@@ -203,7 +203,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-29 22:02:55.465606",
+ "modified": "2024-11-02 09:51:54.741390",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Request",
@@ -237,6 +237,8 @@
    "write": 1
   },
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,

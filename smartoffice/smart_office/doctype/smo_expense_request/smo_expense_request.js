@@ -50,6 +50,11 @@ frappe.ui.form.on("SMO Expense Request", {
       frm.add_custom_button(__("Close"), function () {
         window.close();
       });
+      if (frm.doc.workflow_state !== "Rejected") {
+        frm.page.btn_secondary.hide();
+      } else {
+        frm.page.btn_secondary.show();
+      }
     }
     // if (frappe.utils.get_query_params().from) {
     //   $(".navbar").hide();

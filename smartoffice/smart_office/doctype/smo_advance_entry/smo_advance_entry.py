@@ -29,3 +29,46 @@ class SMOAdvanceEntry(Document):
 		for item in self.expense_item:
 			item.paid_by="เงินทดรอง"
 			item.ref_code=self.reference_code
+		if self.workflow_state == "Draft":
+			self.reject_reason = None
+
+	def on_update(self):
+		"""Send notifications based on workflow state"""
+		if self.workflow_state == "Approval Review":
+			self.create_notification(
+				self.approver, 
+				f"มีคำขอเบิกเงินทดรองใหม่รอการอนุมัติ: {self.name}"
+			)
+		elif self.workflow_state == "Rejected":
+			reject_message = f"คำขอเบิกเงินทดรองของคุณถูกปฏิเสธ: {self.name}"
+			if self.reject_reason:
+				reject_message += f"\nเหตุผล: {self.reject_reason}"
+			self.create_notification(self.owner, reject_message)
+		elif self.workflow_state == "Approved":
+			self.create_notification(
+				self.owner,
+				f"คำขอเบิกเงินทดรองของคุณได้รับการอนุมัติแล้ว: {self.name}"
+			)
+
+	def create_notification(self, user_id, message):
+		"""Create notification log entry and send realtime notification"""
+		notification = frappe.get_doc({
+			"doctype": "Notification Log",
+			"subject": message,
+			"for_user": user_id,
+			"type": "Alert",
+			"document_type": self.doctype,
+			"document_name": self.name,
+			"read": 0,
+		})
+		notification.insert(ignore_permissions=True)
+
+		# Send realtime notification
+		frappe.publish_realtime(
+			event='notification',
+			message={
+				'type': 'Alert',
+				'message': message
+			},
+			user=user_id
+		)

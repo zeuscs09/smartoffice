@@ -21,6 +21,7 @@
   "config_taxi_init",
   "config_taxi_rate",
   "total_amount",
+  "reject_reason",
   "expense_item_section",
   "reference_code",
   "expense_item",
@@ -29,7 +30,6 @@
   "section_break_fabx",
   "amended_from",
   "from_page",
-  "reject_reason",
   "html_summary"
  ],
  "fields": [
@@ -158,9 +158,9 @@
   },
   {
    "allow_on_submit": 1,
+   "depends_on": "reject_reason",
    "fieldname": "reject_reason",
    "fieldtype": "Small Text",
-   "hidden": 1,
    "label": "Reject Reason",
    "no_copy": 1
   },
@@ -204,7 +204,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-10-29 20:47:07.140573",
+ "modified": "2024-11-02 09:59:11.727348",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Advance Entry",

@@ -25,6 +25,11 @@ frappe.ui.form.on("SMO Advance Entry", {
       frm.add_custom_button(__("Close"), function () {
         window.close();
       });
+      if (frm.doc.workflow_state !== "Rejected") {
+        frm.page.btn_secondary.hide();
+      } else {
+        frm.page.btn_secondary.show();
+      }
     }
     // if (frappe.utils.get_query_params().from) {
     //   frappe.breadcrumbs.add("");
@@ -200,7 +205,7 @@ frappe.ui.form.on("SMO Advance Entry", {
       total += item.total_cost || 0;
     });
 
-    // เพิ่มแถวรวม
+    // เพิ่มแถวรวม และ reject reason (ถ้ามี)
     html += `
           <tr style="border-top: 2px solid #ddd; font-weight: bold;">
             <td style="padding: 10px;">รวมทั้งหมด</td>
@@ -211,6 +216,11 @@ frappe.ui.form.on("SMO Advance Entry", {
           </tr>
         </tbody>
       </table>
+      ${frm.doc.reject_reason ? `
+        <div style="margin-top: 20px; padding: 10px; background-color: #fff3f3; border: 1px solid #ffcdd2; border-radius: 5px;">
+          <p style="color: #d32f2f; margin: 0;"><strong>เหตุผลที่ปฏิเสธ:</strong> ${frm.doc.reject_reason}</p>
+        </div>
+      ` : ''}
     </div>
     `;
 

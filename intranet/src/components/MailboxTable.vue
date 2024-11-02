@@ -195,7 +195,7 @@ const sortedData = computed(() => {
 
 const viewDocument = async (link: string, mailId: string) => {
   await updateRead(mailId)
-  location.href = link
+  window.open(`${link}?from_page=mailbox`, '_blank')
 }
 
 // ฟังก์ชันสำหรับอัปเดตสถานะการอ่านและการเห็น

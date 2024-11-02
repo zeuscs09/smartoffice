@@ -27,15 +27,14 @@
   "holiday_description",
   "column_break_lqgd",
   "start_hour_input",
-  "column_break_bgve",
   "start_minute_input",
-  "column_break_cfaf",
-  "finish_date_input",
+  "column_break_bgve",
   "duration",
   "over_night",
+  "column_break_cfaf",
+  "finish_date_input",
   "column_break_jidf",
   "finish_hour_input",
-  "column_break_qrnv",
   "finish_minute_input",
   "section_break_zguh",
   "job_start_on",
@@ -206,8 +205,7 @@
   {
    "fieldname": "duration",
    "fieldtype": "Duration",
-   "label": "Duration",
-   "read_only": 1
+   "label": "Duration"
   },
   {
    "default": "0",
@@ -247,6 +245,7 @@
    "fieldname": "finish_date_input",
    "fieldtype": "Date",
    "label": "Finish Date",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -254,6 +253,7 @@
    "fieldtype": "Select",
    "label": "Hour",
    "options": "00\n01\n02\n03\n04\n05\n06\n07\n08\n09\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -261,6 +261,7 @@
    "fieldtype": "Select",
    "label": "Minute",
    "options": "00\n10\n20\n30\n40\n50",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -288,10 +289,6 @@
   },
   {
    "fieldname": "column_break_cfaf",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_qrnv",
    "fieldtype": "Column Break"
   },
   {
@@ -340,11 +337,13 @@
   {
    "fieldname": "from_page",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "from_page"
   },
   {
    "fieldname": "from_todo",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "from_todo",
    "options": "ToDo"
   },
@@ -374,7 +373,7 @@
    "link_fieldname": "service_report"
   }
  ],
- "modified": "2024-10-29 21:44:39.722827",
+ "modified": "2024-11-02 08:59:40.409013",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Service Report",

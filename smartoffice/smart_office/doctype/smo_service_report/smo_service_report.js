@@ -27,13 +27,22 @@ frappe.ui.form.on("SMO Service Report", {
     //     history.back();
     //   } else {
     //     // ดำเนินการเมื่อไม่สามารถย้อนกลับได้
-    //     // ตัวอย่างเช่น ปิดหน้าต่างหรือนำทางไปยังหน้าหลัก
+    //     // ัวอย่างเช่น ปิดหน้าต่างหรือนำทางไปยังหน้าหลัก
     //    window.close();
     //   }
     // });
 
     if (frm.doc.workflow_state && frm.doc.workflow_state !== "Draft") {
       frm.disable_form();
+    }
+
+    if (frm.doc.from_todo && !frm.doc.start_date_input) {
+      frappe.db.get_value('ToDo', frm.doc.from_todo, 'date')
+        .then(r => {
+          if (r.message && r.message.date) {
+            frm.set_value('start_date_input', r.message.date);
+          }
+        });
     }
   },
   before_save: function(frm) {
@@ -112,11 +121,64 @@ frappe.ui.form.on("SMO Service Report", {
   },
   start_date_input: function(frm) {
     if(frm.doc.start_date_input) {
-        
-        frm.set_value("finish_date_input", frm.doc.start_date_input);
+      frm.set_value("finish_date_input", frm.doc.start_date_input);
+      recalculateEndTime(frm);
     }
-}
+  },
+  start_hour_input: function(frm) {
+    recalculateEndTime(frm);
+  },
+  start_minute_input: function(frm) {
+    recalculateEndTime(frm);
+  },
+  duration: function(frm) {
+    recalculateEndTime(frm);
+  },
 });
+
+// แยกฟังก์ชันคำนวณเวลาออกมาเพื่อเรียกใช้ซ้ำ
+function recalculateEndTime(frm) {
+  if (frm.doc.start_date_input && frm.doc.start_hour_input && 
+      frm.doc.start_minute_input && frm.doc.duration) {
+    // แปลงเวลาเริ่มต้นเป็น Date object และตั้งค่า timezone เป็น UTC
+    let startDateTime = new Date(frm.doc.start_date_input + 'T00:00:00Z');
+    startDateTime.setUTCHours(parseInt(frm.doc.start_hour_input));
+    startDateTime.setUTCMinutes(parseInt(frm.doc.start_minute_input));
+
+    // แปลงวินาทีเป็นชั่วโมงและนาที
+    let durationHours = Math.floor(frm.doc.duration / 3600);
+    let durationMinutes = Math.floor((frm.doc.duration % 3600) / 60);
+    
+    // คำนวณเวลาสิ้นสุดโดยเพิ่มจำนวนมิลลิวินาที
+    let endDateTime = new Date(startDateTime.getTime() + 
+      (durationHours * 60 * 60 * 1000) + 
+      (durationMinutes * 60 * 1000));
+
+    // แปลงวันที่เป็น YYYY-MM-DD format
+    let endDate = endDateTime.toISOString().split('T')[0];
+    frm.set_value('finish_date_input', endDate);
+
+    // set ค่าชั่วโมงสิ้นสุด
+    let endHour = endDateTime.getUTCHours().toString().padStart(2, '0');
+    frm.set_value('finish_hour_input', endHour);
+
+    // set ค่านาทีสิ้นสุด
+    let endMinute = endDateTime.getUTCMinutes();
+    let validMinutes = [0, 10, 20, 30, 40, 50];
+    let closestMinute = validMinutes.reduce((prev, curr) => {
+      return (Math.abs(curr - endMinute) < Math.abs(prev - endMinute) ? curr : prev);
+    });
+    frm.set_value('finish_minute_input', closestMinute.toString().padStart(2, '0'));
+
+    // เช็คว่าเป็นการทำงานข้ามคืนหรือไม่
+    if (startDateTime.getUTCDate() !== endDateTime.getUTCDate()) {
+      frm.set_value('over_night', 1);
+    } else {
+      frm.set_value('over_night', 0);
+    }
+  }
+}
+
 frappe.ui.form.on("SMO Working Team", {
 
   view_task(frm,cdt, cdn) {

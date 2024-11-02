@@ -36,6 +36,7 @@
                 <select class="select select-bordered w-full max-w-xs" v-model="statusFilter"
                     @change="handleFilter">
                     <option value="">All Status</option>
+                    
                     <option value="Open">Open</option>
                     <option value="Closed">Closed</option>
                     <option value="Cancelled">Cancelled</option>
@@ -110,10 +111,11 @@
                             <td>
                                 <span class="cursor-pointer"
                                     @click="router.push({ name: 'TaskDetail', params: { id: report.reference_name }, query: { todo: report.name } })">
-                                    {{ report.reference_name }}
+                                   
+                                    <span class="tooltip tooltip-bottom" data-tip="Due Date">{{ report.reference_name }} &nbsp;{{ formatDate(report.due_date) }}</span>
+                                  
                                     <br/>
-                                    <span class="text-xs text-gray-500 tooltip tooltip-bottom" data-tip="Due Date">&#128197; &nbsp;{{ formatDate(report.due_date) }}</span>
-                                    &nbsp;
+                                   
                                     <span class="text-xs text-gray-500 tooltip tooltip-bottom" data-tip="Created Date">&#128190; &nbsp;{{ formatDate(report.creation) }}</span>
                                 </span>
                             </td>

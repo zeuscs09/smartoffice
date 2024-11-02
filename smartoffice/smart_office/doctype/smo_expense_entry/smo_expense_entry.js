@@ -3,17 +3,20 @@
 
 frappe.ui.form.on("SMO Expense Entry", {
   onload(frm) {
-    frm.set_query("input_expense_types", "expense_item", function (doc, cdt, cdn) {
+    frm.set_query(
+      "input_expense_types",
+      "expense_item",
+      function (doc, cdt, cdn) {
         console.log(frm.customer);
         return {
           filters: {
-            for_expense:1
+            for_expense: 1,
           },
         };
-      });
+      }
+    );
   },
   refresh(frm) {
-
     if (frm.doc.from_page || frappe.utils.get_query_params().from_page) {
       $(".navbar").css("visibility", "hidden");
       $(".menu-btn-group").hide();
@@ -22,6 +25,12 @@ frappe.ui.form.on("SMO Expense Entry", {
       frm.add_custom_button(__("Close"), function () {
         window.close();
       });
+
+      if (frm.doc.workflow_state !== "Rejected") {
+        frm.page.btn_secondary.hide();
+      } else {
+        frm.page.btn_secondary.show();
+      }
     }
     // if(frappe.utils.get_query_params().from){
     //   $('.navbar').hide();
@@ -36,10 +45,10 @@ frappe.ui.form.on("SMO Expense Entry", {
     //   $('.menu-btn-group').hide();
     //   $('.page-icon-group').hide();
     // }
-    
+
     // // เพิ่มการตรวจสอบว่าสามารถใช้ history.back() ได้หรือไม่
     // const canGoBack = window.history.length > 1;
-    
+
     // frm.add_custom_button(__(canGoBack ? 'Back' : 'Close'), function() {
     //   if (canGoBack) {
     //     history.back();
@@ -54,7 +63,6 @@ frappe.ui.form.on("SMO Expense Entry", {
       method: "smartoffice.api.setting.get_taxi", // API ที่สร้างไว้
       args: {},
       callback: function (r) {
-
         if (r.message) {
           let config = r.message;
           if (frm.doc.config_taxi_rate == 0) {
@@ -104,50 +112,49 @@ frappe.ui.form.on("SMO Expense Entry", {
       frm.set_value("ot_rate", 0);
     }
   },
-  before_workflow_action: function(frm) {
+  before_workflow_action: function (frm) {
     if (frm.selected_workflow_action === "Reject") {
       // ยกเลิก default action
       return new Promise(function (resolve, reject) {
         // This will cancel save
-          // frappe.validated = false;
-          // reject();
-        
+        // frappe.validated = false;
+        // reject();
+
         // This will continue to save
-          // var negative = 'frappe.validated = false';
-          // resolve(negative);
-  
+        // var negative = 'frappe.validated = false';
+        // resolve(negative);
+
         // If you comment all of it
         // Save button will be disabled (like it still processing)
         frappe.dom.unfreeze();
-        frappe.prompt([
-          {
-            label: 'เหตุผลในการ Reject',
-            fieldname: 'reject_reason',
-            fieldtype: 'Small Text',
-            reqd: 1
-          }
-        ],
-        function(values){
-          // เมื่อได้เหตุผลแล้ว
-          frm.set_value('reject_reason', values.reject_reason);
-          frm.save("Update", () => {
-            var negative = "frappe.validated = false";
-            resolve(negative);
-          });
-          // ดำเนินการ workflow action ต่อ
-          // frm.selected_workflow_action = "Reject";
-          // //frm.save('Update');
-          // console.log(frm.doc);
+        frappe.prompt(
+          [
+            {
+              label: "เหตุผลในการ Reject",
+              fieldname: "reject_reason",
+              fieldtype: "Small Text",
+              reqd: 1,
+            },
+          ],
+          function (values) {
+            // เมื่อได้เหตุผลแล้ว
+            frm.set_value("reject_reason", values.reject_reason);
+            frm.save("Update", () => {
+              var negative = "frappe.validated = false";
+              resolve(negative);
+            });
+            // ดำเนินการ workflow action ต่อ
+            // frm.selected_workflow_action = "Reject";
+            // //frm.save('Update');
+            // console.log(frm.doc);
 
-          // var negative = 'frappe.validated = false';
-          // resolve(negative);
-        },
-        __('ระบุเหตุผลในการ Reject'),
-        __('ยืนยัน')
+            // var negative = 'frappe.validated = false';
+            // resolve(negative);
+          },
+          __("ระบุเหตุผลในการ Reject"),
+          __("ยืนยัน")
         );
-      })
-     
-      
+      });
     }
   },
 });
@@ -207,8 +214,8 @@ frappe.ui.form.on("SMO Expense Item", {
   // },
   input_expense_types: function (frm, cdt, cdn) {
     let row = locals[cdt][cdn];
-    row.expense_type=row.input_expense_types;
-  
+    row.expense_type = row.input_expense_types;
+
     if (row.rate_per_km == 0) {
       let taxi_rate = frm.get_field("config_taxi_rate").value;
       let taxi_initial = frm.get_field("config_taxi_init").value;
@@ -231,8 +238,8 @@ frappe.ui.form.on("SMO Expense Item", {
     }
     if (row.expense_type == "EP009") {
       row.total_cost = cur_frm.doc.over_night_rate;
-      row.from_date=cur_frm.doc.service_date
-      row.to_date=cur_frm.doc.finish_date
+      row.from_date = cur_frm.doc.service_date;
+      row.to_date = cur_frm.doc.finish_date;
     }
     frm.trigger("cal_total");
     frm.refresh_field("expense_item");

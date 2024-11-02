@@ -7,7 +7,7 @@
                 <div class="bg-gray-100 p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center">
                     <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 mb-4 sm:mb-0">
                         <h1 class="text-xl sm:text-2xl font-bold text-gray-800">
-                            {{ task.doc.task_name }}
+                           {{ task.doc.name }} &nbsp; {{ task.doc.task_name }}
                             <span v-if="todo?.doc?.status">
                                 <span :class="getStatusBadgeClass(todo?.doc?.status)" class="ml-2">
                                     {{ todo.doc?.status || 'กำลังโหลด...' }}
@@ -41,13 +41,15 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-4">
                             <h2 class="text-xl font-semibold text-gray-700 mb-3">ข้อมูลงาน</h2>
-                            <InfoItem label="ประเภทงาน" :value="task.doc.job_type" />
+                     
 
+                            <InfoItem label="ประเภทงาน" :value="task.doc.job_type" />
+                            <InfoItem label="วันที่ต้องเข้าทำงาน" :value="formatDate(todo?.doc?.date)" />
                             <InfoItem label="สถานะ" :value="todo ? todo?.doc?.status : ''" />
                             <InfoItem label="ความสำคัญ" :value="task.doc.priority" />
                             <InfoItem label="ช่วงเวลา" :value="task.doc.period" />
-                            <InfoItem label="วันที่เริ่ม" :value="formatDate(task.doc.start_date)" />
-                            <InfoItem label="วันที่สิ้นสุด" :value="formatDate(task.doc.finish_date)" />
+                            <InfoItem label="วันที่ (plan)" :value="formatDate(task.doc.start_date) + ' - ' + formatDate(task.doc.finish_date)" />
+                         
                         </div>
 
                         <div class="space-y-4">

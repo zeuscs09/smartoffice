@@ -11,7 +11,7 @@ class SMOExpenseRequest(Document):
     def before_save(self):
         if self.workflow_state == "Draft":
             self.set_approvers()
-
+            self.reject_reason = None
     def on_submit(self):
         self.update_approver_status()
         self.create_initial_notification()
@@ -23,6 +23,8 @@ class SMOExpenseRequest(Document):
         self.update_approver_status()
 
     def on_cancel(self):
+        if self.workflow_state != "Rejected":
+            frappe.throw("สามารถยกเลิกเอกสารได้เฉพาะกรณีที่ถูกปฏิเสธ (Rejected) เท่านั้น")
         for item in self.expense_request_item:
             frappe.db.set_value("SMO Expense Entry", item.expense, "is_request", 0)
 

@@ -8,7 +8,7 @@ def get_advance_entry_by_user(page=1, page_size=10, search=None, status=None, st
     page_size = int(page_size)
     offset = (page - 1) * page_size
     
-    conditions = ["ae.owner = %s or ae.approver like %s"]
+    conditions = ["(ae.owner = %s or ae.approver like %s)"]
     values = [user, f"%{user}%"]
     
     if search:
@@ -16,7 +16,7 @@ def get_advance_entry_by_user(page=1, page_size=10, search=None, status=None, st
         values.extend([f"%{search}%"] * 4)
     
     if status:
-        conditions.append("ae.docstatus = %s")
+        conditions.append("ae.workflow_state = %s")
         values.append(status)
     
     if start_date:
@@ -55,8 +55,13 @@ def get_advance_entry_by_user(page=1, page_size=10, search=None, status=None, st
     {sort_clause}
     LIMIT %s OFFSET %s
     """
-   
+    
     values.extend([page_size, offset])
+    
+    # print("=== DEBUG SQL QUERY ===")
+    # final_query = frappe.db.mogrify(query, tuple(values))
+    # frappe.errprint(f"Final Query: {final_query}")
+    # print("=====================")
     
     result = frappe.db.sql(query, tuple(values), as_dict=True)
     

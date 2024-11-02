@@ -26,6 +26,7 @@
                 <select class="select select-bordered w-full max-w-xs" v-model="statusFilter"
                     @change="handleFilter">
                     <option value="">All Status</option>
+                    <option value="Draft">Draft</option>
                     <option value="Customer Review">Customer Review</option>
                     <option value="Customer Approve">Customer Approve</option>
                 </select>
