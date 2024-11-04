@@ -7,11 +7,13 @@ from frappe.utils import now_datetime, time_diff_in_seconds, format_duration as 
 
 
 class SMOExpenseRequest(Document):
+   
     # Lifecycle Methods
     def before_save(self):
         if self.workflow_state == "Draft":
             self.set_approvers()
             self.reject_reason = None
+            self.approve_amount=self.total
     def on_submit(self):
         """ไม่ได้ใช้เพราะใช้ Workflow"""
         frappe.errprint("=== on_submit triggered ===")

@@ -41,10 +41,12 @@ frappe.ui.form.on("SMO Task", {
     }
   },
   
-  start_date(frm) {
-    if (!frm.doc.finish_date) {
-      frm.set_value('finish_date', frm.doc.start_date);
-    }
+  start_date: function(frm) {
+    validateDates(frm);
+  },
+  
+  finish_date: function(frm) {
+    validateDates(frm);
   },
   
   period: function(frm) {
@@ -79,6 +81,19 @@ frappe.ui.form.on("SMO Task", {
     }
   },
 });
+
+function validateDates(frm) {
+  if (frm.doc.start_date && frm.doc.finish_date) {
+    if (frm.doc.start_date > frm.doc.finish_date) {
+      frappe.msgprint({
+        title: 'ข้อผิดพลาด',
+        indicator: 'red',
+        message: 'วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด'
+      });
+      frm.set_value('finish_date', '');
+    }
+  }
+}
 
 frappe.ui.form.on("SMO Working Team", {
   user(frm, cdt, cdn) {

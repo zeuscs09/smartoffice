@@ -143,18 +143,17 @@
    "label": "Customer Name"
   },
   {
-   "fetch_from": "contact_person.mobile_no",
    "fetch_if_empty": 1,
    "fieldname": "contact_mobile",
    "fieldtype": "Data",
    "label": "Contact Mobile"
   },
   {
-   "fetch_from": "contact_person.email_id",
    "fetch_if_empty": 1,
    "fieldname": "contact_email",
    "fieldtype": "Data",
-   "label": "Contact Email"
+   "label": "Contact Email",
+   "reqd": 1
   },
   {
    "depends_on": "customer",
@@ -189,12 +188,12 @@
    "label": "Assign To"
   },
   {
-   "fetch_from": "customer.customer_primary_contact",
    "fetch_if_empty": 1,
    "fieldname": "contact_person",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "label": "Contact Person",
-   "options": "Contact"
+   "options": "Contact",
+   "reqd": 1
   },
   {
    "fieldname": "title",
@@ -255,7 +254,7 @@
    "link_fieldname": "task"
   }
  ],
- "modified": "2024-10-29 21:31:40.530492",
+ "modified": "2024-11-04 23:31:44.722563",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Task",

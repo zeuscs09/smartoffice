@@ -71,12 +71,35 @@ def get_team_workload(month, year):
     employee = frappe.get_value("Employee", {"user_id": user}, "name")
     
     if employee:
-        subordinates = get_subordinates(employee)
-        subordinates.append(employee)  # รวมตัวเองด้วย
+        # ดึง reports_to ของ user ที่ login เข้ามา
+        reports_to = frappe.get_value("Employee", employee, "reports_to")
         
-        employees = frappe.get_all("Employee", 
-                                   filters={"name": ["in", subordinates]},
-                                   fields=["name", "employee_name", "department as team","user_id"])
+        # ดึงลูกน้องทั้งหมดของ user ที่ login
+        subordinates = get_subordinates(employee)
+        
+        if reports_to:
+            # ดึงรายชื่อพนักงานที่มี reports_to เดียวกัน (เพื่อนร่วมทีม)
+            team_members = frappe.get_all("Employee",
+                filters={"reports_to": reports_to},
+                fields=["name", "employee_name", "department as team", "user_id"])
+            
+            # ดึงรายชื่อลูกน้องทั้งหมด
+            subordinate_members = frappe.get_all("Employee",
+                filters={"name": ["in", subordinates]},
+                fields=["name", "employee_name", "department as team", "user_id"])
+            
+            # รวมรายชื่อทั้งหมด (เพื่อนร่วมทีม + ลูกน้อง + ตัวเอง)
+            all_members = team_members + subordinate_members
+            # ลบรายชื่อที่ซ้ำกัน โดยใช้ name เป็น key
+            unique_members = {member.name: member for member in all_members}.values()
+            employees = list(unique_members)
+        else:
+            # กรณีไม่มี reports_to (อาจเป็นหัวหน้าสูงสุด)
+            subordinates.append(employee)  # รวมตัวเองด้วย
+            
+            employees = frappe.get_all("Employee",
+                filters={"name": ["in", subordinates]},
+                fields=["name", "employee_name", "department as team", "user_id"])
 
         # ตรวจสอบว่ามีพนักงานหรือไม่
         if employees:

@@ -34,58 +34,80 @@ def get_todos_with_smo_tasks(page=1, page_size=10, search=None, status=None, sta
     page_size = int(page_size)
     offset = (page - 1) * page_size
     
-    conditions = ["t.allocated_to = %s", "t.reference_type = 'SMO Task'"]
-    values = [user]
+    # เริ่มด้วย base conditions และ values
+    conditions = []
+    values = []
     
+    # เงื่อนไขหลัก
+    conditions.append("""
+        (
+            (t.allocated_to = %s AND t.reference_type = 'SMO Task')
+            OR 
+            (s.docstatus = 0 AND s.owner = %s)
+        )
+    """)
+    values.extend([user, user])
+    
+    # เงื่อนไขการค้นหา
     if search:
-        conditions.append("(t.name LIKE %s OR t.description LIKE %s OR s.project_name LIKE %s OR cs.site_name LIKE %s)")
+        conditions.append("""
+            (
+                COALESCE(t.name, '') LIKE %s 
+                OR COALESCE(t.description, '') LIKE %s 
+                OR COALESCE(s.project_name, '') LIKE %s 
+                OR COALESCE(cs.site_name, '') LIKE %s
+            )
+        """)
         values.extend([f"%{search}%"] * 4)
     
+    # เงื่อนไขสถานะ
     if status:
-        conditions.append("t.status = %s")
-        values.append(status)
-   
+        if status.lower() == 'draft':
+            conditions.append("(s.docstatus = 0)")
+        else:
+            conditions.append("(t.status = %s)")
+            values.append(status)
     
+    # เงื่อนไขวันที่
     if start_date:
-        conditions.append("t.date >= %s")
+        conditions.append("COALESCE(t.date, s.start_date) >= %s")
         values.append(start_date)
     
     if end_date:
-        conditions.append("t.date <= %s")
+        conditions.append("COALESCE(t.date, s.start_date) <= %s")
         values.append(end_date)
     
     where_clause = " AND ".join(conditions)
-    
-    sort_clause = f"ORDER BY {sort_field} {sort_order}" if sort_field and sort_order else "ORDER BY t.creation desc"
+    sort_clause = f"ORDER BY {sort_field} {sort_order}" if sort_field and sort_order else "ORDER BY COALESCE(t.creation, s.creation) DESC"
     
     query = f"""
     SELECT 
-        t.name,
-        t.description, 
-        t.status, 
-        t.allocated_to, 
-        t.reference_name,
-        s.project_name project, 
+        COALESCE(t.name, CONCAT('DRAFT-', s.name)) as name,
+        COALESCE(t.description, s.task_name) as description, 
+        COALESCE(t.status, 'Draft') as status, 
+        COALESCE(t.allocated_to, s.assign_to) as allocated_to, 
+        s.name as reference_name,
+        s.project_name as project, 
         s.site, 
-        s.contact_name contact_person, 
+        s.contact_name as contact_person, 
         s.contact_mobile as contact_phone, 
         s.contact_email,
         s.start_date, 
         s.finish_date, 
         s.job_type, 
-        t.priority,
+        COALESCE(t.priority, 'Medium') as priority,
         cs.site_name, 
-        t.date due_date,s.assign_to ,
+        COALESCE(t.date, s.start_date) as due_date,
+        s.assign_to,
         s.customer_name,
-        t.creation,
+        COALESCE(t.creation, s.creation) as creation,
         COUNT(*) OVER () as ttl_records
     FROM 
-        `tabToDo` t
-    Inner JOIN 
-        `tabSMO Task` s ON t.reference_name = s.name
+        `tabSMO Task` s
+    LEFT JOIN 
+        `tabToDo` t ON t.reference_name = s.name AND t.reference_type = 'SMO Task'
     LEFT JOIN
         `tabSMO Customer Site` cs ON s.site = cs.name
-   
     WHERE 
         {where_clause}
     {sort_clause}
@@ -94,7 +116,16 @@ def get_todos_with_smo_tasks(page=1, page_size=10, search=None, status=None, sta
     
     values.extend([page_size, offset])
     
+    # Debug prints
+    frappe.errprint("Query:")
+    frappe.errprint(query)
+    frappe.errprint("Values:")
+    frappe.errprint(values)
+    
     result = frappe.db.sql(query, tuple(values), as_dict=True)
+    
+    frappe.errprint("Result:")
+    frappe.errprint(result)
     
     total_count = result[0].ttl_records if result else 0
     
@@ -106,6 +137,6 @@ def get_todos_with_smo_tasks(page=1, page_size=10, search=None, status=None, sta
         "total": total_count,
         "page": page,
         "page_size": page_size,
-        "total_pages": -(-total_count // page_size)  # การหารปัดขึ้น
+        "total_pages": -(-total_count // page_size)
     }
 

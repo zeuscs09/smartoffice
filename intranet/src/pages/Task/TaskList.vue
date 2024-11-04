@@ -36,7 +36,7 @@
                 <select class="select select-bordered w-full max-w-xs" v-model="statusFilter"
                     @change="handleFilter">
                     <option value="">All Status</option>
-                    
+                    <option value="Draft">Draft</option>
                     <option value="Open">Open</option>
                     <option value="Closed">Closed</option>
                     <option value="Cancelled">Cancelled</option>
@@ -130,7 +130,8 @@
                                 <span class="badge badge-sm" :class="{
                                     'badge-primary': report.status === 'Open',
                                     'badge-success': report.status === 'Closed',
-                                    'badge-error': report.status === 'Cancelled'
+                                    'badge-error': report.status === 'Cancelled',
+                                    'badge-warning': report.status === 'Draft'
                                 }">{{ report.status }}</span>
                             </td>
                             <td>{{ report.customer_name }}
