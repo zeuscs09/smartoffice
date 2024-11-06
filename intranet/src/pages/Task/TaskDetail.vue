@@ -134,7 +134,9 @@ const todo = createDocumentResource({
     name: todoId,
     auto: true,
 })
-
+window.refresh_table = () => {
+    window.location.reload()
+}
 // ใช้ computed property เพื่อตรวจสอบสถานะการโหลด
 const isLoading = computed(() => task.loading || (todoId && todo.loading))
 

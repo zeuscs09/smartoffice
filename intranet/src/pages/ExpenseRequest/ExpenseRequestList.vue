@@ -148,7 +148,6 @@ const handlePageSizeChange = (newSize: number) => {
 }
 const createExpenseRequest = () => {
     window.open('/app/smo-expense-request/new?from_page=/intranet', '_blank')
-
 }
 
 const timelineModal = ref<HTMLDialogElement | null>(null)
@@ -156,6 +155,11 @@ const timelineModal = ref<HTMLDialogElement | null>(null)
 const timelineEvents = ref([
    
 ])
+
+// เพิ่มฟังก์ชัน refresh_table ให้กับ window object
+window.refresh_table = () => {
+    serviceReportStore.fetchAll(serviceReportStore.currentPage)
+}
 
 </script>
 

@@ -280,6 +280,9 @@ const handleSearch = () => {
     serviceReportStore.searchQuery = searchQuery.value
     serviceReportStore.fetchAll(1)
 }
+window.refresh_table = () => {
+    serviceReportStore.fetchAll(serviceReportStore.currentPage)
+}
 
 const handleFilter = () => {
     serviceReportStore.statusFilter = statusFilter.value

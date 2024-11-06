@@ -58,7 +58,10 @@
           </tr>
         </tbody>
         <tbody v-else-if="data.length > 0">
-          <tr v-for="report in data" :key="report.name">
+          <tr v-for="report in data" :key="report.name" :class="{
+            'read-row': report.read,
+            'unread-row': !report.read
+          }">
             <td>
               <div class="cursor-pointer" @click="viewDocument(report.link, report.name)">
                 {{ report.document_name }}
@@ -236,5 +239,49 @@ const updateRead = async (mailId: string) => {
 
 .card-title {
   @apply text-base mb-1;
+}
+
+/* ปรับ style ให้ override daisy UI */
+table.table tbody tr.read-row {
+  background-color: #f8f8f8 !important;
+  opacity: 0.85;
+  color: #666;
+  transform: scale(1);
+  transition: all 0.2s ease-in-out;
+}
+
+table.table tbody tr.read-row:nth-child(even) {
+  background-color: #f3f3f3 !important;
+}
+
+table.table tbody tr.unread-row {
+  background-color: #ffffff !important;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  font-weight: 500;
+  transform: translateY(-1px) scale(1.002);
+  transition: all 0.2s ease-in-out;
+  z-index: 1;
+}
+
+table.table tbody tr.unread-row:nth-child(even) {
+  background-color: #fafafa !important;
+}
+
+/* hover effects */
+table.table tbody tr.read-row:hover {
+  background-color: #f0f0f0 !important;
+  transform: scale(1.001);
+}
+
+table.table tbody tr.unread-row:hover {
+  background-color: #f5f5f5 !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px) scale(1.003);
+}
+
+/* เพิ่ม border เพื่อแยกแถวให้ชัดเจนขึ้น */
+table.table tbody tr {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 </style>

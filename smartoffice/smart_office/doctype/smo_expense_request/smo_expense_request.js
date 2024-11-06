@@ -42,55 +42,32 @@ frappe.ui.form.on("SMO Expense Request", {
     }
   },
   refresh(frm) {
-    if (frm.doc.from_page || frappe.utils.get_query_params().from_page) {
-      $(".navbar").css("visibility", "hidden");
-      $(".menu-btn-group").hide();
-      $(".page-icon-group").hide();
-
-      frm.add_custom_button(__("Close"), function () {
-        window.close();
-      });
-      if (frm.doc.workflow_state !== "Rejected") {
-        frm.page.btn_secondary.hide();
-      } else {
-        frm.page.btn_secondary.show();
-      }
+    if (
+      frm.doc.workflow_state !== "Rejected" ||
+      frm.doc.owner !== frappe.session.user
+    ) {
+      frm.page.btn_secondary.hide();
+    } else {
+      frm.page.btn_secondary.show();
     }
-    // ตรวจสอบว่า amended_from มีค่า หรือไม่
+    if (window.opener && typeof window.opener.refresh_table === "function") {
+      window.opener.refresh_table();
+    }
+    frm.add_custom_button(__("Close"), function () {
+      // เช็คว่ามี window.opener หรือไม่
+
+      window.close();
+    });
+
     if (frm.doc.amended_from) {
       // ถ้ามีค่าใน amended_from (เป็นเอกสารที่แก้ไขจากเอกสารเดิม)
-      frm.set_df_property('total', 'read_only', false);
-  } else {
+      frm.set_df_property("total", "read_only", false);
+    } else {
       // ถ้า amended_from ว่างเปล่า (ไม่ใช่เอกสารที่แก้ไข)
-      frm.set_df_property('total', 'read_only', true);
+      frm.set_df_property("total", "read_only", true);
     }
-    // if (frappe.utils.get_query_params().from) {
-    //   $(".navbar").hide();
-    //   $(".menu-btn-group").hide();
-    //   $(".page-icon-group").hide();
-    //   // $('.standard-actions').hide();
-    //   // $('.next-doc').hide();
-    // }
-    // if (frm.doc.from_page) {
-    //   $(".app-logo").hide();
-    //   $("#navbar-search").hide();
-    //   $("#navbar-breadcrumbs").hide();
-    //   // $('.menu-btn-group').hide();
-    //   //$('.page-icon-group').hide();
-    // }
 
-    // // เพิ่มการตรวจสอบว่าสามารถใช้ history.back() ได้หรือไม่
-    // const canGoBack = window.history.length > 1;
-
-    // frm.add_custom_button(__(canGoBack ? "Back" : "Close"), function () {
-    //   if (canGoBack) {
-    //     history.back();
-    //   } else {
-    //     // ดำเนินการเมื่อไม่สามารถย้อนกลับได้
-    //     // ตัวอย่างเช่น ปิดหน้าต่างหรือนำทางไปยังหน้าหลัก
-    //     window.close();
-    //   }
-    // });
+   
 
     if (frm.doc.expense_request_item) {
       let msg = [];
@@ -105,18 +82,23 @@ frappe.ui.form.on("SMO Expense Request", {
 
       // frm.set_df_property("html_data", "options", html);
     }
-
-    // แสดงปุ่ม Cancel เฉพาะเมื่อเป็น owner และสถานะเป็น Rejected
-    if (frm.doc.owner === frappe.session.user && frm.doc.workflow_state === "Rejected") {
-        frm.page.btn_secondary.show();
-    } else {
-        frm.page.btn_secondary.hide();
+    frm.set_df_property(
+      "approve_amount",
+      "read_only",
+      frm.doc.workflow_state !== "Pending Approval"
+    );
+    if (frm.doc.from_page || frappe.utils.get_query_params().from_page) {
+      $(".navbar").css("visibility", "hidden");
+      $(".menu-btn-group").hide();
+      $(".page-icon-group").hide();
+      
     }
+    // ตรวจสอบว่า amended_from มีค่า หรือไม่
+   
+  
 
     // ควบคุมการ enable/disable ของฟิลด์ approve_amount
-    frm.set_df_property('approve_amount', 'read_only', 
-        frm.doc.workflow_state !== "Pending Approval"
-    );
+   
   },
   get_data: function (frm) {
     if (!frm.doc.request_by) {

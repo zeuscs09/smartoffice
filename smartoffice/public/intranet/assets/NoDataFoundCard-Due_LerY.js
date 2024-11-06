@@ -1,0 +1,1 @@
+import{_ as a,o,c as r,a as s}from"./index-DNSZ9sfk.js";const t={},c={class:"card bg-base-100 shadow-xl"};function d(n,e){return o(),r("div",c,e[0]||(e[0]=[s("div",{class:"card-body"},[s("div",{class:"h-40 bg-gray-200 rounded-lg flex items-center justify-center"}," No Data Found ")],-1)]))}const l=a(t,[["render",d]]);export{l as N};

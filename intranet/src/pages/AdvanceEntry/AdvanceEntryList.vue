@@ -172,6 +172,9 @@ const handlePageSizeChange = (newSize: number) => {
 const newAdvanceEntry = () => {
     window.open('/app/smo-advance-entry/new?from_page=/intranet', '_blank')
 }
+window.refresh_table = () => {
+    serviceReportStore.fetchAll(serviceReportStore.currentPage)
+}
 
 const timelineModal = ref<HTMLDialogElement | null>(null)
 

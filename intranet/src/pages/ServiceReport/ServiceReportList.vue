@@ -130,6 +130,9 @@ const handlePageSizeChange = (newSize: number) => {
 const refreshData = () => {
     serviceReportStore.fetchAll(serviceReportStore.currentPage)
 }
+window.refresh_table = () => {
+    serviceReportStore.fetchAll(serviceReportStore.currentPage)
+}
 
 const applyFiltersAndRefresh = () => {
     // รวมตรรกะการค้นหาและกรอง

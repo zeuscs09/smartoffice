@@ -13,7 +13,9 @@ frappe.ui.form.on("SMO Service Report", {
       $(".navbar").css("visibility", "hidden");
       $(".menu-btn-group").hide();
       $(".page-icon-group").hide();
-
+      if (window.opener && typeof window.opener.refresh_table === 'function') {
+        window.opener.refresh_table();
+      }
       frm.add_custom_button(__("Close"), function () {
         window.close();
       });

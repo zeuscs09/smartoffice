@@ -211,6 +211,11 @@ const showTimeline = async (docName: string) => {
 
 }
 
+window.refresh_table = () => {
+    serviceReportStore.fetchAll(serviceReportStore.currentPage)
+}
+
+
 const newExpenseEntry = () => {
     window.open('/app/smo-expense-entry/new?from_page=/intranet', '_blank')
 

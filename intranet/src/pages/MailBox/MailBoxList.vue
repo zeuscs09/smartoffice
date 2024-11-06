@@ -164,6 +164,10 @@ const handleFilter = () => {
     saveMailboxState()
 }
 
+window.refresh_table = () => {
+    serviceReportStore.fetchAll(serviceReportStore.currentPage)
+}
+
 const sortMailbox = (field: string) => {
     if (serviceReportStore.sortField === field) {
         serviceReportStore.sortOrder = serviceReportStore.sortOrder === 'asc' ? 'desc' : 'asc'
