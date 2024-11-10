@@ -213,6 +213,8 @@ def get_expense_entry_by_user(page=1, page_size=10, search=None, status=None, st
         ee.owner,
         ee.approver,
         ee.service_date,
+        ee.project_code,
+        ee.project_name,
         COUNT(*) OVER () as ttl_records
     FROM 
         `tabSMO Expense Entry` ee

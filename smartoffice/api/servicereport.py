@@ -164,7 +164,9 @@ def get_user_service_reports(page, page_size, search=None, status=None, start_da
             COUNT(*) OVER () as ttl_records,
             sr.owner,
             wt.parent,
-            wt.users as teams
+            wt.users as teams,
+            sr.project_code,
+            sr.project_name
         FROM `tabSMO Service Report` sr
         INNER JOIN (
             SELECT parent, GROUP_CONCAT(user SEPARATOR ', ') AS users

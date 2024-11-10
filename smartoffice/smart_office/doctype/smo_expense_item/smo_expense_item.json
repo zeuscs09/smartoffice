@@ -12,6 +12,7 @@
   "rate_per_km",
   "description",
   "system_reminder",
+  "reminder",
   "column_break_xpyp",
   "paid_by",
   "total_cost",
@@ -20,9 +21,13 @@
   "attachment",
   "ep001",
   "taxi_depart_distance",
+  "w_edit_depart",
+  "cal_taxi_depart_distance",
   "column_break_zhiq",
   "ep002",
   "taxi_return_distance",
+  "w_edit_return",
+  "cal_taxi_return_distance",
   "ep008",
   "fuel_detail",
   "fuel_liter",
@@ -90,6 +95,7 @@
    "depends_on": "eval:doc.expense_type == 'EP001' || doc.expense_type == 'EP002'",
    "fieldname": "rate_per_km",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Rate (bath/km)",
    "mandatory_depends_on": "eval:doc.expense_type == 'EP001' || doc.expense_type == 'EP002'",
    "non_negative": 1,
@@ -114,6 +120,7 @@
    "fieldtype": "Float",
    "label": "Distance (km)",
    "mandatory_depends_on": "eval:doc.expense_type=='EP002'",
+   "precision": "2",
    "print_hide": 1
   },
   {
@@ -127,6 +134,7 @@
    "fieldtype": "Float",
    "label": "Liter",
    "mandatory_depends_on": "eval:doc.expense_type=='EP008'",
+   "precision": "2",
    "print_hide": 1
   },
   {
@@ -191,6 +199,7 @@
    "depends_on": "eval:doc.expense_type == 'EP001' || doc.expense_type == 'EP002'",
    "fieldname": "taxi_initial",
    "fieldtype": "Int",
+   "hidden": 1,
    "label": "Taxi Start",
    "mandatory_depends_on": "eval:doc.expense_type == 'EP001' || doc.expense_type == 'EP002'",
    "read_only_depends_on": "eval:doc.expense_type == 'EP001' || doc.expense_type == 'EP002'"
@@ -219,12 +228,44 @@
    "hidden": 1,
    "label": "Expense Type Name",
    "print_hide": 1
+  },
+  {
+   "fieldname": "cal_taxi_depart_distance",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Calculate Depart Distance"
+  },
+  {
+   "fieldname": "cal_taxi_return_distance",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Calculate Depart Distance"
+  },
+  {
+   "fieldname": "w_edit_depart",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "w_edit_return",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.reminder",
+   "fieldname": "reminder",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Reminder",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-10-25 12:11:38.124296",
+ "modified": "2024-11-10 22:53:07.574720",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Item",

@@ -64,13 +64,14 @@
         <tbody v-else-if="sortedData.length > 0">
           <tr v-for="doc in sortedData" :key="doc.name">
             <td @click="viewDocument(doc.name)" class="cursor-pointer">
-              <span >{{ doc.name }}</span>
+              <span>{{ doc.name }}</span>
               <br>
               <span class="text-xs text-gray-500">{{ formatCurrency(doc.total) }}</span>
             </td>
             <td>{{ formatDate(doc.creation) }}</td>
             <td>
-              <span :class="getStatusClass(doc.workflow_state)">{{ doc.workflow_state }}</span>
+              {{ doc.month }} - {{ doc.period }} <br />
+              <span class="text-xs" :class="getStatusClass(doc.workflow_state)">{{ doc.workflow_state }}</span>
             </td>
             <td>
               <UserAvatar :email="doc.request_by" />
@@ -116,42 +117,32 @@
         </div>
       </div>
       <div v-else-if="sortedData.length > 0">
-        <div v-for="doc in sortedData" :key="doc.name" class="card bg-base-100 shadow-xl">
+        <div v-for="doc in sortedData" :key="doc.name" class="card bg-base-100 shadow-xl mt-2 border border-base-300">
           <div class="card-body">
-
             <div class="cursor-pointer" @click="viewDocument(doc.name)">
-
-              <h2 class="card-title cursor-pointer" >
-              {{ doc.name }}
+              <h2 class="card-title">
+                {{ doc.name }}
+              </h2>
+              <p class="text-sm text-gray-500">
+                {{ doc.month }} - {{ doc.period }}
+              </p>
              
-            </h2>
-           
-            <div class="grid grid-cols-2 gap-2 mt-2">
-              <div>
-                <p class="font-semibold">Amont</p>
-                <p>{{ formatCurrency(doc.total) }}</p>
-
-                <span  :class="getStatusClass(doc.workflow_state)">{{ doc.workflow_state }}</span>
-              </div>
-              <div class="flex flex-col items-center">
-                <p class="font-semibold mb-2">Request By:</p>
-                <UserAvatar :email="doc.request_by" class="mb-1" />
-                <p class="text-xs text-gray-500 mt-1">
-                 
-                  {{ formatDate(doc.creation) }}
-                </p>
-              </div>
+              <p class="text-sm text-gray-500">
+                {{ formatCurrency(doc.total) }}
+                <span :class="getStatusClass(doc.workflow_state)">{{ doc.workflow_state }}</span>
+              </p>
             </div>
-            </div>
-        
-            
-            <div class="flex justify-between mt-2">
-              <div>
+            <div class="grid grid-cols-1 gap-2 mt-2">
+              <div class="flex items-center gap-2">
+                <UserAvatar :email="doc.request_by" />
+                <span class="text-xs text-gray-500"> Request Date: {{ formatDate(doc.creation) }}</span>
+              </div>
+              <div class="flex justify-between items-center">
                 <p class="font-semibold">Next Action:</p>
                 <UserAvatar v-if="doc.next_action" :email="doc.next_action" />
                 <span v-else>-</span>
               </div>
-              <div>
+              <div class="flex justify-between items-center">
                 <p class="font-semibold">Approver:</p>
                 <div class="cursor-pointer" @click="showTimeline(doc.name)">
                   <UserAvatar :email="doc.approvers" />
@@ -226,11 +217,11 @@ const router = useRouter()
 
 const getStatusClass = (status: string) => {
   switch (status.toLowerCase()) {
-    case 'draft': return 'badge badge-ghost'
-    case 'pending approval': return 'badge badge-warning'
-    case 'approved': return 'badge badge-success'
-    case 'rejected': return 'badge badge-error'
-    default: return 'badge'
+    case 'draft': return 'badge badge-xs badge-ghost '
+    case 'pending approval': return 'badge badge-xs badge-warning'
+    case 'approved': return 'badge badge-xs badge-success'
+    case 'rejected': return 'badge badge-xs badge-error'
+    default: return 'badge badge-xs'
   }
 }
 
@@ -265,7 +256,7 @@ const showTimeline = async (docName: string) => {
 
   await expenseRequest.reload();
   console.log(expenseRequest.doc.approvers);
-  
+
   // ตรวจสอบว่ามีรายการที่ rejected หรือไม่
   const hasRejected = expenseRequest.doc.approvers.some(approver => approver.status.toLowerCase() === 'rejected');
 

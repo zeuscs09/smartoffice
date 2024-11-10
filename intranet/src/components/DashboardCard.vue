@@ -6,7 +6,7 @@
     <div class="stat-title">{{ title }}</div>
     <div class="stat-value">{{ value }}</div>
     <div class="stat-desc">{{ desc }}</div>
-    <div class="stat-previous">ก่อนหน้า: {{ previous }}</div>
+    <div class="stat-previous">Previous: {{ previous }}</div>
   </div>
 </template>
 

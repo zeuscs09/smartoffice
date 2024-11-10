@@ -226,12 +226,14 @@ frappe.ui.form.on("SMO Expense Item", {
     }
     if (row.expense_type == "EP001") {
       row.taxi_depart_distance = frm.get_field("distance_depart").value;
+      row.cal_taxi_depart_distance=frm.get_field("distance_depart").value;
       row.total_cost =
         row.taxi_initial + row.taxi_depart_distance * row.rate_per_km;
     }
 
     if (row.expense_type == "EP002") {
       row.taxi_return_distance = frm.get_field("distance_return").value;
+      row.cal_taxi_return_distance=frm.get_field("distance_return").value;
       row.total_cost =
         row.taxi_initial + row.taxi_return_distance * row.rate_per_km;
     }

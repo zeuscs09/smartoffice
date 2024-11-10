@@ -17,6 +17,7 @@
   "customer_name",
   "customer_site",
   "project",
+  "project_code",
   "project_name",
   "column_break_xeie",
   "working_hour",
@@ -89,7 +90,8 @@
    "fetch_from": "customer_site.depart_km",
    "fieldname": "distance_depart",
    "fieldtype": "Float",
-   "label": "Distance Depart"
+   "label": "Distance Depart",
+   "precision": "2"
   },
   {
    "depends_on": "customer_site",
@@ -104,8 +106,10 @@
    "description": "Bath/km",
    "fieldname": "config_taxi_rate",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Taxi Rate",
    "non_negative": 1,
+   "precision": "2",
    "read_only": 1
   },
   {
@@ -113,6 +117,7 @@
    "fieldname": "total_amount",
    "fieldtype": "Float",
    "label": "Total Amount",
+   "precision": "2",
    "read_only": 1
   },
   {
@@ -148,6 +153,7 @@
    "default": "0",
    "fieldname": "config_taxi_init",
    "fieldtype": "Int",
+   "hidden": 1,
    "label": "Taxi Initial",
    "read_only": 1
   },
@@ -178,6 +184,7 @@
    "fieldname": "ot_rate",
    "fieldtype": "Float",
    "label": "OT Rate",
+   "precision": "2",
    "read_only": 1
   },
   {
@@ -203,6 +210,7 @@
    "fieldname": "over_night_rate",
    "fieldtype": "Float",
    "label": "Overnight Rate",
+   "precision": "2",
    "read_only": 1
   },
   {
@@ -223,11 +231,12 @@
    "label": "Customer Name"
   },
   {
-   "fetch_from": "project.project_name",
+   "fetch_from": "service_report.project_name",
    "fieldname": "project_name",
    "fieldtype": "Data",
    "hidden": 1,
-   "label": "Project Name"
+   "label": "Project Name",
+   "read_only": 1
   },
   {
    "fieldname": "from_page",
@@ -250,13 +259,20 @@
    "label": "Naming Series",
    "options": "EE-.YYYY.-.MM.-.####.",
    "print_hide": 1
+  },
+  {
+   "fetch_from": "service_report.project_code",
+   "fieldname": "project_code",
+   "fieldtype": "Data",
+   "label": "Project Code",
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-11-02 09:43:27.152856",
+ "modified": "2024-11-10 22:54:34.836681",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Entry",

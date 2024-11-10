@@ -404,10 +404,10 @@ function render_summary(data, callback) {
         ${expenseTypes
           .map((type) => {
             const cost = group.expense_types[type.desc] || 0;
-            return `<td style="text-align: right">${cost.toLocaleString()}</td>`;
+            return `<td style="text-align: right">${Number(cost).toFixed(2).toLocaleString()}</td>`;
           })
           .join("")}
-        <td style="text-align: right">${total.toLocaleString()}</td>
+        <td style="text-align: right">${Number(total).toFixed(2).toLocaleString()}</td>
       </tr>
     `;
     });
@@ -421,12 +421,12 @@ function render_summary(data, callback) {
           ${expenseTypes
             .map(
               (type) =>
-                `<th style="text-align: right">${grandTotals[
+                `<th style="text-align: right">${Number(grandTotals[
                   type.desc
-                ].toLocaleString()}</th>`
+                ]).toFixed(2).toLocaleString()}</th>`
             )
             .join("")}
-          <th style="text-align: right">${grandTotalOverall.toLocaleString()}</th>
+          <th style="text-align: right">${Number(grandTotalOverall).toFixed(2).toLocaleString()}</th>
         </tr>
       </tfoot>
     </table>

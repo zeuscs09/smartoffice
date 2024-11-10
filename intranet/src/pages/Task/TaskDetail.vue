@@ -10,7 +10,7 @@
                            {{ task.doc.name }} &nbsp; {{ task.doc.task_name }}
                             <span v-if="todo?.doc?.status">
                                 <span :class="getStatusBadgeClass(todo?.doc?.status)" class="ml-2">
-                                    {{ todo.doc?.status || 'กำลังโหลด...' }}
+                                    {{ todo.doc?.status || 'Loading...' }}
                                 </span>
                             </span>
                         </h1>
@@ -40,31 +40,30 @@
                 <div class="p-4 sm:p-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-4">
-                            <h2 class="text-xl font-semibold text-gray-700 mb-3">ข้อมูลงาน</h2>
-                     
+                            <h2 class="text-xl font-semibold text-gray-700 mb-3">Task Information</h2>
 
-                            <InfoItem label="ประเภทงาน" :value="task.doc.job_type" />
-                            <InfoItem label="วันที่ต้องเข้าทำงาน" :value="formatDate(todo?.doc?.date)" />
-                            <InfoItem label="สถานะ" :value="todo ? todo?.doc?.status : ''" />
-                            <InfoItem label="ความสำคัญ" :value="task.doc.priority" />
-                            <InfoItem label="ช่วงเวลา" :value="task.doc.period" />
-                            <InfoItem label="วันที่ (plan)" :value="formatDate(task.doc.start_date) + ' - ' + formatDate(task.doc.finish_date)" />
-                         
+                            <InfoItem label="Job Type" :value="task.doc.job_type" />
+                            <InfoItem label="Work Date" :value="formatDate(todo?.doc?.date)" />
+                            <InfoItem label="Status" :value="todo ? todo?.doc?.status : ''" />
+                            <InfoItem label="Priority" :value="task.doc.priority" />
+                            <InfoItem label="Period" :value="task.doc.period" />
+                            <InfoItem label="Date (plan)" :value="formatDate(task.doc.start_date) + ' - ' + formatDate(task.doc.finish_date)" />
                         </div>
 
                         <div class="space-y-4">
-                            <h2 class="text-xl font-semibold text-gray-700 mb-3">ข้อมูลโครงการ</h2>
-                            <InfoItem label="โครงการ" :value="task.doc.project_name" />
-                            <InfoItem label="ลูกค้า" :value="task.doc.customer_name" />
-                            <InfoItem label="ผู้ติดต่อ" :value="task.doc.contact_name" />
-                            <InfoItem label="เบอร์โทรผู้ติดต่อ" :value="task.doc.contact_mobile" />
-                            <InfoItem label="อีเมลผู้ติดต่อ" :value="task.doc.contact_email" />
-                            <InfoItem label="สถานที่" :value="task.doc.site" />
+                            <h2 class="text-xl font-semibold text-gray-700 mb-3">Project Information</h2>
+                            <InfoItem label="Project Code" :value="task.doc.project_code" />
+                            <InfoItem label="Project" :value="task.doc.project_name" />
+                            <InfoItem label="Customer" :value="task.doc.customer_name" />
+                            <InfoItem label="Contact Person" :value="task.doc.contact_name" />
+                            <InfoItem label="Contact Mobile" :value="task.doc.contact_mobile" />
+                            <InfoItem label="Contact Email" :value="task.doc.contact_email" />
+                            <InfoItem label="Site" :value="task.doc.site" />
                         </div>
                     </div>
 
                     <div class="mt-8">
-                        <h2 class="text-xl font-semibold text-gray-700 mb-3">รายละเอียด</h2>
+                        <h2 class="text-xl font-semibold text-gray-700 mb-3">Detail</h2>
                         <div v-if="task.doc.detail" class="text-gray-600">
                             {{ task.doc.detail }}
                         </div>
@@ -72,7 +71,7 @@
                     </div>
 
                     <div class="mt-8">
-                        <h2 class="text-xl font-semibold text-gray-700 mb-3">ทีมงาน</h2>
+                        <h2 class="text-xl font-semibold text-gray-700 mb-3">Team</h2>
                         <div v-if="task.doc.team && task.doc.team.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div v-for="member in task.doc.team" :key="member.name"
                                 class="flex items-center space-x-4 bg-gray-50 p-4 rounded-lg">
@@ -82,23 +81,23 @@
                                     <div class="text-sm text-gray-500">{{ member.email }}</div>
                                     <div class="text-sm"
                                         :class="member.overlapping_job_on_date ? 'text-red-500' : 'text-green-500'">
-                                        {{ member.overlapping_job_on_date ? 'มีงานซ้อน' : 'ไม่มีงานซ้อน' }}
+                                        {{ member.overlapping_job_on_date ? 'Has overlapping work' : 'No overlapping work' }}
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <p v-else class="text-gray-600">ไม่มีข้อมูลทีมงาน</p>
+                        <p v-else class="text-gray-600">No team members found</p>
                     </div>
                 </div>
             </div>
             <div v-else class="flex flex-col justify-center items-center min-h-screen space-y-6">
                 <div class="text-center">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-2">ไม่พบข้อมูล</h2>
-                    <p class="text-gray-600">ขออภัย ไม่พบข้อมูลงานที่คุณกำลังค้นหา</p>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Data Not Found</h2>
+                    <p class="text-gray-600">Sorry, the task you're looking for could not be found</p>
                 </div>
 
                 <button @click="goBack" class="btn btn-primary btn-sm">
-                    <span class="mr-2">←</span> ย้อนกลับ
+                    <span class="mr-2">←</span> Back
                 </button>
             </div>
 
@@ -111,7 +110,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, inject } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import UserLayout from '@/layouts/userLayout.vue'
 import { createDocumentResource } from 'frappe-ui'
@@ -122,7 +121,7 @@ const route = useRoute()
 const router = useRouter()
 const taskId = route.params.id as string
 const todoId = route.query.todo as string
-
+const formatDate = inject('formatDate') as (date: string) => string
 const task = createDocumentResource({
     doctype: 'SMO Task',
     name: taskId,
@@ -144,11 +143,6 @@ const canCreateServiceReport = computed(() => {
     return todo.doc?.status === 'Open' && todoId && !todo.loading
 })
 
-const formatDate = (dateString: string): string => {
-    if (!dateString) return ''
-    const date = new Date(dateString)
-    return date.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })
-}
 
 const goBack = () => {
     router.go(-1)

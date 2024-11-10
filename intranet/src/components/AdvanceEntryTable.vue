@@ -17,14 +17,14 @@
                 </span>
               </th>
             
-              <th class="cursor-pointer" @click="$emit('sort', 'creation')">
-                Request Date
+              <th class="cursor-pointer" @click="$emit('sort', 'customer_name')">
+               Customer Name
                 <span class="ml-1" v-if="sortable">
-                  <span :class="{ 'text-primary': sortField === 'creation' }">
-                    {{ sortField === 'creation' && sortOrder === 'asc' ? '▲' : '△' }}
+                  <span :class="{ 'text-primary': sortField === 'customer_name' }">
+                    {{ sortField === 'customer_name' && sortOrder === 'asc' ? '▲' : '△' }}
                   </span>
-                  <span :class="{ 'text-primary': sortField === 'creation' }">
-                    {{ sortField === 'creation' && sortOrder === 'desc' ? '▼' : '▽' }}
+                  <span :class="{ 'text-primary': sortField === 'customer_name' }">
+                    {{ sortField === 'customer_name' && sortOrder === 'desc' ? '▼' : '▽' }}
                   </span>
                 </span>
               </th>

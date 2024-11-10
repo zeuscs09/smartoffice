@@ -75,23 +75,23 @@ frappe.ui.form.on("SMO Task", {
     });
   },
   
-  job_type(frm) {
-    const prefix = `[${frm.doc.job_type}]`;
-    const task_name = frm.doc.task_name || "";
+  // job_type(frm) {
+  //   const prefix = `[${frm.doc.job_type}]`;
+  //   const task_name = frm.doc.task_name || "";
     
-    if (!task_name.startsWith(prefix)) {
-      frm.set_value("task_name", `${prefix} ${task_name.trim()}`);
-    }
-  },
+  //   if (!task_name.startsWith(prefix)) {
+  //     frm.set_value("task_name", `${prefix} ${task_name.trim()}`);
+  //   }
+  // },
 });
 
 function validateDates(frm) {
   if (frm.doc.start_date && frm.doc.finish_date) {
     if (frm.doc.start_date > frm.doc.finish_date) {
       frappe.msgprint({
-        title: 'ข้อผิดพลาด',
+        title: 'Error',
         indicator: 'red',
-        message: 'วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด'
+        message: 'Start date cannot be greater than end date'
       });
       frm.set_value('finish_date', '');
     }
@@ -102,7 +102,7 @@ frappe.ui.form.on("SMO Working Team", {
   user(frm, cdt, cdn) {
     const row = locals[cdt][cdn];
     if (row.user) {
-      frappe.dom.freeze("กำลังโหลดข้อมูล");
+      frappe.dom.freeze("Loading data");
       frappe.call({
         method: "smartoffice.api.task.check_user_task",
         args: {

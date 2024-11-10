@@ -1,12 +1,12 @@
 <template>
   <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
-    <!-- ส่วนหัวของการ์ด -->
+    <!-- Card Header -->
     <div class="bg-gray-100 p-4 border-b border-gray-200">
       <div class="flex justify-between items-center">
         <h3 class="text-lg font-semibold text-gray-800 truncate max-w-[70%]">
-          <span v-if="todo.priority === 'Low'" class="text-green-500 mr-2" title="ความสำคัญต่ำ">&#9679;</span>
-          <span v-else-if="todo.priority === 'Medium'" class="text-yellow-500 mr-2" title="ความสำคัญปานกลาง">&#9679;</span>
-          <span v-else-if="todo.priority === 'High'" class="text-red-500 mr-2" title="ความสำคัญสูง">&#9679;</span>
+          <span v-if="todo.priority === 'Low'" class="text-green-500 mr-2" title="Low Priority">&#9679;</span>
+          <span v-else-if="todo.priority === 'Medium'" class="text-yellow-500 mr-2" title="Medium Priority">&#9679;</span>
+          <span v-else-if="todo.priority === 'High'" class="text-red-500 mr-2" title="High Priority">&#9679;</span>
           {{ todo.customer_name }}
         </h3>
         <div class="flex space-x-2">
@@ -28,9 +28,13 @@
       </div>
     </div>
     
-    <!-- เนื้อหาของการ์ด -->
+    <!-- Card Content -->
     <div class="p-4">
       <div class="grid grid-cols-1 gap-2 text-sm">
+        <div class="flex items-center">
+          <span class="mr-2 text-gray-500 text-lg">&#128736;</span>
+          <span class="text-gray-700">{{todo.project_code}} - {{todo.project}}</span>
+        </div>
         <div class="flex items-center">
           <span class="mr-2 text-gray-500 text-lg">&#128197;</span>
           <span class="text-gray-700">{{ formatDate(todo.due_date) }}</span>
@@ -66,6 +70,7 @@ interface Todo {
   priority: string
   due_date: string
   project: string
+  project_code: string
   site_name: string
   contact_person: string
   customer_name: string
@@ -79,7 +84,7 @@ const router = useRouter()
 
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString)
-  return date.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
 const viewTask = (todo: Todo): void => {

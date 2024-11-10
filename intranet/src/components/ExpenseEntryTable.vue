@@ -17,17 +17,18 @@
               </span>
             </th>
 
-            <th class="cursor-pointer" @click="$emit('sort', 'creation')">
-              Request Date
+            <th class="cursor-pointer" @click="$emit('sort', 'customer_name')">
+              Customer
               <span class="ml-1" v-if="sortable">
-                <span :class="{ 'text-primary': sortField === 'creation' }">
-                  {{ sortField === 'creation' && sortOrder === 'asc' ? '▲' : '△' }}
+                <span :class="{ 'text-primary': sortField === 'customer_name' }">
+                  {{ sortField === 'customer_name' && sortOrder === 'asc' ? '▲' : '△' }}
                 </span>
-                <span :class="{ 'text-primary': sortField === 'creation' }">
-                  {{ sortField === 'creation' && sortOrder === 'desc' ? '▼' : '▽' }}
+                <span :class="{ 'text-primary': sortField === 'customer_name' }">
+                  {{ sortField === 'customer_name' && sortOrder === 'desc' ? '▼' : '▽' }}
                 </span>
               </span>
             </th>
+            <th>Project</th>
             <th class="cursor-pointer" @click="$emit('sort', 'workflow_state')">
               Status
               <span class="ml-1" v-if="sortable">
@@ -60,10 +61,14 @@
               </div>
 
             </td>
+
             <td>
               {{ report.customer_name }}
               <br />
               <span class="text-xs text-gray-500">{{ formatCurrency(report.total_amount) }}</span>
+            </td>
+            <td>
+              {{ report.project_code }} - {{ report.project_name }}
             </td>
             <td>
               <div class="badge badge-sm" :class="{
@@ -107,6 +112,9 @@
 
                 {{ report.customer_name }}
               </h2>
+              <p class="text-sm text-gray-500">
+                {{ report.project_code }} - {{ report.project_name }}
+              </p>
               <p class="text-sm text-gray-500">
                 Service Date: {{ formatDate(report.service_date) }}
                 <br />

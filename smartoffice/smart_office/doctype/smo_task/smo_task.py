@@ -42,7 +42,7 @@ class SMOTask(Document):
                     "description": f"{self.task_name}",
                     "date": current_date.strftime('%Y-%m-%d'),
                     "allocated_to": team_member.user,
-                    "priority": self.priority,
+                    "priority": "Medium" if self.priority == "Normal" else self.priority,
                     "status": "Open"
                 })
                 todo.insert(ignore_permissions=True)

@@ -14,6 +14,8 @@
   "job_type",
   "column_break_debu",
   "project_link",
+  "project_code",
+  "project_name",
   "customer",
   "customer_name",
   "customer_site",
@@ -361,6 +363,20 @@
    "label": "Naming Series",
    "options": "SR-.YYYY.-.MM.-.####.",
    "print_hide": 1
+  },
+  {
+   "fetch_from": "task.project_code",
+   "fieldname": "project_code",
+   "fieldtype": "Data",
+   "label": "Project Code",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "project_link.project_name",
+   "fieldname": "project_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Project Name"
   }
  ],
  "hide_toolbar": 1,
@@ -373,7 +389,7 @@
    "link_fieldname": "service_report"
   }
  ],
- "modified": "2024-11-02 08:59:40.409013",
+ "modified": "2024-11-10 15:18:00.748806",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Service Report",

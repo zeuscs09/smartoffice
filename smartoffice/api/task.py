@@ -88,8 +88,9 @@ def get_todos_with_smo_tasks(page=1, page_size=10, search=None, status=None, sta
         COALESCE(t.allocated_to, s.assign_to) as allocated_to, 
         s.name as reference_name,
         s.project_name as project, 
+        s.project_code,
         s.site, 
-        s.contact_name as contact_person, 
+        s.contact_person as contact_person, 
         s.contact_mobile as contact_phone, 
         s.contact_email,
         s.start_date, 
@@ -117,15 +118,15 @@ def get_todos_with_smo_tasks(page=1, page_size=10, search=None, status=None, sta
     values.extend([page_size, offset])
     
     # Debug prints
-    frappe.errprint("Query:")
-    frappe.errprint(query)
-    frappe.errprint("Values:")
-    frappe.errprint(values)
+    # frappe.errprint("Query:")
+    # frappe.errprint(query)
+    # frappe.errprint("Values:")
+    # frappe.errprint(values)
     
     result = frappe.db.sql(query, tuple(values), as_dict=True)
     
-    frappe.errprint("Result:")
-    frappe.errprint(result)
+    # frappe.errprint("Result:")
+    # frappe.errprint(result)
     
     total_count = result[0].ttl_records if result else 0
     

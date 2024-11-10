@@ -120,11 +120,28 @@ def get_team_workload(month, year):
                 SELECT 
                     t.date,
                     t.allocated_to,
-                    count(*) count_jov
+                    count(*) count_job,
+                    GROUP_CONCAT(
+                        CONCAT(
+                            COALESCE(s.project_code, ''),
+                            ' - ',
+                            COALESCE(s.project_name, ''),
+                            ' (',
+                            COALESCE(s.customer_name, ''),
+                            ')',
+                            IF(s.task_name IS NOT NULL, CONCAT(' | ', s.task_name), ''),
+                            IF(s.start_time IS NOT NULL AND s.to_time IS NOT NULL,
+                                CONCAT(' (', TIME_FORMAT(s.start_time, '%%H:%%i'), ' - ', TIME_FORMAT(s.to_time, '%%H:%%i'), ')'),
+                                ''
+                            )
+                        ) SEPARATOR '{|}'
+                    ) as task_details
                 FROM 
                     `tabToDo` t
                 INNER JOIN 
                     `tabSMO Task` s ON t.reference_name = s.name
+                LEFT JOIN
+                    `tabProject` p ON s.project = p.name
                 WHERE 
                     t.allocated_to IN %(employee_user_ids)s
                     AND MONTH(t.date) = %(month)s
@@ -170,17 +187,37 @@ def get_team_workload(month, year):
         for day in range(1, days_in_month + 1):
             date = datetime(year, month, day).date()
             is_holiday = any(holiday.holiday_date == date for holiday in holidays)
-            has_task = any(task.date == date for task in employee_tasks)
+            
+            # หา task สำหรับวันนี้และนับจำนวน job
+            day_tasks = [task for task in employee_tasks if task.date == date]
+            count_job = day_tasks[0].count_job if day_tasks else 0
+            has_task = bool(day_tasks)
             
             if is_holiday and has_task:
-                status[str(day)] = "work_on_holiday"
+                status[str(day)] = {
+                    "status": "work_on_holiday",
+                    "count_job": count_job,
+                    "task_details": day_tasks[0].task_details if day_tasks else ""
+                }
             elif is_holiday:
-                status[str(day)] = "holiday"
+                status[str(day)] = {
+                    "status": "holiday",
+                    "count_job": 0,
+                    "task_details": ""
+                }
             elif has_task:
-                status[str(day)] = "unavailable"
+                status[str(day)] = {
+                    "status": "unavailable",
+                    "count_job": count_job,
+                    "task_details": day_tasks[0].task_details if day_tasks else ""
+                }
             else:
-                status[str(day)] = "available"
-        
+                status[str(day)] = {
+                    "status": "available",
+                    "count_job": 0,
+                    "task_details": ""
+                }
+
         employee_data = {
             "id": idx,
             "name": employee.employee_name,

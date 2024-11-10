@@ -1,6 +1,6 @@
 <template>
     <UserLayout>
-        <div class="container mx-auto p-4">
+        <div class="mx-auto p-4">
             <div class="flex justify-between items-center mb-4">
                 <div class="breadcrumbs text-sm">
                     <ul>

@@ -26,6 +26,7 @@
                 </span>
               </span>
             </th>
+            <th>Project</th>
             <th class="cursor-pointer" @click="$emit('sort', 'workflow_state')">
               Status
               <span class="ml-1" v-if="sortable">
@@ -41,8 +42,8 @@
           </tr>
         </thead>
         <tbody v-if="loading">
-          <tr >
-            <td colspan="4" >
+          <tr>
+            <td colspan="4">
               <SkeletonTable />
             </td>
           </tr>
@@ -53,20 +54,27 @@
               <div class="cursor-pointer" @click="viewDocument(doc.name)">
 
                 {{ doc.name }}
-                <br/>
-                <span class="text-xs text-gray-500 " > {{ formatDate(doc.job_start_on) }}</span>
-                  </div>
+                <br />
+                <span class="text-xs text-gray-500 "> {{ formatDate(doc.job_start_on) }}</span>
+              </div>
             </td>
             <td>
               {{ doc.customer_name }}
-              <br/>
-              <span class="text-xs text-gray-500 " >
+              <br />
+              <span class="text-xs text-gray-500 ">
                 {{ doc.task_name }}
-                </span>
+              </span>
+            </td>
+            <td>
+              {{ doc.project_code }}
+              <br />
+              <span class="text-xs text-gray-500 ">
+                {{ doc.project_name }}
+              </span>
             </td>
             <td>
               <div :class="getStatusClass(doc.workflow_state)">{{ doc.workflow_state }}</div>
-              <br/>
+              <br />
               <button class="btn btn-neutral btn-xs mt-1" @click="openExpenseEntry(doc.name)">
                 + Expense
               </button>
@@ -74,12 +82,12 @@
             <td>
               <UserAvatar :email="doc.teams" />
             </td>
-            
+
           </tr>
         </tbody>
         <tbody v-else>
-          <tr >
-            <td colspan="4" >
+          <tr>
+            <td colspan="4">
               <NoDataFoundTable />
             </td>
           </tr>
@@ -87,31 +95,40 @@
       </table>
     </div>
 
-    <div class="md:hidden">
+    <div class="md:hidden space-y-4 mt-4">
       <div v-if="loading">
         <SkeletonCard />
       </div>
-      <div v-else-if="sortedData.length > 0" class="space-y-4">
-        <div v-for="doc in sortedData" :key="doc.name" class="card bg-base-100 shadow-xl">
-          <div class="card-body" >
+      <div v-else-if="sortedData.length > 0">
+        <div v-for="doc in sortedData" :key="doc.name" 
+          class="card bg-base-100 shadow-sm border border-base-200 mt-2">
+          <div class="card-body">
             <div class="cursor-pointer" @click="viewDocument(doc.name)">
-            <h2 class="card-title cursor-pointer">
-              {{ doc.customer_name }}
-            </h2>
-            <p class="text-sm text-gray-500">{{ doc.task_name }} {{ formatDate(doc.job_start_on) }}</p>
-            <p>{{ doc.name }}</p>
-            <p>Status: <span :class="getStatusClass(doc.workflow_state)">{{ doc.workflow_state }}</span></p>
-           </div>
+              <h2 class="card-title">
+                {{ doc.customer_name }}
+              </h2>
+              <p class="text-sm text-gray-500">
+                {{ doc.project_code }} - {{ doc.project_name }}
+              </p>
+              <p class="text-sm text-gray-500">
+                {{ doc.task_name }}
+                <br />
+                # {{ doc.name }}
+              </p>
+              <p class="text-sm text-gray-500">
+                {{ formatDate(doc.job_start_on) }}
+                <span :class="getStatusClass(doc.workflow_state)">
+                  {{ doc.workflow_state }}
+                </span>
+              </p>
+            </div>
             <div class="card-actions justify-end">
               <div class="flex justify-between items-center w-full">
                 <button class="btn btn-neutral btn-sm" @click="openExpenseEntry(doc.name)">
-                  
-               
                   <span class="ml-1 text-xs">+ Expense</span>
                 </button>
                 <UserAvatar :email="doc.teams" />
               </div>
-              
             </div>
           </div>
         </div>
@@ -166,10 +183,10 @@ const router = useRouter()
 
 const getStatusClass = (status: string) => {
   switch (status.toLowerCase()) {
-    case 'customer review': return 'badge badge-warning'
-    case 'customer approve': return 'badge badge-success'
-    case 'rejected': return 'badge badge-error'
-    default: return 'badge'
+    case 'customer review': return 'badge badge-xs badge-warning'
+    case 'customer approve': return 'badge badge-xs badge-success'
+    case 'rejected': return 'badge badge-xs badge-error'
+    default: return 'badge badge-xs'
   }
 }
 

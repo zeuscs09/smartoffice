@@ -14,14 +14,34 @@ class SMOExpenseEntry(Document):
 		total_cost = 0
 		seen_expense = set()
 		for item in self.expense_item:
+	
 			# ตรวจสอบรายการซ้ำเฉพาะ expense_type EXP001, EXP002
 			if item.expense_type in ["EP001", "EP002"]:
+				if item.cal_taxi_depart_distance != item.taxi_depart_distance:
+					item.w_edit_depart = f"Edit Distance from {format(float(item.cal_taxi_depart_distance), '.2f')} to {format(float(item.taxi_depart_distance), '.2f')}"
+				else:
+					item.w_edit_depart = ""
+     
+				if item.cal_taxi_return_distance != item.taxi_return_distance:
+					item.w_edit_return = f"Edit Distance from {format(float(item.cal_taxi_return_distance), '.2f')} to {format(float(item.taxi_return_distance), '.2f')}"
+				else:
+					item.w_edit_return = ""
+     
 				item_key = (item.expense_type)  # ปรับตามโครงสร้างข้อมูลจริงของคุณ
 				if item_key in seen_expense:
-					doc_expense_type=frappe.get_doc("SMO Expense Type", item.expense_type)
-					frappe.throw(f"Duplicate expense found: {doc_expense_type.description} ")
+						doc_expense_type=frappe.get_doc("SMO Expense Type", item.expense_type)
+						frappe.throw(f"Duplicate expense found: {doc_expense_type.description} ")
 				seen_expense.add(item_key)
+			# สร้าง reminder string จากค่าที่มีอยู่เท่านั้น
+			reminder_parts = []
+			if item.system_reminder:
+				reminder_parts.append(item.system_reminder)
+			if item.w_edit_depart:
+				reminder_parts.append(item.w_edit_depart)
+			if item.w_edit_return:
+				reminder_parts.append(item.w_edit_return)
 			
+			item.reminder = " ".join(reminder_parts)
 			total_cost += item.total_cost
 		
 		if total_cost != self.total_amount:
@@ -54,7 +74,7 @@ class SMOExpenseEntry(Document):
 					total_count = row['total_count']  # จำนวนรวม
 					requested_by = row['requested_by']  # ายชื่อผู้ขอ (concat แล้ว)
 					if not item.system_reminder :
-						item.system_reminder = f"This item been entered {int(total_count)} times by {requested_by}."
+						item.system_reminder = f"This expense item has already been recorded {int(total_count)} time(s) by {requested_by}"
 			
 			
 	def on_update(self):

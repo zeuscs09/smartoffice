@@ -1,6 +1,6 @@
 <template>
     <UserLayout>
-        <div class="container mx-auto p-4">
+        <div class=" mx-auto p-4">
             <div class="flex justify-between items-center mb-4">
                 <div class="breadcrumbs text-sm">
                     <ul>
@@ -136,11 +136,11 @@
                             </td>
                             <td>{{ report.customer_name }}
                                 <br />
-                                <span class="badge badge-sm badge-ghost">{{ report.project }}</span>
+                                <span class="text-xs text-gray-500">{{ report.project_code }}-{{ report.project }} </span>
 
                             </td>
 
-                            <td> {{ report.contact_person }} - {{ report.contact_email }} 
+                            <td> {{ report.contact_person }} {{ report.contact_email }} 
 
                             </td>
                             <td>

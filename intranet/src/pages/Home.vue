@@ -4,7 +4,7 @@
       <!-- Heatmap Section -->
       <div class="bg-base-100 p-4 rounded-lg shadow w-full">
         <div class="flex justify-between items-center mb-2 cursor-pointer" @click="toggleHeatmap">
-          <h2 class="text-xl font-bold">สถิติงานรายเดือน</h2>
+          <h2 class="text-xl font-bold">Monthly Work Statistics</h2>
           <span class="text-2xl">{{ isHeatmapExpanded ? '▲' : '▼' }}</span>
         </div>
         <transition name="collapse">
@@ -13,7 +13,7 @@
               <span class="loading loading-spinner loading-lg"></span>
             </div>
             <div v-else-if="heatmapResource.error" class="text-center py-8">
-              <p class="text-error">เกิดข้อผิดพลาดในการโหลดข้อมูล Heatmap</p>
+              <p class="text-error">Error loading Heatmap data</p>
             </div>
             <CalendarHeatmap v-else :values="heatmapData" :end-date="endDateHeatmap" :tooltip-unit="'น'"
               :range-color="['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39']" :max="5" :round="0"
@@ -40,10 +40,10 @@
               <span class="loading loading-spinner loading-lg"></span>
             </div>
             <div v-else-if="taskStore.documentsResource.error" class="text-center py-8">
-              <p class="text-error">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
+              <p class="text-error">Error loading data</p>
             </div>
             <div v-else-if="todos.length === 0" class="text-center py-8">
-              <p class="text-gray-500">ไม่พบงานในขณะนี้</p>
+              <p class="text-gray-500">No tasks found</p>
             </div>
             <div v-else class="space-y-4">
               
@@ -56,25 +56,24 @@
         <div class="lg:col-span-2 space-y-6">
           <!-- Dashboard Cards - แสดงเฉพาะบนจอขนาดใหญ่ -->
           <div class="hidden lg:block bg-base-100 p-6 rounded-lg shadow">
-            <h2 class="text-2xl font-bold mb-4">แดชบอร์ด</h2>
+            <h2 class="text-2xl font-bold mb-4">Dashboard</h2>
             <!-- Display Current Period -->
             <div class="text-sm text-gray-500 mb-4" v-if="dashboardData.period">
-              ช่วงเวลาปัจจุบัน: {{ formatDate(dashboardData.period.current.start) }} - {{
-                formatDate(dashboardData.period.current.end) }}
+              Current Period: {{ formatDate(dashboardData.period.current.start) }} - {{ formatDate(dashboardData.period.current.end) }}
             </div>
             <!-- Time Range Selector -->
             <div class="flex justify-end mb-4">
               <select v-model="selectedTimeRange" class="select select-bordered w-full max-w-xs">
-                <option value="week">สัปดาห์นี้</option>
-                <option value="month">เดือนนี้</option>
-                <option value="year">ปีนี้</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+                <option value="year">This Year</option>
               </select>
             </div>
             <div v-if="dashboardResource.loading" class="flex justify-center items-center h-40">
               <span class="loading loading-spinner loading-lg"></span>
             </div>
             <div v-else-if="dashboardResource.error" class="text-center py-8">
-              <p class="text-error">เกิดข้อผิดพลาดในการดึงข้อมูล</p>
+              <p class="text-error">Error loading data</p>
             </div>
             <div v-else>
               <!-- Summary Cards -->
@@ -207,6 +206,7 @@ interface Todo {
   job_type: string
   priority: string
   due_date: string
+  project_code: string
 }
 
 interface DashboardData {
@@ -263,9 +263,9 @@ const todos = computed<Todo[]>(() => taskStore.data || [])
 
 // 9. ประกาศค่าคงที่
 const dashboardCards = [
-  { title: "งานทั้งหมด", icon: "📊", color: "primary", dataKey: "total_tasks" },
-  { title: "งานด่วน", icon: "🚨", color: "warning", dataKey: "urgent_tasks" },
-  { title: "งานเสร็จสิ้น", icon: "✅", color: "success", dataKey: "completed_tasks" }
+  { title: "Total Tasks", icon: "📊", color: "primary", dataKey: "total_tasks" },
+  { title: "Urgent Tasks", icon: "🚨", color: "warning", dataKey: "urgent_tasks" },
+  { title: "Completed Tasks", icon: "✅", color: "success", dataKey: "completed_tasks" }
 ]
 
 const tabs = [
@@ -289,7 +289,7 @@ const fetchHeatmapData = () => {
       heatmapData.value = formatHeatmapData(response)
     })
     .catch((error) => {
-      console.error('เกิดข้อผิดพลาดในกาดึงข้อมูล Heatmap:', error)
+      console.error('Error fetching Heatmap data:', error)
     })
 }
 
@@ -303,8 +303,12 @@ const fetchDashboardData = () => {
       dashboardData.value = response
     })
     .catch((error) => {
-      console.error('เกิดข้อ��ิดพลาดในการดึงข้อมูล Dashboard:', error)
+      console.error('Error fetching Dashboard data:', error)
     })
+}
+
+window.refresh_table = () => {
+  fetchDocuments()
 }
 
 const fetchDocuments = () => {
@@ -348,8 +352,8 @@ const load_advance_entry = async () => {
 const formatChangeDescription = (change: number | undefined) => {
   if (change === undefined || change === null) return ''
   const absChange = Math.abs(change)
-  const direction = change >= 0 ? 'มากกว่า' : 'น้อยกว่า'
-  return `${absChange.toFixed(0)}% ${direction}${selectedTimeRange.value === 'week' ? 'สัปดาห์' : selectedTimeRange.value === 'month' ? 'เดือน' : 'ปี'}ที่แล้ว`
+  const direction = change >= 0 ? 'higher than' : 'lower than'
+  return `${absChange.toFixed(0)}% ${direction} last ${selectedTimeRange.value}`
 }
 
 const toggleHeatmap = () => {

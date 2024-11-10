@@ -2,13 +2,12 @@ export function formatDate(dateString: string, format: 'short' | 'long' = 'short
   const date = new Date(dateString);
   
   if (format === 'short') {
-    return date.toLocaleDateString('th-TH', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    }).replace(/\//g, '/');
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   } else {
-    return date.toLocaleDateString('th-TH', {
+    return date.toLocaleDateString('en-US', {
       day: 'numeric',
       month: 'short',
       year: 'numeric'
@@ -17,7 +16,7 @@ export function formatDate(dateString: string, format: 'short' | 'long' = 'short
 }
 
 export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('th-TH', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'THB'
   }).format(amount);

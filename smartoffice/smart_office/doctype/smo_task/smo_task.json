@@ -21,6 +21,7 @@
   "expected_time_use",
   "column_break_wfvh",
   "project",
+  "project_code",
   "project_name",
   "customer",
   "customer_name",
@@ -74,10 +75,11 @@
    "options": "Open\nOn Hold\nIn Process\nDelayed\nCompleted\nCancel"
   },
   {
+   "default": "Normal",
    "fieldname": "priority",
    "fieldtype": "Select",
    "label": "Priority",
-   "options": "High\nMedium\nLow"
+   "options": "High\nNormal\nLow"
   },
   {
    "fieldname": "period",
@@ -243,6 +245,13 @@
    "label": "Naming Series",
    "options": "Task-.YYYY.-.MM.-.####.",
    "print_hide": 1
+  },
+  {
+   "fetch_from": "project.custom_project_code",
+   "fieldname": "project_code",
+   "fieldtype": "Data",
+   "label": "Project Code",
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
@@ -254,7 +263,7 @@
    "link_fieldname": "task"
   }
  ],
- "modified": "2024-11-04 23:31:44.722563",
+ "modified": "2024-11-10 16:01:36.493348",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Task",
