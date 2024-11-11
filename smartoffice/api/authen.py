@@ -5,6 +5,9 @@ import string
 from frappe.utils import now_datetime, add_to_date, get_datetime
 import jwt
 import json
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 
 
@@ -150,12 +153,22 @@ def send_otp_email(email, otp, reference_code):
         subject = frappe.render_template(email_template.subject, args)
         message = frappe.render_template(email_template.response, args)
         
-        frappe.sendmail(
-            recipients=email,
-            subject=subject,
-            message=message
-        )
+        # ใช้ Email Account เริ่มต้น
+        email_account = frappe.get_doc("Email Account", {"default_outgoing": 1})
         
+        # ส่งอีเมล์โดยตรงผ่าน SMTP จาก Email Account
+        msg = MIMEMultipart()
+        msg['From'] = email_account.email_id
+        msg['To'] = email
+        msg['Subject'] = subject
+        msg.attach(MIMEText(message, 'html'))
+        
+        # ส่งอีเมล์โดยตรงผ่าน SMTP
+        with smtplib.SMTP(email_account.smtp_server, email_account.smtp_port) as server:
+            server.starttls()
+            server.login(email_account.email_id, email_account.get_password())
+            server.send_message(msg)
+            
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "OTP Email Sending Error")
         frappe.throw(_("Failed to send OTP email"))
