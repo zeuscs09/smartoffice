@@ -10,7 +10,7 @@
             class="btn btn-sm btn-outline" 
             @click="handleLogout"
           >
-            ออกจากระบบ
+            Logout
           </button>
         </div>
       </div>
@@ -145,11 +145,11 @@
     <!-- Approve Modal -->
     <dialog ref="approveModal" class="modal">
       <div class="modal-box">
-        <h3 class="font-bold text-lg">ยืนยันการอนุมัติ</h3>
-        <p class="py-4">คุณต้องการอนุมัติรายงานนี้ใช่หรือไม่?</p>
+        <h3 class="font-bold text-lg">Confirm Approval</h3>
+        <p class="py-4">Do you want to approve this report?</p>
         <div class="modal-action">
-          <button class="btn btn-success" @click="confirmApprove">ยืนยัน</button>
-          <button class="btn" @click="closeApproveModal">ยกเลิก</button>
+          <button class="btn btn-success" @click="confirmApprove">Confirm</button>
+          <button class="btn" @click="closeApproveModal">Cancel</button>
         </div>
       </div>
     </dialog>
