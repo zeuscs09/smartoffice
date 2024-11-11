@@ -52,6 +52,23 @@ const routes = [
     name:'WorkLoad',
     path:'/workload',
     component:()=>import('@/pages/Team/WorkLoad.vue')
+  },
+  {
+    path: '/customer',
+    redirect: '/customer/login',
+    children: [
+      {
+        name: 'CustomerLogin',
+        path: 'login',
+        component: () => import('@/pages/CustomerPortal/Login.vue'),
+      },
+      {
+        name: 'CustomerServiceList',
+        path: 'services',
+        component: () => import('@/pages/CustomerPortal/ServiceList.vue'),
+        meta: { requiresCustomerAuth: true }
+      }
+    ]
   }
 ]
 
@@ -67,7 +84,24 @@ let router = createRouter({
   }
 })
 
+const isCustomerAuthenticated = () => {
+  const token = localStorage.getItem('customerToken')
+  return !!token // returns true if token exists
+}
+
 router.beforeEach(async (to, from, next) => {
+  if (to.matched.some(record => record.meta.requiresCustomerAuth)) {
+    if (!isCustomerAuthenticated()) {
+      next({ name: 'CustomerLogin' })
+      return
+    }
+  }
+
+  if (to.name === 'CustomerLogin' && isCustomerAuthenticated()) {
+    next({ name: 'CustomerServiceList' })
+    return
+  }
+
   let isLoggedIn = session.isLoggedIn
   try {
     await userResource.promise
@@ -77,7 +111,7 @@ router.beforeEach(async (to, from, next) => {
 
   if (to.name === 'Login' && isLoggedIn) {
     next({ name: 'Home' })
-  } else if (to.name !== 'Login' && !isLoggedIn) {
+  } else if (to.name !== 'Login' && !isLoggedIn && !to.path.startsWith('/customer')) {
     next({ name: 'Login' })
   } else {
     next()

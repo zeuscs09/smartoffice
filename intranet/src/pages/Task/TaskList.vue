@@ -110,7 +110,7 @@
                         <tr v-for="report in serviceReportStore.data" :key="report.name">
                             <td>
                                 <span class="cursor-pointer"
-                                    @click="router.push({ name: 'TaskDetail', params: { id: report.reference_name }, query: { todo: report.name } })">
+                                    @click="viewDocument(report.name,report.reference_name)">
                                    
                                     <span class="tooltip tooltip-bottom" data-tip="Due Date">{{ report.reference_name }} &nbsp;{{ formatDate(report.due_date) }}</span>
                                   
@@ -318,8 +318,12 @@ const applyFiltersAndRefresh = () => {
     serviceReportStore.fetchAll(serviceReportStore.currentPage)
 }
 
-const viewDocument = (docName: string) => {
-    window.open(`/app/smo-service-report/${docName}?from_page=/intranet/service-report&from=front_end`, '_blank')
+const viewDocument = (docName: string,reference_name:string) => {
+    if(docName.startsWith('DRAFT')){
+        window.open(`/app/smo-task/${reference_name}?from_page=/intranet/service-report&from=front_end`, '_blank')
+    }else{
+        router.push({ name: 'TaskDetail', params: { id: reference_name }, query: { todo: docName } })
+    }
 }
 const newTask = () => {
     window.open('/app/smo-task/new?from_page=/intranet', '_blank')

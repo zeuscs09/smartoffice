@@ -3,12 +3,14 @@
 
 frappe.ui.form.on("SMO Service Report", {
   refresh(frm) {
-    // if(frappe.utils.get_query_params().from){
-    //   frappe.breadcrumbs.add("");
-    //   $('.navbar').hide();
-    //   $('.standard-actions').hide();
-    //   // $('.next-doc').hide();
-    // }
+    if (
+      frm.doc.workflow_state !== "Customer Reject" ||
+      frm.doc.owner !== frappe.session.user
+    ) {
+      frm.page.btn_secondary.hide();
+    } else {
+      frm.page.btn_secondary.show();
+    }
     if (frm.doc.from_page || frappe.utils.get_query_params().from_page) {
       $(".navbar").css("visibility", "hidden");
       $(".menu-btn-group").hide();

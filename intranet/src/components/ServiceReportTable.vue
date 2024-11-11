@@ -186,6 +186,7 @@ const getStatusClass = (status: string) => {
     case 'customer review': return 'badge badge-xs badge-warning'
     case 'customer approve': return 'badge badge-xs badge-success'
     case 'rejected': return 'badge badge-xs badge-error'
+    case 'customer reject': return 'badge badge-xs badge-error'
     default: return 'badge badge-xs'
   }
 }
