@@ -23,6 +23,7 @@
   "contact_name",
   "contact_mobile",
   "contact_email",
+  "reject_reason",
   "job_detail_section",
   "start_date_input",
   "is_holiday",
@@ -377,6 +378,12 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Project Name"
+  },
+  {
+   "fieldname": "reject_reason",
+   "fieldtype": "Data",
+   "label": "Reject Reason",
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
@@ -389,7 +396,7 @@
    "link_fieldname": "service_report"
   }
  ],
- "modified": "2024-11-10 15:18:00.748806",
+ "modified": "2024-11-11 17:29:23.110183",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Service Report",
@@ -419,6 +426,21 @@
    "report": 1,
    "role": "Engineer Staff",
    "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "if_owner": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Engineer Staff",
+   "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],
