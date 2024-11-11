@@ -10,15 +10,15 @@
   "doc_detail_section",
   "naming_series",
   "service_date",
-  "customer",
-  "customer_name",
-  "customer_site",
+  "total_amount",
+  "reject_reason",
   "column_break_ifjs",
+  "customer",
+  "customer_site",
+  "customer_name",
   "project",
   "project_code",
   "project_name",
-  "total_amount",
-  "reject_reason",
   "section_break_xllw",
   "distance_depart",
   "distance_return",
@@ -26,9 +26,13 @@
   "config_taxi_init",
   "expense_item_section",
   "reference_code",
-  "expense_item",
+  "column_break_cxiw",
+  "advance_amount",
+  "section_break_fcof",
   "approve_by",
   "approver",
+  "expense_items_section",
+  "expense_item",
   "section_break_fabx",
   "amended_from",
   "from_page",
@@ -100,8 +104,7 @@
   },
   {
    "fieldname": "expense_item_section",
-   "fieldtype": "Section Break",
-   "label": "Expense Item"
+   "fieldtype": "Section Break"
   },
   {
    "depends_on": "eval:doc.reference_code != undefined && doc.reference_code.trim() != ''",
@@ -212,13 +215,32 @@
    "fieldname": "section_break_xllw",
    "fieldtype": "Section Break",
    "hidden": 1
+  },
+  {
+   "fieldname": "column_break_cxiw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "advance_amount",
+   "fieldtype": "Float",
+   "label": "Advance Amount",
+   "precision": "2"
+  },
+  {
+   "fieldname": "section_break_fcof",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "expense_items_section",
+   "fieldtype": "Section Break",
+   "label": "Expense Items"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-11-08 23:25:00.450630",
+ "modified": "2024-11-11 21:42:02.393131",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Advance Entry",

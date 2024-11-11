@@ -305,7 +305,7 @@ frappe.ui.form.on("SMO Expense Item", {
     var df = frappe.meta.get_docfield(
       "SMO Expense Item",
       "paid_by",
-      cur_frm.doc.name
+      frm.doc.name
     );
     df.hidden = 1;
 
@@ -337,9 +337,19 @@ frappe.ui.form.on("SMO Expense Item", {
       row.total_cost =
         row.taxi_initial + row.taxi_return_distance * row.rate_per_km;
     }
-    if (row.expense_type == "EP004") {
-      row.total_cost = cur_frm.doc.ot_rate;
-    }
+    var df = frappe.meta.get_docfield(
+      "SMO Expense Item",
+      "total_cost",
+      frm.doc.name
+    );
+  
+
+    // if (row.expense_type == "EP004") {
+    //   df.toggle_editable("total_cost", 0);
+    // } else {
+    //   df.toggle_editable("total_cost", 1);
+    // }
+    
     frm.trigger("cal_total");
     frm.refresh_field("expense_item");
   },
