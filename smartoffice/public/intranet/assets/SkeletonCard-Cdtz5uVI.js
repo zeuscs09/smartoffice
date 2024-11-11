@@ -1,1 +1,0 @@
-import{_ as a,o,c as r,a as e}from"./index-BW28XbHO.js";const c={},d={class:"card bg-base-100 shadow-xl"};function n(t,s){return o(),r("div",d,s[0]||(s[0]=[e("div",{class:"card-body"},[e("div",{class:"h-40 bg-gray-200 rounded-lg"}," Loading ")],-1)]))}const _=a(c,[["render",n]]);export{_ as S};

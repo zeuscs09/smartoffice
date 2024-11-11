@@ -93,3 +93,132 @@ def verify_customer_token(token):
         return email
     except:
         return None
+
+@frappe.whitelist(allow_guest=True)
+def approve_service_report(report_name):
+    try:
+        # Check token from header
+        token = frappe.get_request_header('Authorization')
+        if not token:
+            return {
+                "status": "error",
+                "message": "Not authenticated"
+            }
+            
+        # Verify token
+        token = token.replace('Bearer ', '')
+        email = verify_customer_token(token)
+        if not email:
+            return {
+                "status": "error",
+                "message": "Invalid or expired token"
+            }
+
+        # Check report status and contact email
+        result = frappe.db.get_value("SMO Service Report", report_name, 
+            ["workflow_state", "contact_email"], as_dict=1)
+            
+        if not result:
+            return {
+                "status": "error",
+                "message": "Service report not found"
+            }
+            
+        workflow_state = result.workflow_state
+       
+        if workflow_state != "Customer Review":
+            return {
+                "status": "error",
+                "message": "This service report is not in review status"
+            }
+
+        # Update status
+        doc = frappe.get_doc("SMO Service Report", report_name)
+        doc.workflow_state = "Customer Approve"
+        doc.flags.ignore_permissions = True
+        doc.submit()
+        frappe.db.commit()
+
+        return {
+            "status": "success",
+            "message": "Service report approved successfully"
+        }
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Customer Portal - Approve Error")
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
+@frappe.whitelist(allow_guest=True)
+def reject_service_report(report_name, reason=None):
+    try:
+        # Check token from header
+        token = frappe.get_request_header('Authorization')
+        if not token:
+            return {
+                "status": "error",
+                "message": "Not authenticated"
+            }
+            
+        # Verify token
+        token = token.replace('Bearer ', '')
+        email = verify_customer_token(token)
+        if not email:
+            return {
+                "status": "error",
+                "message": "Invalid or expired token"
+            }
+
+        # Check report status
+        workflow_state = frappe.db.get_value("SMO Service Report", report_name, "workflow_state")
+        
+        if workflow_state != "Customer Review":
+            return {
+                "status": "error",
+                "message": "This service report cannot be rejected in its current status"
+            }
+
+        # Update status
+        frappe.db.set_value("SMO Service Report", report_name, {
+            "workflow_state": "Customer Reject",
+            "reject_reason": reason
+        })
+        frappe.db.commit()
+
+        # Send notification
+        send_rejection_notification(report_name, reason)
+
+        return {
+            "status": "success",
+            "message": "Service report rejected successfully"
+        }
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Customer Portal - Reject Error")
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
+def send_rejection_notification(name, reason):
+    try:
+        doc = frappe.db.get_value("SMO Service Report", name, 
+            ["name", "owner"], as_dict=True)
+        
+        team_emails = frappe.db.sql("""
+            SELECT email FROM `tabSMO Service Report Team`
+            WHERE parent = %s
+        """, (name,), as_dict=True)
+        
+        recipients = [d.email for d in team_emails] + [doc.owner]
+        frappe.sendmail(
+            recipients=recipients,
+            subject=f"Service Report {doc.name} Rejected",
+            message=f"The service report {doc.name} has been rejected by the customer. Reason: {reason or 'No reason provided'}",
+            reference_doctype="SMO Service Report",
+            reference_name=doc.name
+        )
+    except Exception as e:
+        frappe.log_error(f"Error sending rejection notification: {str(e)}")
