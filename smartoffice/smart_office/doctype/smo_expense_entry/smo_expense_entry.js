@@ -69,12 +69,15 @@ frappe.ui.form.on("SMO Expense Entry", {
           let config = r.message;
           if (frm.doc.config_taxi_rate == 0) {
             frm.set_value("config_taxi_rate", config.taxi_rate);
+            frm.refresh_field("config_taxi_rate");
           }
           if (frm.doc.config_taxi_init == 0) {
             frm.set_value("config_taxi_init", config.taxi_start);
+            frm.refresh_field("config_taxi_init");
           }
           if (frm.doc.over_night_rate == 0) {
             frm.set_value("over_night_rate", config.over_night_rate);
+            frm.refresh_field("over_night_rate");
           }
           // frm.set_value("config_taxi_rate", r.message);
         }
@@ -94,7 +97,7 @@ frappe.ui.form.on("SMO Expense Entry", {
   cal_total(frm) {
     console.log("cal_total");
     let total_amount = 0;
-
+    console.log(frm.doc.expense_item);
     if (frm.doc.expense_item) {
       frm.doc.expense_item.forEach((e) => {
         total_amount += e.total_cost || 0;
@@ -164,8 +167,9 @@ frappe.ui.form.on("SMO Expense Entry", {
 frappe.ui.form.on("SMO Expense Item", {
   refresh(frm) {},
   expense_item_add: function (frm, cdt, cdn) {
-    let taxi_rate = frm.get_field("config_taxi_rate").value;
-    let taxi_initial = frm.get_field("config_taxi_init").value;
+   
+    let taxi_rate = frm.doc.config_taxi_rate;
+    let taxi_initial = frm.doc.config_taxi_init;
     // เข้าถึงแถวที่ถูกเพิ่ม (child row)
     let row = locals[cdt][cdn];
     row.receipt_date = frappe.datetime
@@ -219,8 +223,9 @@ frappe.ui.form.on("SMO Expense Item", {
     row.expense_type = row.input_expense_types;
 
     if (row.rate_per_km == 0) {
-      let taxi_rate = frm.get_field("config_taxi_rate").value;
-      let taxi_initial = frm.get_field("config_taxi_init").value;
+      
+    let taxi_rate = frm.doc.config_taxi_rate;
+    let taxi_initial = frm.doc.config_taxi_init;
       row.rate_per_km = taxi_rate;
       row.taxi_initial = taxi_initial;
     }
