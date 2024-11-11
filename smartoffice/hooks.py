@@ -228,4 +228,4 @@ app_license = "mit"
 # }
 
 
-website_route_rules = [{'from_route': '/intranet/<path:app_path>', 'to_route': 'intranet'},]
+website_route_rules = [{'from_route': '/intranet/<path:app_path>', 'to_route': 'intranet'}]

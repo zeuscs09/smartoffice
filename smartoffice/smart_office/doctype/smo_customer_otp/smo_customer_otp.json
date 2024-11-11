@@ -1,0 +1,78 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-11-11 09:27:17.455455",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "email",
+  "otp",
+  "expiry",
+  "is_used",
+  "session_token",
+  "reference_code"
+ ],
+ "fields": [
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Email",
+   "reqd": 1
+  },
+  {
+   "fieldname": "otp",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "OTP",
+   "reqd": 1
+  },
+  {
+   "fieldname": "expiry",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Expiry Time",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_used",
+   "fieldtype": "Check",
+   "label": "Is Used"
+  },
+  {
+   "fieldname": "session_token",
+   "fieldtype": "Data",
+   "label": "Session Token"
+  },
+  {
+   "fieldname": "reference_code",
+   "fieldtype": "Data",
+   "label": "Reference Code"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-11-11 09:34:33.880968",
+ "modified_by": "Administrator",
+ "module": "Smart Office",
+ "name": "SMO Customer OTP",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
