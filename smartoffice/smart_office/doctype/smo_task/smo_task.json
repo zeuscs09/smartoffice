@@ -129,6 +129,7 @@
    "label": "Project",
    "link_filters": "[[\"Project\",\"custom_project_status\",\"not in\",[\"completed\",\"Cancelled\",null]]]",
    "options": "Project",
+   "reqd": 1,
    "search_index": 1
   },
   {
@@ -272,7 +273,7 @@
    "link_fieldname": "task"
   }
  ],
- "modified": "2024-11-12 15:26:07.563258",
+ "modified": "2024-11-12 22:06:48.935716",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Task",
