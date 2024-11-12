@@ -64,7 +64,7 @@ class SMOTask(Document):
             if isinstance(self.start_date, str):
                 start_date = datetime.strptime(self.start_date, '%Y-%m-%d')
 
-            # วนลูปสำหรับแต่ละวันในช่วงเวลา
+            # วนลูปสหรับแต่ละวันในช่วงเวลา
             current_date = start_date
             end_date = datetime.strptime(self.finish_date or self.start_date, '%Y-%m-%d')
             while current_date <= end_date:
@@ -75,16 +75,27 @@ class SMOTask(Document):
                 )
 
                 # ตรวจสอบว่าเป็นทั้งวันหรือไม่
-                if self.period == "All Day":
+                if self.period == "All day":
                     dtstart = current_date.strftime('%Y%m%d')
                     dtend = (current_date + timedelta(days=1)).strftime('%Y%m%d')
                     dtstart_format = f"DTSTART;VALUE=DATE:{dtstart}"
                     dtend_format = f"DTEND;VALUE=DATE:{dtend}"
                 else:
-                    dtstart = current_date.strftime('%Y%m%dT%H%M%S')
-                    dtend = (current_date + timedelta(hours=self.expected_time_use/3600)).strftime('%Y%m%dT%H%M%S')
+                    # รวมวันที่และเวลาเริ่มต้นที่วางแผนไว้
+                    start_datetime = datetime.combine(
+                        current_date.date(),
+                        datetime.strptime(self.start_time, '%H:%M:%S').time()
+                    )
+                    # คำนวณเวลาสิ้นสุดโดยบวกเวลาที่คาดว่าจะใช้
+                    end_datetime = start_datetime + timedelta(hours=self.expected_time_use/3600)
+                    
+                    dtstart = start_datetime.strftime('%Y%m%dT%H%M%S')
+                    dtend = end_datetime.strftime('%Y%m%dT%H%M%S')
                     dtstart_format = f"DTSTART;TZID=Asia/Bangkok:{dtstart}"
                     dtend_format = f"DTEND;TZID=Asia/Bangkok:{dtend}"
+
+                # สร้าง URL สำหรับ link กลับไปยัง document
+                doc_url = f"{frappe.utils.get_url()}/app/smo-task/{self.name}?from_page=calendar"
 
                 ics_content = f"""BEGIN:VCALENDAR
 VERSION:2.0
@@ -101,15 +112,16 @@ DTSTART:19700101T000000
 END:STANDARD
 END:VTIMEZONE
 BEGIN:VEVENT
-UID:{self.name}@{frappe.local.site}
+UID:{self.name}-{current_date.strftime('%Y%m%d')}@{frappe.local.site}
 DTSTAMP:{datetime.now().strftime('%Y%m%dT%H%M%SZ')}
 ORGANIZER;CN={frappe.session.user}:MAILTO:{frappe.session.user}
 {attendees}
 SUMMARY:{self.task_name}
 {dtstart_format}
 {dtend_format}
-DESCRIPTION:Task: {self.task_name}\\nLocation: {self.location}\\nPriority: {self.priority}\\nProject: {self.project_code} - {self.project_name}
+DESCRIPTION:Task: {self.task_name}\\nLocation: {self.location}\\nPriority: {self.priority}\\nProject: {self.project_code} - {self.project_name}\\n\\nView Task: {doc_url}
 LOCATION:{self.location}
+URL:{doc_url}
 STATUS:CONFIRMED
 SEQUENCE:0
 END:VEVENT
