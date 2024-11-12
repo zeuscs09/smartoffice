@@ -130,6 +130,7 @@ def get_team_workload(month, year):
                             COALESCE(s.customer_name, ''),
                             ')',
                             IF(s.task_name IS NOT NULL, CONCAT(' | ', s.task_name), ''),
+                            IF(s.location IS NOT NULL, CONCAT(' @ ', s.location), ''),
                             IF(s.start_time IS NOT NULL AND s.to_time IS NOT NULL,
                                 CONCAT(' (', TIME_FORMAT(s.start_time, '%%H:%%i'), ' - ', TIME_FORMAT(s.to_time, '%%H:%%i'), ')'),
                                 ''
