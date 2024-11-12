@@ -75,7 +75,11 @@
             <td>
               <div :class="getStatusClass(doc.workflow_state)">{{ doc.workflow_state }}</div>
               <br />
-              <button class="btn btn-neutral btn-xs mt-1" @click="openExpenseEntry(doc.name)">
+              <button 
+                v-if="!['customer reject', 'rejected'].includes(doc.workflow_state.toLowerCase())"
+                class="btn btn-neutral btn-xs mt-1" 
+                @click="openExpenseEntry(doc.name)"
+              >
                 + Expense
               </button>
             </td>
@@ -124,7 +128,11 @@
             </div>
             <div class="card-actions justify-end">
               <div class="flex justify-between items-center w-full">
-                <button class="btn btn-neutral btn-sm" @click="openExpenseEntry(doc.name)">
+                <button 
+                  v-if="!['customer reject', 'rejected'].includes(doc.workflow_state.toLowerCase())"
+                  class="btn btn-neutral btn-sm" 
+                  @click="openExpenseEntry(doc.name)"
+                >
                   <span class="ml-1 text-xs">+ Expense</span>
                 </button>
                 <UserAvatar :email="doc.teams" />
