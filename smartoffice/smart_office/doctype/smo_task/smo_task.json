@@ -8,6 +8,7 @@
   "task_infromation_section",
   "naming_series",
   "job_type",
+  "location",
   "title",
   "task_name",
   "start_date",
@@ -118,7 +119,8 @@
   {
    "fieldname": "expected_time_use",
    "fieldtype": "Duration",
-   "label": "Expected Time Use"
+   "label": "Expected Time Use",
+   "mandatory_depends_on": "eval:doc.location==\"Office\""
   },
   {
    "fieldname": "project",
@@ -155,14 +157,14 @@
    "fieldname": "contact_email",
    "fieldtype": "Data",
    "label": "Contact Email",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.location==\"On Site\""
   },
   {
    "depends_on": "customer",
    "fieldname": "site",
    "fieldtype": "Link",
    "label": "Site",
-   "mandatory_depends_on": "customer",
+   "mandatory_depends_on": "eval:doc.location==\"On Site\";",
    "options": "SMO Customer Site"
   },
   {
@@ -194,8 +196,8 @@
    "fieldname": "contact_person",
    "fieldtype": "Data",
    "label": "Contact Person",
-   "options": "Contact",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.location==\"On Site\"",
+   "options": "Contact"
   },
   {
    "fieldname": "title",
@@ -252,6 +254,13 @@
    "fieldtype": "Data",
    "label": "Project Code",
    "read_only": 1
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Select",
+   "label": "Location",
+   "options": "\nOn Site\nOffice",
+   "reqd": 1
   }
  ],
  "hide_toolbar": 1,
@@ -263,7 +272,7 @@
    "link_fieldname": "task"
   }
  ],
- "modified": "2024-11-10 16:01:36.493348",
+ "modified": "2024-11-12 15:26:07.563258",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Task",

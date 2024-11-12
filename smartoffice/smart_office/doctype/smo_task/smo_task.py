@@ -3,6 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe import _
 from datetime import datetime, timedelta
 
   
@@ -22,6 +23,8 @@ class SMOTask(Document):
 
     def on_submit(self):
         self.create_todos()
+        if self.location == "Office":
+            self.create_timesheet()
 
     def on_cancel(self):
         self.delete_todos()
@@ -43,7 +46,7 @@ class SMOTask(Document):
                     "date": current_date.strftime('%Y-%m-%d'),
                     "allocated_to": team_member.user,
                     "priority": "Medium" if self.priority == "Normal" else self.priority,
-                    "status": "Open"
+                    "status": "Closed" if self.location == "Office" else "Open"
                 })
                 todo.insert(ignore_permissions=True)
                 current_date += timedelta(days=1)
@@ -58,6 +61,46 @@ class SMOTask(Document):
         for todo in todos:
             frappe.delete_doc("ToDo", todo, ignore_permissions=True)
 
+    def create_timesheet(self):
+        created_timesheets = []  # เก็บรายการ timesheet ที่สร้าง
+        for item in self.team:
+            try:
+                employee = frappe.get_doc('Employee', {"user_id": item.user})
+                
+                timesheet = frappe.get_doc({
+                    'doctype': 'Timesheet',
+                    'company': employee.company,
+                    'employee': employee.name,
+                    'time_logs': [{
+                        'activity_type': 'Office Work',
+                        'from_time': self.start_date,
+                        'hours': self.expected_time_use / 3600,
+                        'completed': 1,
+                        'project': self.project
+                    }]
+                })
+                
+                if self.customer:
+                    timesheet.customer = self.customer
+                
+                try:
+                    timesheet.flags.ignore_validate = True
+                    timesheet.insert(ignore_permissions=True)
+                    timesheet.submit()
+                    created_timesheets.append(timesheet.name)  # เก็บชื่อ timesheet
+                    frappe.msgprint(_(f"Timesheet {timesheet.name} created for {employee.employee_name}"))
+                except Exception as e:
+                    frappe.log_error(f"Failed to create timesheet for {employee.employee_name}: {str(e)}")
+                    frappe.throw(_(f"Could not create timesheet for {employee.employee_name}: {str(e)}"))
+                
+            except frappe.DoesNotExistError:
+                frappe.log_error(f"Employee not found for user: {item.user}")
+                frappe.throw(_(f"Employee not found for user: {item.user}"))
+            except Exception as e:
+                frappe.log_error(f"Error creating timesheet: {str(e)}")
+                frappe.throw(_(f"Error creating timesheet: {str(e)}"))
+        
+        return created_timesheets  # ส่งคืนรายการ timesheet ที่สร้างทั้งหมด
 @frappe.whitelist()
 def fetch_task_data(task):
     if not task:

@@ -1,7 +1,7 @@
 <template>
     <UserLayout>
 
-        <div v-if="!isLoading" class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+        <div v-if="!isLoading" class="mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
 
             <div v-if="task.doc">
                 <div class="bg-gray-100 p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center">
