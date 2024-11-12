@@ -120,7 +120,7 @@
    "fieldname": "expected_time_use",
    "fieldtype": "Duration",
    "label": "Expected Time Use",
-   "mandatory_depends_on": "eval:doc.location==\"Office\""
+   "reqd": 1
   },
   {
    "fieldname": "project",
@@ -173,7 +173,7 @@
    "fieldtype": "Section Break"
   },
   {
-   "depends_on": "eval:doc.start_date != null",
+   "depends_on": "start_date",
    "fieldname": "team",
    "fieldtype": "Table",
    "label": "Team",
@@ -273,7 +273,7 @@
    "link_fieldname": "task"
   }
  ],
- "modified": "2024-11-12 22:06:48.935716",
+ "modified": "2024-11-12 22:46:47.739099",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Task",

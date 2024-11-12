@@ -5,11 +5,7 @@ import frappe
 from frappe.model.document import Document
 from frappe import _
 from datetime import datetime, timedelta
-try:
-    from icalendar import Calendar, Event, vText
-except ImportError:
-    frappe.throw(_("Please install icalendar package: pip install icalendar"))
-    
+
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
@@ -33,6 +29,7 @@ class SMOTask(Document):
 
     def on_submit(self):
         self.create_todos()
+        self.send_task_email()
         if self.location == "Office":
             self.create_timesheet()
 
@@ -59,84 +56,116 @@ class SMOTask(Document):
                     "status": "Closed" if self.location == "Office" else "Open"
                 })
                 todo.insert(ignore_permissions=True)
+                current_date += timedelta(days=1)
+    def send_task_email(self):
+        try:
+            # แปลง self.start_date เป็น datetime ถ้าจำเป็น
+            start_date = self.start_date
+            if isinstance(self.start_date, str):
+                start_date = datetime.strptime(self.start_date, '%Y-%m-%d')
 
-                try:
-                    
-                    employee = frappe.get_doc("Employee", team_member.employee)
-                    cal = Calendar()
-                    cal.add('prodid', '-//Smart Office Task Calendar//')
-                    cal.add('version', '2.0')
+            # วนลูปสำหรับแต่ละวันในช่วงเวลา
+            current_date = start_date
+            end_date = datetime.strptime(self.finish_date or self.start_date, '%Y-%m-%d')
+            while current_date <= end_date:
+                # สร้างไฟล์ .ics ด้วยตนเอง
+                attendees = "\n".join(
+                    f"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN={frappe.get_doc('Employee', member.employee).employee_name}:MAILTO:{frappe.get_doc('Employee', member.employee).personal_email or member.user}"
+                    for member in self.team
+                )
 
-                    event = Event()
-                    event.add('status', 'CONFIRMED')
-                    event.add('method', 'REQUEST')
-                    event.add('sequence', 0)
-                    event['uid'] = f"{self.name}@{frappe.local.site}"
-                    event.add('organizer', f"mailto:{frappe.session.user}")
-                    event.add('attendee', f"mailto:{employee.personal_email or employee.user_id}")
-                    event.add('summary', self.task_name)
-                    event.add('dtstart', current_date)
-                    event.add('dtend', current_date + timedelta(hours=self.expected_time_use/3600))
-                    event.add('description', f"""
-                        Task: {self.task_name}
-                        Location: {self.location}
-                        Priority: {self.priority}
-                        Project: {self.project_code} - {self.project_name}
-                    """)
-                    event.add('location', self.location)
-                    event.add('priority', 5 if self.priority == "Normal" else 1)
-                    
-                    cal.add_component(event)
+                # ตรวจสอบว่าเป็นทั้งวันหรือไม่
+                if self.period == "All Day":
+                    dtstart = current_date.strftime('%Y%m%d')
+                    dtend = (current_date + timedelta(days=1)).strftime('%Y%m%d')
+                    dtstart_format = f"DTSTART;VALUE=DATE:{dtstart}"
+                    dtend_format = f"DTEND;VALUE=DATE:{dtend}"
+                else:
+                    dtstart = current_date.strftime('%Y%m%dT%H%M%S')
+                    dtend = (current_date + timedelta(hours=self.expected_time_use/3600)).strftime('%Y%m%dT%H%M%S')
+                    dtstart_format = f"DTSTART;TZID=Asia/Bangkok:{dtstart}"
+                    dtend_format = f"DTEND;TZID=Asia/Bangkok:{dtend}"
 
-                    email_settings = frappe.get_doc('Email Account', {'default_outgoing': 1})
-                    
-                    email_body = f"""
-                    Dear {employee.employee_name},
+                ics_content = f"""BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Smart Office Task Calendar//
+METHOD:REQUEST
+BEGIN:VTIMEZONE
+TZID:Asia/Bangkok
+X-LIC-LOCATION:Asia/Bangkok
+BEGIN:STANDARD
+TZOFFSETFROM:+0700
+TZOFFSETTO:+0700
+TZNAME:ICT
+DTSTART:19700101T000000
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:{self.name}@{frappe.local.site}
+DTSTAMP:{datetime.now().strftime('%Y%m%dT%H%M%SZ')}
+ORGANIZER;CN={frappe.session.user}:MAILTO:{frappe.session.user}
+{attendees}
+SUMMARY:{self.task_name}
+{dtstart_format}
+{dtend_format}
+DESCRIPTION:Task: {self.task_name}\\nLocation: {self.location}\\nPriority: {self.priority}\\nProject: {self.project_code} - {self.project_name}
+LOCATION:{self.location}
+STATUS:CONFIRMED
+SEQUENCE:0
+END:VEVENT
+END:VCALENDAR"""
 
-                    You have been assigned a new task:
-                    Project: {self.project_code} - {self.project_name}
-                    Task Name: {self.task_name}
-                    Start Date: {self.start_date}
-                    End Date: {self.finish_date or self.start_date}
-                    Location: {self.location}
-                    Priority: {self.priority}
-
-                    Please find attached the calendar invitation.
-
-                    Best regards,
-                    {frappe.session.user}
-                    """
-
-                    msg = MIMEMultipart('mixed')
-                    msg['Subject'] = f"New Task Assignment: {self.task_name}"
-                    msg['From'] = email_settings.email_id
-                    recipient_email = employee.personal_email or employee.user_id
-                    msg['To'] = recipient_email
-
-                    # สร้าง alternative part
-                    alt = MIMEMultipart('alternative')
-                    
-                    # เพิ่ม text part
-                    text_part = MIMEText(email_body, 'plain')
-                    alt.attach(text_part)
-                    
-                    # เพิ่ม calendar part
-                    cal_part = MIMEText(cal.to_ical().decode('utf-8'), 'text/calendar; method=REQUEST; charset=UTF-8')
-                    cal_part.add_header('Content-Disposition', 'attachment; filename=invite.ics')
-                    alt.attach(cal_part)
-                    
-                    msg.attach(alt)
-
-                    with smtplib.SMTP(email_settings.smtp_server, email_settings.smtp_port) as server:
-                        server.starttls()
-                        server.login(email_settings.email_id, email_settings.get_password())
-                        server.send_message(msg)
-                    # frappe.msgprint(_(f"Calendar invitation sent to {recipient_email}"))
-                except Exception as e:
-                    frappe.throw(f"Failed to send calendar invitation to {recipient_email}: {str(e)}")
+                email_settings = frappe.get_doc('Email Account', {'default_outgoing': 1})
                 
+                email_body = f"""
+                Dear Team,
+
+                You have been assigned a new task:
+                Project: {self.project_code} - {self.project_name}
+                Task Name: {self.task_name}
+                Start Date: {self.start_date}
+                End Date: {self.finish_date or self.start_date}
+                Location: {self.location}
+                Priority: {self.priority}
+
+                Please find attached the calendar invitation.
+
+                Best regards,
+                {frappe.session.user}
+                """
+
+                msg = MIMEMultipart('mixed')
+                msg['Subject'] = f"New Task Assignment: {self.task_name}"
+                msg['From'] = email_settings.email_id
+
+                # รวบรวมอีเมลของสมาชิกในทีม
+                recipient_emails = [frappe.get_doc("Employee", member.employee).personal_email or member.user for member in self.team]
+                msg['To'] = ", ".join(recipient_emails)
+
+                # สร้าง alternative part
+                alt = MIMEMultipart('alternative')
+                
+                # เพิ่ม text part
+                text_part = MIMEText(email_body, 'plain')
+                alt.attach(text_part)
+                
+                # เพิ่ม calendar part
+                cal_part = MIMEText(ics_content, 'text/calendar; method=REQUEST; charset=UTF-8')
+                cal_part.add_header('Content-Disposition', 'inline; filename=invite.ics')
+                cal_part.add_header('Content-Class', 'urn:content-classes:calendarmessage')
+                alt.attach(cal_part)
+                
+                msg.attach(alt)
+
+                with smtplib.SMTP(email_settings.smtp_server, email_settings.smtp_port) as server:
+                    server.starttls()
+                    server.login(email_settings.email_id, email_settings.get_password())
+                    server.send_message(msg)
+
                 current_date += timedelta(days=1)
 
+        except Exception as e:
+            frappe.throw(f"Failed to send calendar invitation: {str(e)}")
     def delete_todos(self):
         todos = frappe.get_all("ToDo", 
                                filters={
