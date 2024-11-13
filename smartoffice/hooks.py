@@ -229,3 +229,15 @@ app_license = "mit"
 
 
 website_route_rules = [{'from_route': '/intranet/<path:app_path>', 'to_route': 'intranet'}]
+
+cors_headers = [
+    {
+        "origin": [
+            "http://localhost:5173",
+            "http://localhost:3000"
+           
+        ],
+        "methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "allow_headers": "Content-Type, Authorization, X-Requested-With"
+    }
+]

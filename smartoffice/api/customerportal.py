@@ -132,15 +132,12 @@ def approve_service_report(report_name):
                 "message": "This service report is not in review status"
             }
 
-        # Update status
-        doc = frappe.get_doc("SMO Service Report", report_name)
-        doc.workflow_state = "Customer Approve"
-        doc.flags.ignore_permissions = True
-        doc.submit()
+        # Update status using db.set_value
+        frappe.db.set_value("SMO Service Report", report_name, "workflow_state", "Customer Approve")
         frappe.db.commit()
 
         return {
-            "status": "success",
+            "status": "success", 
             "message": "Service report approved successfully"
         }
 
