@@ -93,7 +93,7 @@
    "options": "All day\nAM\nPM\nNot Specific"
   },
   {
-   "default": "00:00:00",
+   "default": "08:30:30",
    "fieldname": "start_time",
    "fieldtype": "Time",
    "label": "Plan Start Time"
@@ -103,7 +103,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "23:59:59",
+   "default": "17:30:00",
    "fieldname": "to_time",
    "fieldtype": "Time",
    "label": "Plan To"
@@ -297,7 +297,7 @@
    "link_fieldname": "task"
   }
  ],
- "modified": "2024-11-22 09:42:41.940711",
+ "modified": "2024-11-22 10:32:27.847324",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Task",

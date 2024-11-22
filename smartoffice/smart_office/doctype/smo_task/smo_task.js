@@ -3,12 +3,6 @@
 
 frappe.ui.form.on("SMO Task", {
   refresh(frm) {
-    // if(frappe.utils.get_query_params().from){
-    //   frappe.breadcrumbs.add("");
-    //   $('.navbar').hide();
-    //   $('.standard-actions').hide();
-    //   // $('.next-doc').hide();
-    // }
     if (frm.doc.from_page || frappe.utils.get_query_params().from_page) {
       $(".navbar").css("visibility", "hidden");
       $(".menu-btn-group").hide();
@@ -26,36 +20,17 @@ frappe.ui.form.on("SMO Task", {
       frm.copy_doc();
     }
    
-    
-    // เพิ่มการตรวจสอบว่าสามารถใช้ history.back() ได้หรือไม่
     const canGoBack = window.history.length > 1;
     if(frm.doc.from_page == "copy"){
       canGoBack = false;
     }
     
-
     if (
       frm.doc.status === "Completed" ||
       frm.doc.status === "Cancel" ||
       frm.doc.status === "In Review"
     ) {
-      // Disable all fields
       frm.disable_form();
-    } else if (frm.doc.__islocal || (!frm.doc.docstatus && frm.doc.status === "Draft")) {
-      // เพิ่มปุ่มเมื่อเป็นเอกสารใหม่หรือ Draft
-      frm.add_custom_button(__("Save with Service Report"), function() {
-        frappe.confirm(
-          'คุณต้องการบันทึกและสร้าง Service Report หรือไม่?',
-          function() {
-            frm.save('Submit', function() {
-              frappe.new_doc('SMO Service Report', {
-                task: frm.doc.name,
-                from_page: frm.doc.from_page,
-              });
-            });
-          }
-        );
-      }).addClass('btn-primary');
     }
   },
   
@@ -69,7 +44,7 @@ frappe.ui.form.on("SMO Task", {
   
   period: function(frm) {
     const periodTimes = {
-      "Full Day": ["08:30:00", "17:30:59"],
+      "Full Day": ["08:30:00", "17:30:00"],
       "AM": ["08:30:00", "12:00:00"],
       "PM": ["13:00:00", "17:30:00"],
       "default": ["08:30:00", "17:30:59"],
@@ -110,6 +85,32 @@ frappe.ui.form.on("SMO Task", {
   //     frm.set_value("task_name", `${prefix} ${task_name.trim()}`);
   //   }
   // },
+  
+  // เพิ่ม trigger สำหรับ location field
+  location: function(frm) {
+    // ซ่อนปุ่มที่มีอยู่ก่อน (ถ้ามี)
+    frm.remove_custom_button('Save with Service Report');
+    
+    // แสดงปุ่มเฉพาะเมื่อเป็น On Site
+    if (frm.doc.location === "On Site" && 
+        (frm.doc.__islocal || (!frm.doc.docstatus && frm.doc.status === "Draft"))) {
+      frm.add_custom_button(__("Save with Service Report"), function() {
+        frappe.confirm(
+          'คุณต้องการบันทึกและสร้าง Service Report หรือไม่?',
+          function() {
+            frappe.msgprint(frm.doc.start_date);
+            frm.save('Submit', function() {
+              frappe.new_doc('SMO Service Report', {
+                task: frm.doc.name,
+                from_page: frm.doc.from_page,
+                start_date_input: frm.doc.start_date,
+              });
+            });
+          }
+        );
+      }).addClass('btn-primary');
+    }
+  },
 });
 
 function validateDates(frm) {

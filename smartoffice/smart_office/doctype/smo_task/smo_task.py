@@ -30,7 +30,7 @@ class SMOTask(Document):
     def on_submit(self):
         self.create_todos()
         self.send_task_email()
-        if self.location == "Office":
+        if self.location in ["Office", "Remote"]:
             self.create_timesheet()
 
     def on_cancel(self):
