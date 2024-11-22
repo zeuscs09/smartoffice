@@ -66,9 +66,11 @@ frappe.ui.form.on("SMO Advance Entry", {
     if (frm.doc.workflow_state && frm.doc.workflow_state == "Draft") {
       frm.set_df_property("doc_detail_section", "hidden", 0);
       frm.set_df_property("expense_items_section", "hidden", 0);
+      frm.set_df_property("advance_info", "hidden", 0);
     } else {
       frm.set_df_property("doc_detail_section", "hidden", 1);
       frm.set_df_property("expense_items_section", "hidden", 1);
+      frm.set_df_property("advance_info", "hidden", 1);
       frm.events.update_html_summary(frm);
     }
 
@@ -140,11 +142,20 @@ frappe.ui.form.on("SMO Advance Entry", {
         <h2 style="text-align: center; margin-bottom: 20px;">สรุปรายการค่าใช้จ่าย</h2>
         
         <div style="margin-bottom: 20px; border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
-          <p><strong>ลูกค้า:</strong> ${frm.doc.customer_name || "ไม่ระบุ"}</p>
-          <p><strong>วันที่ให้บริการ:</strong> ${
-            frappe.datetime.str_to_user(frm.doc.service_date) || "ไม่ระบุ"
-          }</p>
-          <p><strong>โครงการ:</strong> ${frm.doc.project_name || "ไม่ระบุ"}</p>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div>
+              <p><strong>ลูกค้า:</strong> ${frm.doc.customer_name || "ไม่ระบุ"}</p>
+              <p><strong>วันที่ให้บริการ:</strong> ${frappe.datetime.str_to_user(frm.doc.service_date) || "ไม่ระบุ"}</p>
+              <p><strong>โครงการ:</strong> ${frm.doc.project_name || "ไม่ระบุ"}</p>
+            </div>
+            <div>
+              <p><strong>เอกสารอ้างอิงเลขที่:</strong> ${frm.doc.reference_code || "ไม่ระบุ"}</p>
+              <p><strong>ยอดเบิก:</strong> ${new Intl.NumberFormat('th-TH', { 
+                style: 'currency', 
+                currency: 'THB'
+              }).format(frm.doc.advance_amount || 0)}</p>
+            </div>
+          </div>
         </div>
 
         <table style="width: 100%; border-collapse: collapse;">

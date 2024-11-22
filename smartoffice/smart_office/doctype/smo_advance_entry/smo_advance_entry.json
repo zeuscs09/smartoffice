@@ -24,13 +24,11 @@
   "distance_return",
   "config_taxi_rate",
   "config_taxi_init",
-  "expense_item_section",
+  "advance_info",
   "reference_code",
-  "column_break_cxiw",
   "advance_amount",
-  "section_break_fcof",
+  "column_break_cxiw",
   "approve_by",
-  "column_break_rhat",
   "approver",
   "expense_items_section",
   "expense_item",
@@ -102,10 +100,6 @@
    "fieldtype": "Float",
    "label": "Total Amount",
    "read_only": 1
-  },
-  {
-   "fieldname": "expense_item_section",
-   "fieldtype": "Section Break"
   },
   {
    "depends_on": "eval:doc.reference_code != undefined && doc.reference_code.trim() != ''",
@@ -228,24 +222,20 @@
    "precision": "2"
   },
   {
-   "fieldname": "section_break_fcof",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "expense_items_section",
    "fieldtype": "Section Break",
    "label": "Expense Items"
   },
   {
-   "fieldname": "column_break_rhat",
-   "fieldtype": "Column Break"
+   "fieldname": "advance_info",
+   "fieldtype": "Section Break"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-11-22 11:03:34.748859",
+ "modified": "2024-11-22 11:18:11.514370",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Advance Entry",
