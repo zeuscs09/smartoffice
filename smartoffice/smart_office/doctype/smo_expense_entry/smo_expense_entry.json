@@ -16,6 +16,7 @@
   "customer",
   "customer_name",
   "customer_site",
+  "site_name",
   "project",
   "project_code",
   "project_name",
@@ -78,6 +79,7 @@
    "fetch_from": "service_report.customer_site",
    "fieldname": "customer_site",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Customer Site",
    "options": "SMO Customer Site"
   },
@@ -125,6 +127,7 @@
    "fetch_if_empty": 1,
    "fieldname": "customer",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Customer",
    "options": "Customer"
   },
@@ -132,6 +135,7 @@
    "fetch_from": "service_report.project_link",
    "fieldname": "project",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Project",
    "options": "Project"
   },
@@ -227,14 +231,12 @@
    "fetch_from": "customer.customer_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Customer Name"
   },
   {
    "fetch_from": "service_report.project_name",
    "fieldname": "project_name",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Project Name",
    "read_only": 1
   },
@@ -266,13 +268,20 @@
    "fieldtype": "Data",
    "label": "Project Code",
    "read_only": 1
+  },
+  {
+   "fetch_from": "customer_site.site_name",
+   "fetch_if_empty": 1,
+   "fieldname": "site_name",
+   "fieldtype": "Data",
+   "label": "Customer Site"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-11-11 20:59:39.387415",
+ "modified": "2024-11-22 09:17:08.235309",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Entry",

@@ -41,6 +41,21 @@ frappe.ui.form.on("SMO Task", {
     ) {
       // Disable all fields
       frm.disable_form();
+    } else if (frm.doc.__islocal || (!frm.doc.docstatus && frm.doc.status === "Draft")) {
+      // เพิ่มปุ่มเมื่อเป็นเอกสารใหม่หรือ Draft
+      frm.add_custom_button(__("Save with Service Report"), function() {
+        frappe.confirm(
+          'คุณต้องการบันทึกและสร้าง Service Report หรือไม่?',
+          function() {
+            frm.save('Submit', function() {
+              frappe.new_doc('SMO Service Report', {
+                task: frm.doc.name,
+                from_page: frm.doc.from_page,
+              });
+            });
+          }
+        );
+      }).addClass('btn-primary');
     }
   },
   
@@ -54,10 +69,12 @@ frappe.ui.form.on("SMO Task", {
   
   period: function(frm) {
     const periodTimes = {
+      "Full Day": ["08:30:00", "17:30:59"],
       "AM": ["08:30:00", "12:00:00"],
-      "PM": ["13:00:00", "18:00:00"],
-      "After working hours": ["18:00:00", "23:59:59"],
-      "default": ["00:00:00", "23:59:59"]
+      "PM": ["13:00:00", "17:30:00"],
+      "default": ["08:30:00", "17:30:59"],
+      "Not Specific": ["00:00:00", "23:59:59"]
+      
     };
     
     const [start_time, to_time] = periodTimes[frm.doc.period] || periodTimes.default;
@@ -70,6 +87,16 @@ frappe.ui.form.on("SMO Task", {
       return {
         filters: {
           customer: frm.doc.customer,
+        },
+      };
+    });
+  },
+  job_group(frm) {
+    frm.set_value("job_type", "");
+    frm.set_query("job_type", () => {
+      return {
+        filters: {
+          group: frm.doc.job_group,
         },
       };
     });

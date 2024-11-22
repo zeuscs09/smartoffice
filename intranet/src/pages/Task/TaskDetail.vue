@@ -47,7 +47,12 @@
                             <InfoItem label="Status" :value="todo ? todo?.doc?.status : ''" />
                             <InfoItem label="Priority" :value="task.doc.priority" />
                             <InfoItem label="Period" :value="task.doc.period" />
-                            <InfoItem label="Date (plan)" :value="formatDate(task.doc.start_date) + ' - ' + formatDate(task.doc.finish_date)" />
+                            <InfoItem 
+                                    label="Date (plan)" 
+                                    :value="task.doc.start_date === task.doc.finish_date 
+                                        ? formatDate(task.doc.start_date)
+                                        : formatDate(task.doc.start_date) + ' - ' + formatDate(task.doc.finish_date)" 
+                                />
                         </div>
 
                         <div class="space-y-4">
@@ -58,8 +63,9 @@
                             <InfoItem label="Contact Person" :value="task.doc.contact_name" />
                             <InfoItem label="Contact Mobile" :value="task.doc.contact_mobile" />
                             <InfoItem label="Contact Email" :value="task.doc.contact_email" />
-                            <InfoItem label="Site" :value="task.doc.site" />
+                            <InfoItem label="Site" :value="task.doc.site_name" />
                         </div>
+                       
                     </div>
 
                     <div class="mt-8">

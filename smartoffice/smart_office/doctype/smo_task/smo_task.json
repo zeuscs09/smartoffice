@@ -2,20 +2,23 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2024-09-15 21:22:59.368645",
+ "description": "Task",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "task_infromation_section",
   "naming_series",
-  "job_type",
-  "location",
   "title",
+  "job_group",
+  "job_type",
+  "other_detail",
+  "location",
   "task_name",
+  "priority",
+  "status",
+  "column_break_vpuz",
   "start_date",
   "finish_date",
-  "other_detail",
-  "status",
-  "priority",
   "period",
   "start_time",
   "to_time",
@@ -31,6 +34,7 @@
   "contact_mobile",
   "contact_email",
   "site",
+  "site_name",
   "section_break_giws",
   "team",
   "assign_to",
@@ -86,7 +90,7 @@
    "fieldname": "period",
    "fieldtype": "Select",
    "label": "Period",
-   "options": "All day\nAM\nPM\nAfter working hours"
+   "options": "All day\nAM\nPM\nNot Specific"
   },
   {
    "default": "00:00:00",
@@ -260,8 +264,28 @@
    "fieldname": "location",
    "fieldtype": "Select",
    "label": "Location",
-   "options": "\nOn Site\nOffice",
+   "options": "\nOn Site\nOffice\nRemote",
    "reqd": 1
+  },
+  {
+   "fieldname": "job_group",
+   "fieldtype": "Link",
+   "label": "Job Group",
+   "options": "SMO Job Type Group",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_vpuz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "site.site_name",
+   "fetch_if_empty": 1,
+   "fieldname": "site_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Site Name"
   }
  ],
  "hide_toolbar": 1,
@@ -273,7 +297,7 @@
    "link_fieldname": "task"
   }
  ],
- "modified": "2024-11-12 22:46:47.739099",
+ "modified": "2024-11-22 09:42:41.940711",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Task",

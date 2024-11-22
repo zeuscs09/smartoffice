@@ -11,11 +11,12 @@
   "naming_series",
   "task",
   "task_name",
+  "job_group",
   "job_type",
   "column_break_debu",
   "project_link",
-  "project_code",
   "project_name",
+  "project_code",
   "customer",
   "customer_name",
   "customer_site",
@@ -100,13 +101,15 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Job Type",
-   "options": "SMO Job Type"
+   "options": "SMO Job Type",
+   "read_only_depends_on": "task"
   },
   {
    "fieldname": "column_break_debu",
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:doc.tas==\"\"",
    "fetch_from": "task.project",
    "fieldname": "project_link",
    "fieldtype": "Link",
@@ -116,7 +119,7 @@
    "read_only": 1
   },
   {
-   "fetch_from": "task.contact_person",
+   "fetch_from": "task.contact_name",
    "fieldname": "contact_person",
    "fieldtype": "Data",
    "label": "Contact Person"
@@ -178,6 +181,7 @@
    "options": "SMO Working Team"
   },
   {
+   "collapsible": 1,
    "fieldname": "section_break_irho",
    "fieldtype": "Section Break",
    "label": "Part Usage"
@@ -197,6 +201,7 @@
    "fieldtype": "Long Text"
   },
   {
+   "depends_on": "eval:doc.task==\"\"",
    "fetch_from": "task.customer",
    "fieldname": "customer",
    "fieldtype": "Link",
@@ -248,7 +253,6 @@
    "fieldname": "finish_date_input",
    "fieldtype": "Date",
    "label": "Finish Date",
-   "read_only": 1,
    "reqd": 1
   },
   {
@@ -256,7 +260,6 @@
    "fieldtype": "Select",
    "label": "Hour",
    "options": "00\n01\n02\n03\n04\n05\n06\n07\n08\n09\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23",
-   "read_only": 1,
    "reqd": 1
   },
   {
@@ -264,7 +267,6 @@
    "fieldtype": "Select",
    "label": "Minute",
    "options": "00\n10\n20\n30\n40\n50",
-   "read_only": 1,
    "reqd": 1
   },
   {
@@ -316,7 +318,6 @@
    "fetch_if_empty": 1,
    "fieldname": "customer_name",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Customer Name"
   },
   {
@@ -376,7 +377,6 @@
    "fetch_from": "project_link.project_name",
    "fieldname": "project_name",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Project Name"
   },
   {
@@ -384,6 +384,14 @@
    "fieldtype": "Data",
    "label": "Reject Reason",
    "read_only": 1
+  },
+  {
+   "fetch_from": "task.job_group",
+   "fieldname": "job_group",
+   "fieldtype": "Link",
+   "label": "Job Group",
+   "options": "SMO Job Type Group",
+   "read_only_depends_on": "task"
   }
  ],
  "hide_toolbar": 1,
@@ -396,7 +404,7 @@
    "link_fieldname": "service_report"
   }
  ],
- "modified": "2024-11-11 17:29:23.110183",
+ "modified": "2024-11-22 09:22:22.605512",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Service Report",

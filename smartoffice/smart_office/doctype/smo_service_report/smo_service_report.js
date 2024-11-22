@@ -23,19 +23,6 @@ frappe.ui.form.on("SMO Service Report", {
       });
     }
     
-    // เพิ่มการตรวจสอบว่าสามารถใช้ history.back() ได้หรือไม่
-    // const canGoBack = window.history.length > 1;
-    
-    // frm.add_custom_button(__(canGoBack ? 'Back' : 'Close'), function() {
-    //   if (canGoBack) {
-    //     history.back();
-    //   } else {
-    //     // ดำเนินการเมื่อไม่สามารถย้อนกลับได้
-    //     // ัวอย่างเช่น ปิดหน้าต่างหรือนำทางไปยังหน้าหลัก
-    //    window.close();
-    //   }
-    // });
-
     if (frm.doc.workflow_state && frm.doc.workflow_state !== "Draft") {
       frm.disable_form();
     }
@@ -50,29 +37,48 @@ frappe.ui.form.on("SMO Service Report", {
     }
   },
   before_save: function(frm) {
-    var hour = frm.doc.start_hour_input;  // ดึงค่าจากฟิลด์ชั่วโมง
-    var minute = frm.doc.start_minute_input;  // ดึงค่าจากฟิลด์นาที
+    console.log("before_save triggered");
+    
+    var hour = frm.doc.start_hour_input;
+    var minute = frm.doc.start_minute_input;
     
     if (hour && minute) {
-        var time_value = frm.doc.start_date_input + ' ' + hour + ':' + minute;
-        frm.set_value('job_start_on', time_value);
+      var time_value = frm.doc.start_date_input + ' ' + hour + ':' + minute;
+      frm.set_value('job_start_on', time_value);
     }
 
-     hour = frm.doc.finish_hour_input;  // ดึงค่าจากฟิลด์ชั่วโมง
-     minute = frm.doc.finish_minute_input;  // ดึงค่าจากฟิลด์นาที
+    hour = frm.doc.finish_hour_input;
+    minute = frm.doc.finish_minute_input;
     
     if (hour && minute) {
-        var time_value = frm.doc.finish_date_input + ' ' + hour + ':' + minute;
-        frm.set_value('job_finish', time_value);
+      var time_value = frm.doc.finish_date_input + ' ' + hour + ':' + minute;
+      frm.set_value('job_finish', time_value);
     }
+
     // validate วันที่เริ่มงานต้องน้อยกว่าวันที่สิ้นสุดงาน
     if (frm.doc.job_start_on > frm.doc.job_finish) {
-        frappe.throw("Start date cannot be greater than Finish date");
+      frappe.throw(__("Start date cannot be greater than Finish date"));
     }
 
     if (frm.doc.start_date_input > frm.doc.finish_date_input) {
       frm.set_value('over_night', 1);
     }
+
+    // เพิ่มการ refresh field ที่สำคัญ
+    frm.refresh_field('job_start_on');
+    frm.refresh_field('job_finish');
+    frm.refresh_field('over_night');
+  },
+  after_save: function(frm) {
+    console.log("after_save triggered");
+    
+    // แสดงข้อความยืนยันการบันทึก
+    frappe.show_alert({
+      message: __('Service Report saved successfully'),
+      indicator: 'green'
+    }, 5);
+    
+    frm.refresh();
   },
   task(frm) {
     // get data from SMO Working Team where parent=task parenttype='SMO Task' and parentfield='team'
@@ -138,6 +144,15 @@ frappe.ui.form.on("SMO Service Report", {
   duration: function(frm) {
     recalculateEndTime(frm);
   },
+  finish_date_input: function(frm) {
+    calculateDurationFromEndTime(frm);
+  },
+  finish_hour_input: function(frm) {
+    calculateDurationFromEndTime(frm);
+  },
+  finish_minute_input: function(frm) {
+    calculateDurationFromEndTime(frm);
+  },
 });
 
 // แยกฟังก์ชันคำนวณเวลาออกมาเพื่อเรียกใช้ซ้ำ
@@ -175,6 +190,43 @@ function recalculateEndTime(frm) {
     frm.set_value('finish_minute_input', closestMinute.toString().padStart(2, '0'));
 
     // เช็คว่าเป็นการทำงานข้ามคืนหรือไม่
+    if (startDateTime.getUTCDate() !== endDateTime.getUTCDate()) {
+      frm.set_value('over_night', 1);
+    } else {
+      frm.set_value('over_night', 0);
+    }
+  }
+}
+
+// เพิ่มฟังก์ชันใหม่สำหรับคำนวณ duration จาก end time
+function calculateDurationFromEndTime(frm) {
+  if (frm.doc.start_date_input && frm.doc.start_hour_input && 
+      frm.doc.start_minute_input && frm.doc.finish_date_input && 
+      frm.doc.finish_hour_input && frm.doc.finish_minute_input) {
+    
+    // แปลงเวลาเริ่มต้นเป็น Date object
+    let startDateTime = new Date(frm.doc.start_date_input + 'T00:00:00Z');
+    startDateTime.setUTCHours(parseInt(frm.doc.start_hour_input));
+    startDateTime.setUTCMinutes(parseInt(frm.doc.start_minute_input));
+
+    // แปลงเวลาสิ้นสุดเป็น Date object
+    let endDateTime = new Date(frm.doc.finish_date_input + 'T00:00:00Z');
+    endDateTime.setUTCHours(parseInt(frm.doc.finish_hour_input));
+    endDateTime.setUTCMinutes(parseInt(frm.doc.finish_minute_input));
+
+    // คำนวณความต่างของเวลาเป็นวินาที
+    let diffInSeconds = (endDateTime - startDateTime) / 1000;
+    
+    // ถ้าเวลาสิ้นสุดน้อยกว่าเวลาเริ่มต้น ให้แจ้งเตือน
+    if (diffInSeconds < 0) {
+      frappe.msgprint('End time cannot be earlier than start time');
+      return;
+    }
+
+    // set ค่า duration
+    frm.set_value('duration', diffInSeconds);
+
+    // เช็คการทำงานข้ามคืน
     if (startDateTime.getUTCDate() !== endDateTime.getUTCDate()) {
       frm.set_value('over_night', 1);
     } else {
