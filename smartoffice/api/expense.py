@@ -2,7 +2,7 @@ import frappe
 from frappe import _
 
 @frappe.whitelist()
-def get_expense_entries(month, year,request_by):
+def get_expense_entries(month, year,request_by,period):
     # ตรวจสอบว่า month และ year มีค่าเป็นตัวเลข
     if not month.isdigit() or not year.isdigit():
         frappe.throw(_("Month and Year must be numeric"))
@@ -53,11 +53,16 @@ def get_expense_entries(month, year,request_by):
             ee.workflow_state = 'approved'
             AND MONTH(ee.creation) = %(month)s
             AND YEAR(ee.creation) = %(year)s
-            and ee.owner = %(request_by)s
+            AND ee.owner = %(request_by)s
+            AND (
+                %(period)s != 'Mid month'
+                OR (%(period)s = 'Mid month' AND DAY(ee.creation) <= 15)
+            )
     """, {
         "month": month,
         "year": year,
-        "request_by": request_by
+        "request_by": request_by,
+        "period": period
     }, as_dict=True)
 
     # Return ข้อมูลออกมาในรูปแบบ JSON

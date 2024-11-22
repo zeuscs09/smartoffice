@@ -129,6 +129,7 @@ frappe.ui.form.on("SMO Expense Request", {
         month: monthNames.indexOf(frm.doc.month) + 1, // แปลงชื่อเดือนเป็นตัวเลข (1-12)
         year: frm.doc.year,
         request_by: frm.doc.request_by,
+        period: frm.doc.period,
       },
       callback: function (r) {
         if (r.message) {
@@ -404,10 +405,10 @@ function render_summary(data, callback) {
         ${expenseTypes
           .map((type) => {
             const cost = group.expense_types[type.desc] || 0;
-            return `<td style="text-align: right">${Number(cost).toFixed(2).toLocaleString()}</td>`;
+            return `<td style="text-align: right">${formatNumber(cost)}</td>`;
           })
           .join("")}
-        <td style="text-align: right">${Number(total).toFixed(2).toLocaleString()}</td>
+        <td style="text-align: right">${formatNumber(total)}</td>
       </tr>
     `;
     });
@@ -421,12 +422,10 @@ function render_summary(data, callback) {
           ${expenseTypes
             .map(
               (type) =>
-                `<th style="text-align: right">${Number(grandTotals[
-                  type.desc
-                ]).toFixed(2).toLocaleString()}</th>`
+                `<th style="text-align: right">${formatNumber(grandTotals[type.desc])}</th>`
             )
             .join("")}
-          <th style="text-align: right">${Number(grandTotalOverall).toFixed(2).toLocaleString()}</th>
+          <th style="text-align: right">${formatNumber(grandTotalOverall)}</th>
         </tr>
       </tfoot>
     </table>
@@ -462,4 +461,12 @@ function formatDate(date) {
   const month = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+
+// เพิ่มฟังก์ชันใหม่สำหรับจัดรูปแบบตัวเลข
+function formatNumber(num) {
+  return Number(num).toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
 }

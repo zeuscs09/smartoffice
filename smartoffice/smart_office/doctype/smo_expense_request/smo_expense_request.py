@@ -11,6 +11,8 @@ import calendar
 class SMOExpenseRequest(Document):
     def validate(self):
         self.set_period_display()
+        if self.total <= 0:
+            frappe.throw("No expense amount")
     # Lifecycle Methods
     def before_save(self):
         if self.workflow_state == "Draft":
@@ -21,6 +23,8 @@ class SMOExpenseRequest(Document):
     def on_submit(self):
         """ไม่ได้ใช้เพราะใช้ Workflow"""
         frappe.errprint("=== on_submit triggered ===")
+        for item in self.expense_request_item:
+            frappe.db.set_value("SMO Expense Entry", item.expense, "is_request", 1)
         self.update_approver_status()
         
        
