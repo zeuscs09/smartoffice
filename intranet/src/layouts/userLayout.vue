@@ -92,6 +92,18 @@
                                         </svg>
                                     </div>
                                 </button>
+                                <button class="btn btn-ghost btn-circle tooltip tooltip-bottom" 
+                                    data-tip="Accounting Report"
+                                    @click="openReport('Accounting Report')">
+                                    <div class="indicator">
+                                        <svg class="h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M21 11.5H3M21 11.5C21.8284 11.5 22.5 12.1716 22.5 13V19C22.5 19.8284 21.8284 20.5 21 20.5H3C2.17157 20.5 1.5 19.8284 1.5 19V13C1.5 12.1716 2.17157 11.5 3 11.5M21 11.5V9C21 8.17157 20.3284 7.5 19.5 7.5H4.5C3.67157 7.5 3 8.17157 3 9V11.5M12 15.5V17.5M8 15.5V17.5M16 15.5V17.5" 
+                                                stroke="currentColor" 
+                                                stroke-width="1.5" 
+                                                stroke-linecap="round"/>
+                                        </svg>
+                                    </div>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -251,6 +263,18 @@
                         Advance Request
                     </a>
                 </li>
+                <li>
+                    <a @click="openReport('Accounting Report')" 
+                       class="flex items-center gap-3">
+                        <svg class="h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 11.5H3M21 11.5C21.8284 11.5 22.5 12.1716 22.5 13V19C22.5 19.8284 21.8284 20.5 21 20.5H3C2.17157 20.5 1.5 19.8284 1.5 19V13C1.5 12.1716 2.17157 11.5 3 11.5M21 11.5V9C21 8.17157 20.3284 7.5 19.5 7.5H4.5C3.67157 7.5 3 8.17157 3 9V11.5M12 15.5V17.5M8 15.5V17.5M16 15.5V17.5" 
+                                stroke="currentColor" 
+                                stroke-width="1.5" 
+                                stroke-linecap="round"/>
+                        </svg>
+                        Accounting Report
+                    </a>
+                </li>
 
             </ul>
         </div>
@@ -354,6 +378,9 @@ function getCookie(name: string) {
 
 const getInitials = (name: string) => {
     return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2)
+}
+function openReport(reportName: string) {
+    window.open(`/app/query-report/${reportName}?year=2024&month=November`, '_blank')
 }
 </script>
 

@@ -9,7 +9,8 @@
  "field_order": [
   "description",
   "for_expense",
-  "for_advance"
+  "for_advance",
+  "account_code"
  ],
  "fields": [
   {
@@ -32,11 +33,16 @@
    "fieldtype": "Check",
    "in_list_view": 1,
    "label": "For Advance"
+  },
+  {
+   "fieldname": "account_code",
+   "fieldtype": "Data",
+   "label": "Account Code"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-28 10:03:07.586059",
+ "modified": "2024-11-22 05:56:56.148662",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Type",

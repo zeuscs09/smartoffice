@@ -4,27 +4,33 @@
 import frappe
 from frappe.model.document import Document
 from frappe.utils import now_datetime, time_diff_in_seconds, format_duration as frappe_format_duration
+from datetime import datetime
+import calendar
 
 
 class SMOExpenseRequest(Document):
-   
+    def validate(self):
+        self.set_period_display()
     # Lifecycle Methods
     def before_save(self):
         if self.workflow_state == "Draft":
             self.set_approvers()
             self.reject_reason = None
             self.approve_amount=self.total
+           
     def on_submit(self):
         """ไม่ได้ใช้เพราะใช้ Workflow"""
         frappe.errprint("=== on_submit triggered ===")
         self.update_approver_status()
+        
        
 
     def on_update(self):
         """สำหรับ Draft state"""
         frappe.errprint("=== on_update triggered ===")
         # ไม่ต้องทำอะไรใน Draft
-        pass
+        
+        
     
     def on_update_after_submit(self):
         """จัดการทุก state changes จาก Workflow"""
@@ -227,3 +233,17 @@ class SMOExpenseRequest(Document):
         })
         notification.insert(ignore_permissions=True)
         frappe.errprint(f"=== End create_notification ===")
+
+    def set_period_display(self):
+        # แปลงปีและเดือนเป็น datetime object
+       
+        date_str = f"{self.year}-{self.month}-01"
+        date_obj = datetime.strptime(date_str, "%Y-%B-%d")
+        
+        # หาวันสุดท้ายของเดือน
+        last_day = calendar.monthrange(date_obj.year, date_obj.month)[1]
+        # กำหนดรูปแบบการแสดงผลตาม period
+        if self.period == "Mid month":
+            self.period_display = f"01/{date_obj.strftime('%m')}/{str(date_obj.year)[2:]}-15/{date_obj.strftime('%m')}/{str(date_obj.year)[2:]} รอบที่ 1"
+        else:  # End of month
+            self.period_display = f"01/{date_obj.strftime('%m')}/{str(date_obj.year)[2:]}-{last_day}/{date_obj.strftime('%m')}/{str(date_obj.year)[2:]} รอบที่ 2"

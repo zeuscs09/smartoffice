@@ -8,8 +8,62 @@ import json
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from frappe.core.doctype.user.user import generate_keys  # เพิ่ม import ที่ด้านบน
+from datetime import datetime, timedelta
 
 
+def create_jwt_token(user, api_key, api_secret):
+    SECRET_KEY = "your-secret-key"  # ควรย้ายไปเก็บใน configuration
+    
+    # สร้าง payload จากข้อมูล api key/secret
+    payload = {
+        'user': user.name,
+        'api_key': api_key,
+        'api_secret': api_secret,
+        'exp': datetime.utcnow() + timedelta(days=1),
+        'iat': datetime.utcnow()
+    }
+    
+    # สร้าง JWT token
+    token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+    return token
+
+@frappe.whitelist()
+def login(username, password):
+    try:
+        original_user = frappe.session.user
+        
+        if "System Manager" in frappe.get_roles(original_user):
+            auth = frappe.auth.LoginManager()
+            auth.authenticate(username, password)
+            
+            frappe.set_user(original_user)
+            generate_keys(username)
+            
+            user = frappe.get_doc("User", username)
+            api_key = user.api_key
+            api_secret = user.get_password('api_secret')
+            
+            # สร้าง JWT token จากข้อมูล api key/secret
+            jwt_token = create_jwt_token(user, api_key, api_secret)
+            
+            return {
+                "message": "Login successful",
+                "status": "success",
+                "token": jwt_token,
+                "token_type": "Bearer"
+            }
+        else:
+            return {
+                "message": f"Original user '{original_user}' does not have System Manager role",
+                "status": "error"
+            }
+                
+    except Exception as e:
+        return {
+            "message": str(e),
+            "status": "error"
+        }
 
 @frappe.whitelist(allow_guest=True)
 def request_customer_otp():

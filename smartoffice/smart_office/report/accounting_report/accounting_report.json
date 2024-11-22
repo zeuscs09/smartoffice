@@ -1,0 +1,56 @@
+{
+ "add_total_row": 1,
+ "columns": [],
+ "creation": "2024-11-22 07:20:33.365718",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [
+  {
+   "default": "2024",
+   "fieldname": "year",
+   "fieldtype": "Select",
+   "label": "Year",
+   "mandatory": 0,
+   "options": "2023\n2024",
+   "wildcard_filter": 0
+  },
+  {
+   "default": "November",
+   "fieldname": "month",
+   "fieldtype": "Select",
+   "label": "Month",
+   "mandatory": 0,
+   "options": "January\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember",
+   "wildcard_filter": 0
+  }
+ ],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letterhead": null,
+ "modified": "2024-11-22 07:31:30.269455",
+ "modified_by": "Administrator",
+ "module": "Smart Office",
+ "name": "Accounting Report",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "query": "\nWITH ExpenseSummary AS (\n    SELECT\n        'TPS' AS QCCORP,\n        '00000' AS QCBRANCH,\n        '' AS QCACCBOOK,\n        '' AS `DATE`,\n        '' AS CODE,\n        CONCAT(\n            'Exp-Engineer \u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e04\u0e0a\u0e08. \u0e1e\u0e23\u0e49\u0e2d\u0e21\u0e15\u0e31\u0e49\u0e07\u0e40\u0e1a\u0e34\u0e01\u0e40\u0e07\u0e34\u0e19  ',\n            IFNULL(er.period_display, '')\n        ) AS REMARKH1,\n        '' AS REMARKH2,\n        '' AS REMARKH3,\n        '' AS REMARKH4,\n        '' AS REMARKH5,\n        ed.account_code AS QCACCHART,\n        SUM(ed.AMT) AS AMT,\n        us.full_name AS DETAIL,\n        ed.project_code AS QCSECTI,\n        er.`year`,\n        er.`month`,\n        er.period\n    FROM\n        `tabSMO Expense Request` er\n    INNER JOIN `tabUser` us ON er.request_by = us.name\n    INNER JOIN (\n        SELECT\n            ri.parent AS expense_request_name,\n            et.account_code,\n            SUM(ei.total_cost) AS AMT,\n            ee.project_code,\n            ee.name\n        FROM\n            `tabSMO Expense Request Item` ri\n        INNER JOIN `tabSMO Expense Item` ei ON ri.expense_item = ei.name\n        INNER JOIN `tabSMO Expense Type` et ON ei.expense_type = et.name\n        INNER JOIN `tabSMO Expense Entry` ee ON ei.parent = ee.name\n        GROUP BY\n            ri.parent, et.account_code, ee.project_code, ee.name\n    ) ed ON er.name = ed.expense_request_name\n    WHERE\n        er.workflow_state = 'Approved'\n        and er.year = %(year)s\n        and er.month = %(month)s\n    GROUP BY\n        er.request_by, us.full_name, er.year, er.month, er.period, ed.account_code, ed.project_code, er.period_display\n),\nAdvanceSummary AS (\n    SELECT\n        'TPS' AS QCCORP,\n        '00000' AS QCBRANCH,\n        '' AS QCACCBOOK,\n        '' AS `DATE`,\n        '' AS CODE,\n        CONCAT(\n            '\u0e40\u0e04\u0e25\u0e35\u0e22\u0e23\u0e4c\u0e40\u0e07\u0e34\u0e19 Advance ',\n            reference_code,\n            ' Project ',\n            project_code\n        ) AS REMARKH1,\n        '' AS REMARKH2,\n        '' AS REMARKH3,\n        '' AS REMARKH4,\n        '' AS REMARKH5,\n        '115101' AS QCACCHART,\n        SUM(total_amount) AS AMT,\n        reference_code AS DETAIL,\n        project_code AS QCSECTI,\n        YEAR(service_date) AS `year`,\n        MONTHNAME(service_date) AS `month`, -- \u0e43\u0e0a\u0e49 MONTHNAME() \u0e40\u0e1e\u0e37\u0e48\u0e2d\u0e41\u0e1b\u0e25\u0e07\u0e27\u0e31\u0e19\u0e17\u0e35\u0e48\u0e40\u0e1b\u0e47\u0e19 Full Month Name\n        '' AS period\n    FROM\n        `tabSMO Advance Entry` ae\n    INNER JOIN `tabUser` us ON ae.owner = us.name\n    WHERE\n        ae.workflow_state = 'Approved'\n        and year(ae.service_date) = %(year)s\n        and MONTHNAME(service_date) = %(month)s\n       \n    GROUP BY\n        reference_code, project_code, YEAR(service_date), MONTHNAME(service_date)\n)\nSELECT\n    *\nFROM\n    ExpenseSummary\n\nUNION ALL\n\nSELECT\n    *\nFROM\n    AdvanceSummary;",
+ "ref_doctype": "SMO Expense Request",
+ "report_name": "Accounting Report",
+ "report_type": "Query Report",
+ "roles": [
+  {
+   "role": "Engineer Staff"
+  },
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Employee"
+  },
+  {
+   "role": "VP"
+  }
+ ],
+ "timeout": 0
+}

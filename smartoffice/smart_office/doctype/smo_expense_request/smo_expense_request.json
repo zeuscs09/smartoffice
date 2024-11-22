@@ -11,6 +11,8 @@
   "year",
   "month",
   "period",
+  "period_display",
+  "month_value",
   "column_break_gmlg",
   "advance_payment",
   "general_payment",
@@ -197,13 +199,26 @@
    "label": "Series",
    "options": "ER-.YYYY.-.MM.-.####.",
    "print_hide": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "period_display",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Period Display"
+  },
+  {
+   "fieldname": "month_value",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "month_value"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-11-10 22:56:51.446120",
+ "modified": "2024-11-22 07:46:07.561538",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Request",
@@ -284,6 +299,18 @@
    "report": 1,
    "role": "Employee",
    "share": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
   }
  ],
  "sort_field": "modified",
