@@ -30,6 +30,7 @@
   "advance_amount",
   "section_break_fcof",
   "approve_by",
+  "column_break_rhat",
   "approver",
   "expense_items_section",
   "expense_item",
@@ -172,7 +173,7 @@
   {
    "fieldname": "approve_by",
    "fieldtype": "Link",
-   "label": "Approve By",
+   "label": "Checked By",
    "link_filters": "[[\"Employee\",\"grade\",\"=\",\"220 - Finance Staff\"]]",
    "options": "Employee",
    "reqd": 1
@@ -181,7 +182,7 @@
    "fetch_from": "approve_by.user_id",
    "fieldname": "approver",
    "fieldtype": "Data",
-   "label": "Approver",
+   "label": "Checker Name",
    "print_hide": 1
   },
   {
@@ -234,13 +235,17 @@
    "fieldname": "expense_items_section",
    "fieldtype": "Section Break",
    "label": "Expense Items"
+  },
+  {
+   "fieldname": "column_break_rhat",
+   "fieldtype": "Column Break"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-11-11 21:42:02.393131",
+ "modified": "2024-11-22 11:03:34.748859",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Advance Entry",

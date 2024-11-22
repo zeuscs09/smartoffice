@@ -65,10 +65,10 @@ frappe.ui.form.on("SMO Advance Entry", {
     //เช็คสถานะจาก workflow_state
     if (frm.doc.workflow_state && frm.doc.workflow_state == "Draft") {
       frm.set_df_property("doc_detail_section", "hidden", 0);
-      frm.set_df_property("expense_item_section", "hidden", 0);
+      frm.set_df_property("expense_items_section", "hidden", 0);
     } else {
       frm.set_df_property("doc_detail_section", "hidden", 1);
-      frm.set_df_property("expense_item_section", "hidden", 1);
+      frm.set_df_property("expense_items_section", "hidden", 1);
       frm.events.update_html_summary(frm);
     }
 
