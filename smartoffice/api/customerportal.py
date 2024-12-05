@@ -133,7 +133,7 @@ def approve_service_report(report_name):
             }
 
         # Update status using db.set_value
-        frappe.db.set_value("SMO Service Report", report_name, "workflow_state", "Customer Approve")
+        frappe.db.set_value("SMO Service Report", report_name, "workflow_state", "Customer Approved")
         frappe.db.commit()
 
         return {

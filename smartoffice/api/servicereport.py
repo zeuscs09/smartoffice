@@ -18,7 +18,7 @@ def approve_service_report(name, customer_email, hash, timestamp):
 
         # อัปเดตค่าโดยตรงในฐานข้อมูล
         frappe.db.set_value("SMO Service Report", name, {
-            "workflow_state": "Customer Approve",
+            "workflow_state": "Customer Approved",
             "approval_hash": None,
             "approval_salt": None
         })

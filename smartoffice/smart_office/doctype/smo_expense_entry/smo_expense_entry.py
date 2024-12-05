@@ -5,16 +5,26 @@ import frappe
 from frappe.model.document import Document
 from frappe import _
 
+def is_user_in_team(user, team_name):
+    # ดึงข้อมูลทีมจากฐานข้อมูล
+    team_members = frappe.get_all("SMO Working Team", filters={"parent": team_name,"parenttype":"SMO Service Report","parentfield":"team","user":user}, fields=["user"])
+    
+    # ตรวจสอบว่า user อยู่ในทีมนี้หรือไม่
+    return any(member.user == user for member in team_members)
 
 class SMOExpenseEntry(Document):
 
 	def validate(self):
-
+		
+		# ตรวจสอบว่า user ที่ล็อกอินอยู่ในทีมที่เกี่ยวข้องหรือไม่
+		if not is_user_in_team(frappe.session.user, self.service_report):
+			frappe.throw(_(f"ไม่สามารถเลือก Service report {self.service_report} เนื่องจากไม่ได้เป็นส่วนหนึ่งของทีมที่เกี่ยวข้อง"))
 		
 		total_cost = 0
 		seen_expense = set()
+		
 		for item in self.expense_item:
-	
+			
 			# ตรวจสอบรายการซ้ำเฉพาะ expense_type EXP001, EXP002
 			if item.expense_type in ["EP001", "EP002"]:
 				if item.cal_taxi_depart_distance != item.taxi_depart_distance:
@@ -32,6 +42,7 @@ class SMOExpenseEntry(Document):
 						doc_expense_type=frappe.get_doc("SMO Expense Type", item.expense_type)
 						frappe.throw(f"Duplicate expense found: {doc_expense_type.description} ")
 				seen_expense.add(item_key)
+    
 			# สร้าง reminder string จากค่าที่มีอยู่เท่านั้น
 			reminder_parts = []
 			if item.system_reminder:
@@ -47,14 +58,17 @@ class SMOExpenseEntry(Document):
 		if total_cost != self.total_amount:
 			frappe.throw("Total cost is not equal to total amount")
 		# frappe.throw(self.workflow_state)
+		self.validate_expense_claim()
 		if self.workflow_state == "Draft":
 			self.set_approvers()
 			self.reject_reason = None
-			# self.check_service_report_status()
+			
 		if self.workflow_state == "Approval Review":
 			self.check_service_report_status()
-	def before_save(self):
-		if self.workflow_state != "Draft":
+   
+	def validate_expense_claim(self):
+		
+		if self.workflow_state == "Draft":
 			for item in self.expense_item:
 				result = frappe.db.sql("""
 					SELECT SUM(1) AS total_count, 
@@ -73,9 +87,11 @@ class SMOExpenseEntry(Document):
 				for row in result:
 					total_count = row['total_count']  # จำนวนรวม
 					requested_by = row['requested_by']  # ายชื่อผู้ขอ (concat แล้ว)
-					if not item.system_reminder :
-						item.system_reminder = f"This expense item has already been recorded {int(total_count)} time(s) by {requested_by}"
-			
+					frappe.msgprint(item.system_reminder)
+					if not item.system_reminder:
+						item.system_reminder = f"รายการค่าใช้จ่าย {item.expense_type_name} ถูกบันทึกแล้ว {int(total_count)} ครั้ง โดย {requested_by}"
+						frappe.msgprint(item.system_reminder)
+	
 			
 	def on_update(self):
 		"""สำหรับ Draft และ Approval Review"""
@@ -176,7 +192,7 @@ class SMOExpenseEntry(Document):
 	def check_service_report_status(self):
 		if self.service_report:
 			service_report_status = frappe.db.get_value("SMO Service Report", self.service_report, "workflow_state")
-			if service_report_status != "Customer Approve":
+			if service_report_status != "Customer Approved":
 				frappe.throw(_("ไม่สามารถส่งรายการค่าใช้จ่ายได้ เนื่องจากลูกค้ายังไม่อนุมัติ Service Report"))
 
 	def before_cancel(self):

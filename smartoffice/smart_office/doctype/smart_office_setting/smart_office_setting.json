@@ -10,7 +10,9 @@
   "over_night_rate",
   "service_report_approval_template",
   "customer_otp_template",
-  "jwt_secret_key"
+  "jwt_secret_key",
+  "flow_section",
+  "admin"
  ],
  "fields": [
   {
@@ -54,12 +56,23 @@
    "fieldname": "jwt_secret_key",
    "fieldtype": "Data",
    "label": "JWT Secret Key"
+  },
+  {
+   "fieldname": "flow_section",
+   "fieldtype": "Section Break",
+   "label": "Flow"
+  },
+  {
+   "fieldname": "admin",
+   "fieldtype": "Link",
+   "label": "Admin",
+   "options": "User"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-11-11 09:57:47.304160",
+ "modified": "2024-12-05 01:12:02.228587",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "Smart Office Setting",

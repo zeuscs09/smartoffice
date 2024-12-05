@@ -29,6 +29,11 @@ const routes = [
     component: () => import('@/pages/ExpenseEntry/ExpenseEntryList.vue'),
   },
   {
+    name: 'ExpenseEntryDetail',
+    path: '/expense-entry/:id',
+    component: () => import('@/pages/ExpenseEntry/ExpenseEntryDetail.vue'),
+  },
+  {
     name: 'ServiceReportList',
     path: '/service-report',
     component: () => import('@/pages/ServiceReport/ServiceReportList.vue'),
@@ -39,9 +44,19 @@ const routes = [
     component: () => import('@/pages/ExpenseRequest/ExpenseRequestList.vue'),
   },
   {
+    name: 'ExpenseRequestDetail',
+    path: '/expense-request/:id',
+    component: () => import('@/pages/ExpenseRequest/ExpenseRequestDetail.vue'),
+  },
+  {
     name: 'AdvanceRequestList',
     path: '/advance-entry',
     component: () => import('@/pages/AdvanceEntry/AdvanceEntryList.vue'),
+  },
+  {
+    name: 'AdvanceEntryDetail',
+    path: '/advance-entry/:id',
+    component: () => import('@/pages/AdvanceEntry/AdvanceEntryDetail.vue'),
   },
   {
     name: 'MailBoxList',
@@ -69,6 +84,11 @@ const routes = [
         meta: { requiresCustomerAuth: true }
       }
     ]
+  },
+  {
+    name: 'ServiceReportDetail',
+    path: '/service-report/:id',
+    component: () => import('@/pages/ServiceReport/ServiceReportDetail.vue'),
   }
 ]
 

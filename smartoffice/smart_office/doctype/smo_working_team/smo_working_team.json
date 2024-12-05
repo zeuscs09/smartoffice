@@ -41,7 +41,6 @@
    "fetch_if_empty": 1,
    "fieldname": "email",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Email"
   },
   {
@@ -83,7 +82,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-11-12 22:45:58.255366",
+ "modified": "2024-12-04 22:39:12.626662",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Working Team",

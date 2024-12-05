@@ -3,6 +3,7 @@
 
 frappe.ui.form.on("SMO Expense Entry", {
   onload(frm) {
+  
     frm.set_query(
       "input_expense_types",
       "expense_item",
@@ -21,7 +22,7 @@ frappe.ui.form.on("SMO Expense Entry", {
       $(".navbar").css("visibility", "hidden");
       $(".menu-btn-group").hide();
       $(".page-icon-group").hide();
-      if (window.opener && typeof window.opener.refresh_table === 'function') {
+      if (window.opener && typeof window.opener.refresh_table === "function") {
         window.opener.refresh_table();
       }
       frm.add_custom_button(__("Close"), function () {
@@ -162,12 +163,55 @@ frappe.ui.form.on("SMO Expense Entry", {
       });
     }
   },
+  auto_expense(frm) {
+    frm.clear_table("expense_item");
+    // เพิ่มรายการค่าใช้จ่าย EP001
+    let ep001 = frm.add_child("expense_item", {
+      input_expense_types: "EP001",
+      expense_type: "EP001",
+      taxi_depart_distance: frm.get_field("distance_depart").value,
+      cal_taxi_depart_distance: frm.get_field("distance_depart").value,
+      rate_per_km: frm.doc.config_taxi_rate,
+      taxi_initial: frm.doc.config_taxi_init,
+      receipt_date: frm.doc.service_date,
+    });
+    ep001.total_cost =
+      ep001.taxi_initial + ep001.taxi_depart_distance * ep001.rate_per_km;
+
+    // เพิ่มรายการค่าใช้จ่าย EP002
+    let ep002 = frm.add_child("expense_item", {
+      input_expense_types: "EP002",
+      expense_type: "EP002",
+      taxi_return_distance: frm.get_field("distance_return").value,
+      cal_taxi_return_distance: frm.get_field("distance_return").value,
+      rate_per_km: frm.doc.config_taxi_rate,
+      taxi_initial: frm.doc.config_taxi_init,
+      receipt_date: frm.doc.service_date,
+    });
+    ep002.total_cost =
+      ep002.taxi_initial + ep002.taxi_return_distance * ep002.rate_per_km;
+
+    // เพิ่มรายการค่าใช้จ่าย EP004 ถ้า over_night เป็น true
+    if (frm.doc.is_holiday) {
+      let ep004 = frm.add_child("expense_item", {
+        input_expense_types: "EP004",
+        expense_type: "EP004",
+        total_cost: frm.doc.ot_rate,
+        receipt_date: frm.doc.service_date,
+        from_date: frm.doc.service_date,
+        to_date: frm.doc.finish_date,
+      });
+    }
+
+    // รีเฟรชฟิลด์ expense_item เพื่อแสดงรายการที่เพิ่ม
+    frm.refresh_field("expense_item");
+    frm.trigger("cal_total");
+  },
 });
 
 frappe.ui.form.on("SMO Expense Item", {
   refresh(frm) {},
   expense_item_add: function (frm, cdt, cdn) {
-   
     let taxi_rate = frm.doc.config_taxi_rate;
     let taxi_initial = frm.doc.config_taxi_init;
     // เข้าถึงแถวที่ถูกเพิ่ม (child row)
@@ -223,22 +267,21 @@ frappe.ui.form.on("SMO Expense Item", {
     row.expense_type = row.input_expense_types;
 
     if (row.rate_per_km == 0) {
-      
-    let taxi_rate = frm.doc.config_taxi_rate;
-    let taxi_initial = frm.doc.config_taxi_init;
+      let taxi_rate = frm.doc.config_taxi_rate;
+      let taxi_initial = frm.doc.config_taxi_init;
       row.rate_per_km = taxi_rate;
       row.taxi_initial = taxi_initial;
     }
     if (row.expense_type == "EP001") {
       row.taxi_depart_distance = frm.get_field("distance_depart").value;
-      row.cal_taxi_depart_distance=frm.get_field("distance_depart").value;
+      row.cal_taxi_depart_distance = frm.get_field("distance_depart").value;
       row.total_cost =
         row.taxi_initial + row.taxi_depart_distance * row.rate_per_km;
     }
 
     if (row.expense_type == "EP002") {
       row.taxi_return_distance = frm.get_field("distance_return").value;
-      row.cal_taxi_return_distance=frm.get_field("distance_return").value;
+      row.cal_taxi_return_distance = frm.get_field("distance_return").value;
       row.total_cost =
         row.taxi_initial + row.taxi_return_distance * row.rate_per_km;
     }

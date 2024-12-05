@@ -149,7 +149,7 @@ frappe.ui.form.on("SMO Advance Entry", {
               <p><strong>โครงการ:</strong> ${frm.doc.project_name || "ไม่ระบุ"}</p>
             </div>
             <div>
-              <p><strong>เอกสารอ้างอิงเลขที่:</strong> ${frm.doc.reference_code || "ไม่ระบุ"}</p>
+              <p><strong>เอกสารอ้างอิงเลขที่:</strong> ${frm.doc.reference_code_finance || "ไม่ระบุ"}</p>
               <p><strong>ยอดเบิก:</strong> ${new Intl.NumberFormat('th-TH', { 
                 style: 'currency', 
                 currency: 'THB'
@@ -310,7 +310,7 @@ frappe.ui.form.on("SMO Expense Item", {
     // ตั้งค่าฟิลด์ใน child row ด้วยค่าเริ่มต้น
     row.rate_per_km = taxi_rate;
     row.taxi_initial = taxi_initial;
-    row.ref_code = frm.get_field("reference_code").value;
+    row.ref_code = frm.get_field("reference_code_finance").value;
 
     row.paid_by = "เงินทดรอง";
     var df = frappe.meta.get_docfield(

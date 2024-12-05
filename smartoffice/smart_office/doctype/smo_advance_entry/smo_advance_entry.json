@@ -15,6 +15,7 @@
   "column_break_ifjs",
   "customer",
   "customer_site",
+  "site_name",
   "customer_name",
   "project",
   "project_code",
@@ -25,7 +26,8 @@
   "config_taxi_rate",
   "config_taxi_init",
   "advance_info",
-  "reference_code",
+  "reference_code_finance",
+  "reference_code_accounting",
   "advance_amount",
   "column_break_cxiw",
   "approve_by",
@@ -102,7 +104,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.reference_code != undefined && doc.reference_code.trim() != ''",
+   "depends_on": "eval:doc.reference_code_finance != undefined && doc.reference_code_finance.trim() != ''",
    "fieldname": "expense_item",
    "fieldtype": "Table",
    "options": "SMO Expense Item"
@@ -133,13 +135,6 @@
    "label": "Taxi Rate",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "reference_code",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Reference Code",
-   "reqd": 1
   },
   {
    "fieldname": "html_summary",
@@ -229,13 +224,33 @@
   {
    "fieldname": "advance_info",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "reference_code_finance",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Reference Code Finance",
+   "reqd": 1
+  },
+  {
+   "fieldname": "reference_code_accounting",
+   "fieldtype": "Data",
+   "label": "Reference Code Accounting",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "customer_site.site_name",
+   "fieldname": "site_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Site Name"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-11-22 11:18:11.514370",
+ "modified": "2024-12-06 06:40:36.335810",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Advance Entry",

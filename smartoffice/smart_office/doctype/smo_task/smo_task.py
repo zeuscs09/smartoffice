@@ -17,7 +17,13 @@ class SMOTask(Document):
     def validate(self):
         self.assign_to = self.get_assigned_users()
         self.title = f"{self.name} - {self.task_name}"
-
+        self.set_times()
+        
+    def set_times(self):
+        # คำนวณ start_time และ to_time จาก input
+        self.start_time = f"{self.start_hour_input}:{self.start_minute_input}:00"
+        self.to_time = f"{self.finish_hour_input}:{self.finish_minute_input}:00"
+        
     def get_assigned_users(self):
         if not isinstance(self.team, list):
             return None

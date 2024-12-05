@@ -66,11 +66,20 @@
                 <span class="text-xs text-gray-500">{{ formatCurrency(report.total_amount)}}</span>
               </td>
               <td>
-                <div class="badge badge-sm" :class="{
-                  'badge-primary': report.workflow_state === 'Approved',
-                  'badge-warning': report.workflow_state === 'Approval Review',
-                  'badge-error': report.workflow_state === 'Rejected'
-                }">{{ report.workflow_state }}</div>
+                <div class="flex items-center">
+                  <span class="w-2 h-6 block mr-2" :class="{
+                    'bg-green-500': report.workflow_state === 'Approved',
+                    'bg-yellow-500': report.workflow_state === 'Approval Review',
+                    'bg-red-500': report.workflow_state === 'Rejected',
+                    'bg-gray-500': report.workflow_state === 'Draft'
+                  }"></span>
+                  <span class="opacity-75" :class="{
+                    'text-green-500': report.workflow_state === 'Approved',
+                    'text-yellow-500': report.workflow_state === 'Approval Review',
+                    'text-red-500': report.workflow_state === 'Rejected',
+                    'text-gray-500': report.workflow_state === 'Draft'
+                  }">{{ report.workflow_state }}</span>
+                </div>
               </td>
               
               <td>
@@ -112,11 +121,14 @@
                 <br/>
                 # {{ report.name }}
               </p>
-              <p class="text-sm text-gray-500">{{ formatCurrency(report.total_amount) }}   <span class="badge badge-sm" :class="{
-                    'badge-primary': report.workflow_state === 'Approved',
-                    'badge-warning': report.workflow_state === 'Approval Review',
-                    'badge-error': report.workflow_state === 'Rejected'
-                  }">{{ report.workflow_state }}</span></p>
+              <p class="text-sm text-gray-500">{{ formatCurrency(report.total_amount) }}
+                <span class="inline-flex border rounded-md px-2 py-1" :class="{
+                  'bg-gray-100 border-gray-200 text-gray-700': report.workflow_state === 'Draft',
+                  'bg-yellow-100 border-yellow-200 text-yellow-700': report.workflow_state === 'Approval Review',
+                  'bg-green-100 border-green-200 text-green-700': report.workflow_state === 'Approved',
+                  'bg-red-100 border-red-200 text-red-700': report.workflow_state === 'Rejected'
+                }">{{ report.workflow_state }}</span>
+              </p>
              </div>
               <div class="grid grid-cols-1 gap-2 mt-2">
                
@@ -164,6 +176,9 @@
   import NoDataFoundTable from '@/components/NoDataFoundTable.vue'
   import SkeletonCard from '@/components/SkeletonCard.vue'
   import NoDataFoundCard from '@/components/NoDataFoundCard.vue'
+  import { useRouter } from 'vue-router'
+  
+  const router = useRouter()
   
   const props = defineProps({
     data: {
@@ -211,7 +226,9 @@
   }
   
   const viewDocument = (docName: string) => {
-    window.open(`/app/smo-advance-entry/${docName}?from_page=/intranet/advance-entry`, '_blank')
+    // window.open(`/app/smo-advance-entry/${docName}?from_page=/intranet/advance-entry`, '_blank')
+
+    router.push(`/advance-entry/${docName}`)
 
   }
   
@@ -232,7 +249,7 @@
     const duration = modifiedDate.getTime() - creationDate.getTime();
     // แปลงมิลลิวินาทีเป็นวินาที
     const durationInSeconds = Math.floor(duration / 1000);
-    // เพิ่มเหตุการณ์ "สร้างคำขอ" ที่ด้านบนสุดของ timeline
+    // เพิ่มเหตุกาณ "สร้างคำขอ" ที่ด้านบนสุดของ timeline
     timelineEvents.value.push({
       date: expenseRequest.doc.creation,
       action: 'Submit Request',

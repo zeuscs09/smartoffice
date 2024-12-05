@@ -28,7 +28,7 @@ class SMOAdvanceEntry(Document):
 
 		for item in self.expense_item:
 			item.paid_by="เงินทดรอง"
-			item.ref_code=self.reference_code
+			item.ref_code=self.reference_code_finance
 		if self.workflow_state == "Draft":
 			self.reject_reason = None
 

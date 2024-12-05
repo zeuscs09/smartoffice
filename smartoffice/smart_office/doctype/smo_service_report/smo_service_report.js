@@ -114,6 +114,9 @@ frappe.ui.form.on("SMO Service Report", {
         }
     });
   },
+  task_date(frm) {
+    frm.set_value('start_date_input', frm.doc.task_date);
+  },
   customer(frm) {
     frm.set_query("customer_site", () => {
       return {
@@ -152,6 +155,11 @@ frappe.ui.form.on("SMO Service Report", {
   },
   finish_minute_input: function(frm) {
     calculateDurationFromEndTime(frm);
+  },
+  onload(frm) {
+    if (frm.doc.task_date) {
+      frm.set_value('start_date_input', frm.doc.task_date);
+    }
   },
 });
 

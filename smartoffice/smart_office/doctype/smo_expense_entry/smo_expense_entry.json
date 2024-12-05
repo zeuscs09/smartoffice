@@ -30,6 +30,7 @@
   "config_taxi_rate",
   "total_amount",
   "expense_item_section",
+  "auto_expense",
   "expense_item",
   "section_break_nfeq",
   "approver",
@@ -275,13 +276,19 @@
    "fieldname": "site_name",
    "fieldtype": "Data",
    "label": "Customer Site"
+  },
+  {
+   "depends_on": "service_report",
+   "fieldname": "auto_expense",
+   "fieldtype": "Button",
+   "label": "Auto Expense"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-11-22 09:17:08.235309",
+ "modified": "2024-12-05 21:13:32.931877",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Entry",

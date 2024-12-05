@@ -16,13 +16,6 @@
   "task_name",
   "priority",
   "status",
-  "column_break_vpuz",
-  "start_date",
-  "finish_date",
-  "period",
-  "start_time",
-  "to_time",
-  "expected_time_use",
   "column_break_wfvh",
   "project",
   "project_code",
@@ -35,6 +28,22 @@
   "contact_email",
   "site",
   "site_name",
+  "section_break_cqxl",
+  "column_break_vpuz",
+  "start_date",
+  "period",
+  "start_time",
+  "to_time",
+  "column_break_gnkj",
+  "start_hour_input",
+  "start_minute_input",
+  "column_break_xxkk",
+  "expected_time_use",
+  "column_break_bxzk",
+  "finish_date",
+  "column_break_xxaa",
+  "finish_hour_input",
+  "finish_minute_input",
   "section_break_giws",
   "team",
   "assign_to",
@@ -92,11 +101,11 @@
    "label": "Period",
    "options": "All day\nAM\nPM\nNot Specific"
   },
-  
   {
    "default": "08:30:30",
    "fieldname": "start_time",
    "fieldtype": "Time",
+   "hidden": 1,
    "label": "Plan Start Time"
   },
   {
@@ -107,6 +116,7 @@
    "default": "17:30:00",
    "fieldname": "to_time",
    "fieldtype": "Time",
+   "hidden": 1,
    "label": "Plan To"
   },
   {
@@ -287,6 +297,50 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Site Name"
+  },
+  {
+   "fieldname": "section_break_cqxl",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_gnkj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "start_hour_input",
+   "fieldtype": "Select",
+   "label": "Hour",
+   "options": "00\n01\n02\n03\n04\n05\n06\n07\n08\n09\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23"
+  },
+  {
+   "fieldname": "start_minute_input",
+   "fieldtype": "Select",
+   "label": "Minute",
+   "options": "00\n10\n20\n30\n40\n50"
+  },
+  {
+   "fieldname": "column_break_bxzk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_xxaa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_xxkk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "finish_hour_input",
+   "fieldtype": "Select",
+   "label": "Hour",
+   "options": "00\n01\n02\n03\n04\n05\n06\n07\n08\n09\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23"
+  },
+  {
+   "fieldname": "finish_minute_input",
+   "fieldtype": "Select",
+   "label": "Minute",
+   "options": "00\n10\n20\n30\n40\n50"
   }
  ],
  "hide_toolbar": 1,
@@ -298,7 +352,7 @@
    "link_fieldname": "task"
   }
  ],
- "modified": "2024-11-22 10:32:27.847324",
+ "modified": "2024-12-04 22:37:12.032257",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Task",

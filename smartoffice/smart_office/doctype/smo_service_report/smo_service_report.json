@@ -12,6 +12,7 @@
   "task",
   "task_name",
   "job_group",
+  "job_group_name",
   "job_type",
   "column_break_debu",
   "project_link",
@@ -20,6 +21,7 @@
   "customer",
   "customer_name",
   "customer_site",
+  "site_name",
   "contact_person",
   "contact_name",
   "contact_mobile",
@@ -29,6 +31,7 @@
   "start_date_input",
   "is_holiday",
   "holiday_description",
+  "task_date",
   "column_break_lqgd",
   "start_hour_input",
   "start_minute_input",
@@ -230,12 +233,14 @@
    "label": "Holiday Description"
   },
   {
+   "fetch_from": "task.start_date",
    "fieldname": "start_date_input",
    "fieldtype": "Date",
    "label": "Job Start On",
    "reqd": 1
   },
   {
+   "default": "08",
    "fieldname": "start_hour_input",
    "fieldtype": "Select",
    "label": "Hour",
@@ -243,6 +248,7 @@
    "reqd": 1
   },
   {
+   "default": "30",
    "fieldname": "start_minute_input",
    "fieldtype": "Select",
    "label": "Minute",
@@ -256,6 +262,7 @@
    "reqd": 1
   },
   {
+   "default": "17",
    "fieldname": "finish_hour_input",
    "fieldtype": "Select",
    "label": "Hour",
@@ -263,6 +270,7 @@
    "reqd": 1
   },
   {
+   "default": "30",
    "fieldname": "finish_minute_input",
    "fieldtype": "Select",
    "label": "Minute",
@@ -392,6 +400,27 @@
    "label": "Job Group",
    "options": "SMO Job Type Group",
    "read_only_depends_on": "task"
+  },
+  {
+   "fieldname": "task_date",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "task date"
+  },
+  {
+   "fetch_from": "job_group.description",
+   "fieldname": "job_group_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Job Group Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer_site.site_name",
+   "fieldname": "site_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Site Name"
   }
  ],
  "hide_toolbar": 1,
@@ -404,7 +433,7 @@
    "link_fieldname": "service_report"
   }
  ],
- "modified": "2024-11-22 09:22:22.605512",
+ "modified": "2024-12-05 21:56:05.942026",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Service Report",

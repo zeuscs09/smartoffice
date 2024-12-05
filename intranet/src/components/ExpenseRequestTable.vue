@@ -68,10 +68,25 @@
               <br>
               <span class="text-xs text-gray-500">{{ formatCurrency(doc.total) }}</span>
             </td>
-            <td>{{ formatDate(doc.creation) }}</td>
             <td>
               {{ doc.month }} - {{ doc.period }} <br />
-              <span class="text-xs" :class="getStatusClass(doc.workflow_state)">{{ doc.workflow_state }}</span>
+              <span class="text-xs text-gray-500">{{ formatDate(doc.creation) }}</span>
+            </td>
+            <td>
+              <div class="flex items-center">
+                <span class="w-2 h-6 block mr-2" :class="{
+                  'bg-green-500': doc.workflow_state === 'Approved',
+                  'bg-yellow-500': doc.workflow_state === 'Pending Approval',
+                  'bg-red-500': doc.workflow_state === 'Rejected',
+                  'bg-gray-500': doc.workflow_state === 'Draft'
+                }"></span>
+                <span class="opacity-75" :class="{
+                  'text-green-500': doc.workflow_state === 'Approved',
+                  'text-yellow-500': doc.workflow_state === 'Pending Approval',
+                  'text-red-500': doc.workflow_state === 'Rejected',
+                  'text-gray-500': doc.workflow_state === 'Draft'
+                }">{{ doc.workflow_state }}</span>
+              </div>
             </td>
             <td>
               <UserAvatar :email="doc.request_by" />
@@ -129,7 +144,12 @@
              
               <p class="text-sm text-gray-500">
                 {{ formatCurrency(doc.total) }}
-                <span :class="getStatusClass(doc.workflow_state)">{{ doc.workflow_state }}</span>
+                <span class="inline-flex border rounded-md px-2 py-1" :class="{
+                  'bg-gray-100 border-gray-200 text-gray-700': doc.workflow_state === 'Draft',
+                  'bg-yellow-100 border-yellow-200 text-yellow-700': doc.workflow_state === 'Pending Approval',
+                  'bg-green-100 border-green-200 text-green-700': doc.workflow_state === 'Approved',
+                  'bg-red-100 border-red-200 text-red-700': doc.workflow_state === 'Rejected'
+                }">{{ doc.workflow_state }}</span>
               </p>
             </div>
             <div class="grid grid-cols-1 gap-2 mt-2">
@@ -215,16 +235,6 @@ const formatDate = inject('formatDate') as (date: string) => string
 const formatCurrency = inject('formatCurrency') as (amount: number) => string
 const router = useRouter()
 
-const getStatusClass = (status: string) => {
-  switch (status.toLowerCase()) {
-    case 'draft': return 'badge badge-xs badge-ghost '
-    case 'pending approval': return 'badge badge-xs badge-warning'
-    case 'approved': return 'badge badge-xs badge-success'
-    case 'rejected': return 'badge badge-xs badge-error'
-    default: return 'badge badge-xs'
-  }
-}
-
 const sortedData = computed(() => {
   if (!props.sortable || !props.sortField) return props.data
   return [...props.data].sort((a, b) => {
@@ -240,7 +250,8 @@ const toggleSort = (field: string) => {
 }
 
 const viewDocument = (docName: string) => {
-  window.open(`/app/smo-expense-request/${docName}?from_page=/intranet/expense-request`, '_blank')
+  // window.open(`/app/smo-expense-request/${docName}?from_page=/intranet/expense-request`, '_blank')
+  router.push(`/expense-request/${docName}`)
 }
 
 const timelineModal = ref<HTMLDialogElement | null>(null)

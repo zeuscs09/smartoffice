@@ -4,7 +4,7 @@
       <table class="table table-zebra w-full">
         <thead>
           <tr>
-            <th class="cursor-pointer" @click="$emit('sort', 'name')">
+            <th class="cursor-pointer w-32" @click="$emit('sort', 'name')">
               No.
               <span class="ml-1" v-if="sortable">
                 <span :class="{ 'text-primary': sortField === 'name' }">
@@ -15,7 +15,7 @@
                 </span>
               </span>
             </th>
-            <th class="cursor-pointer" @click="$emit('sort', 'customer_name')">
+            <th class="cursor-pointer w-64" @click="$emit('sort', 'customer_name')">
               Customer
               <span class="ml-1" v-if="sortable">
                 <span :class="{ 'text-primary': sortField === 'customer_name' }">
@@ -26,8 +26,8 @@
                 </span>
               </span>
             </th>
-            <th>Project</th>
-            <th class="cursor-pointer" @click="$emit('sort', 'workflow_state')">
+            <th class="w-64">Project</th>
+            <th class="cursor-pointer w-48" @click="$emit('sort', 'workflow_state')">
               Status
               <span class="ml-1" v-if="sortable">
                 <span :class="{ 'text-primary': sortField === 'workflow_state' }">
@@ -38,7 +38,7 @@
                 </span>
               </span>
             </th>
-            <th>Responsible</th>
+            <th class="w-32">Responsible</th>
           </tr>
         </thead>
         <tbody v-if="loading">
@@ -73,15 +73,32 @@
               </span>
             </td>
             <td>
-              <div :class="getStatusClass(doc.workflow_state)">{{ doc.workflow_state }}</div>
-              <br />
-              <button 
-                v-if="!['customer reject', 'rejected'].includes(doc.workflow_state.toLowerCase())"
-                class="btn btn-neutral btn-xs mt-1" 
-                @click="openExpenseEntry(doc.name)"
-              >
-                + Expense
-              </button>
+              <div class="flex items-center space-y-2 flex-col">
+                <div class="flex items-center w-full">
+                  <span class="w-2 h-6 block mr-2" :class="{
+                    'bg-green-500': doc.workflow_state.toLowerCase() === 'customer approved',
+                    'bg-yellow-500': doc.workflow_state.toLowerCase() === 'customer review',
+                    'bg-red-500': ['customer reject', 'rejected'].includes(doc.workflow_state.toLowerCase()),
+                    'bg-gray-500': doc.workflow_state.toLowerCase() === 'draft'
+                  }"></span>
+                  <span class="opacity-75" :class="{
+                    'text-green-500': doc.workflow_state.toLowerCase() === 'customer approved',
+                    'text-yellow-500': doc.workflow_state.toLowerCase() === 'customer review',
+                    'text-red-500': ['customer reject', 'rejected'].includes(doc.workflow_state.toLowerCase()),
+                    'text-gray-500': doc.workflow_state.toLowerCase() === 'draft'
+                  }">{{ doc.workflow_state }}</span>
+                </div>
+                <button 
+                  v-if="!['customer reject', 'rejected', 'draft'].includes(doc.workflow_state.toLowerCase())"
+                  class="btn btn-ghost btn-xs text-primary hover:bg-primary/10" 
+                  @click="openExpenseEntry(doc.name)"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                  Expense
+                </button>
+              </div>
             </td>
             <td>
               <UserAvatar :email="doc.teams" />
@@ -121,19 +138,25 @@
               </p>
               <p class="text-sm text-gray-500">
                 {{ formatDate(doc.job_start_on) }}
-                <span :class="getStatusClass(doc.workflow_state)">
-                  {{ doc.workflow_state }}
-                </span>
+                <span class="inline-flex border rounded-md px-2 py-1" :class="{
+                  'bg-gray-100 border-gray-200 text-gray-700': doc.workflow_state.toLowerCase() === 'draft',
+                  'bg-yellow-100 border-yellow-200 text-yellow-700': doc.workflow_state.toLowerCase() === 'customer review',
+                  'bg-green-100 border-green-200 text-green-700': doc.workflow_state.toLowerCase() === 'customer approved',
+                  'bg-red-100 border-red-200 text-red-700': ['customer reject', 'rejected'].includes(doc.workflow_state.toLowerCase())
+                }">{{ doc.workflow_state }}</span>
               </p>
             </div>
             <div class="card-actions justify-end">
               <div class="flex justify-between items-center w-full">
                 <button 
-                  v-if="!['customer reject', 'rejected'].includes(doc.workflow_state.toLowerCase())"
-                  class="btn btn-neutral btn-sm" 
+                  v-if="!['customer reject', 'rejected', 'draft'].includes(doc.workflow_state.toLowerCase())"
+                  class="btn btn-ghost btn-sm text-primary hover:bg-primary/10" 
                   @click="openExpenseEntry(doc.name)"
                 >
-                  <span class="ml-1 text-xs">+ Expense</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                  Expense
                 </button>
                 <UserAvatar :email="doc.teams" />
               </div>
@@ -192,7 +215,7 @@ const router = useRouter()
 const getStatusClass = (status: string) => {
   switch (status.toLowerCase()) {
     case 'customer review': return 'badge badge-xs badge-warning'
-    case 'customer approve': return 'badge badge-xs badge-success'
+    case 'customer approved': return 'badge badge-xs badge-success'
     case 'rejected': return 'badge badge-xs badge-error'
     case 'customer reject': return 'badge badge-xs badge-error'
     default: return 'badge badge-xs'
@@ -214,7 +237,8 @@ const toggleSort = (field: string) => {
 }
 
 const viewDocument = (docName: string) => {
-  window.open(`/app/smo-service-report/${docName}?from_page=/intranet`, '_blank')
+  // window.open(`/app/smo-service-report/${docName}?from_page=/intranet`, '_blank')
+  router.push(`/service-report/${docName}`)
 }
 
 const openExpenseEntry = (docName: string) => {

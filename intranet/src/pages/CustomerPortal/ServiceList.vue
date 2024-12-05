@@ -202,7 +202,7 @@ const handleFilter = () => {
 const getStatusClass = (status: string) => {
   const classes = {
     'Customer Review': 'badge badge-warning',
-    'Customer Approve': 'badge badge-success',
+    'Customer Approved': 'badge badge-success',
     'Customer Reject': 'badge badge-error'
   }
   return classes[status] || 'badge'
