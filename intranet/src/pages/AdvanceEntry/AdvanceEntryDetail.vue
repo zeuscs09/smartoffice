@@ -2,7 +2,7 @@
 import { ref, onMounted, watch, inject } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createDocumentResource, createResource } from 'frappe-ui'
-import UserLayout from '@/layouts/UserLayout.vue'
+import UserLayout from '@/layouts/userLayout.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import { session } from '@/data/session'
 import { useToast } from '@/composables/useToast'
@@ -47,10 +47,10 @@ const applyTransition = async (transition) => {
       action: transition.action,
     })
     
-    toast.success('บันทึกข้อมูลสำเร็จ')
+    toast.success('Saved successfully')
     
   } catch (error) {
-    let errorMessage = 'เกิดข้อผิดพลาดในการดำเนินการ'
+    let errorMessage = 'An error occurred during the operation'
     if (applyWorkflowResource.error.messages) {
       errorMessage = applyWorkflowResource.error.messages.join(', ')
     }
@@ -80,7 +80,7 @@ const handleTransition = (transition) => {
 
 const confirmReject = async () => {
   if (!rejectReason.value) {
-    alert('กรุณาใส่เหตุผลในการ Reject')
+    alert('Please enter a reason for rejection')
     return
   }
   advanceResource.doc.reject_reason = rejectReason.value

@@ -214,7 +214,7 @@
 import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createDocumentResource, createResource } from 'frappe-ui'
-import UserLayout from '@/layouts/UserLayout.vue'
+import UserLayout from '@/layouts/userLayout.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import { session } from '@/data/session'
 import { useToast } from '@/composables/useToast'

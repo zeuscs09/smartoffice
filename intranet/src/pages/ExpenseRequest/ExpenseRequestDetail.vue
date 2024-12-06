@@ -2,7 +2,7 @@
 import { ref, onMounted, watch, computed, inject } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createDocumentResource, createResource } from 'frappe-ui'
-import UserLayout from '@/layouts/UserLayout.vue'
+import UserLayout from '@/layouts/userLayout.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import { session } from '@/data/session'
 import { useToast } from '@/composables/useToast'
@@ -46,10 +46,10 @@ const applyTransition = async (transition) => {
       action: transition.action,
     })
     
-    toast.success('บันทึกข้อมูลสำเร็จ')
+    toast.success('Saved successfully')
     
   } catch (error) {
-    let errorMessage = 'เกิดข้อผิดพลาดในการดำเนินการ'
+    let errorMessage = 'An error occurred during the operation'
     if (applyWorkflowResource.error.messages) {
       errorMessage = applyWorkflowResource.error.messages.join(', ')
     }
@@ -67,7 +67,7 @@ const handleTransition = (transition) => {
 
 const confirmReject = async () => {
   if (!rejectReason.value) {
-    alert('กรุณาใส่เหตุผลในการ Reject')
+    alert('Please enter a reason for rejection')
     return
   }
   await applyTransition({ action: 'Reject' })
@@ -203,11 +203,11 @@ onMounted(() => {
       <input type="checkbox" id="reject-modal" class="modal-toggle" />
       <div class="modal">
         <div class="modal-box">
-          <h3 class="font-bold text-lg">กรุณาใส่เหตุผลในการ Reject</h3>
-          <textarea v-model="rejectReason" class="textarea textarea-bordered w-full mt-4" placeholder="เหตุผล..."></textarea>
+          <h3 class="font-bold text-lg">Please provide a reason for rejection</h3>
+          <textarea v-model="rejectReason" class="textarea textarea-bordered w-full mt-4" placeholder="Reason..."></textarea>
           <div class="modal-action">
-            <label for="reject-modal" class="btn" @click="confirmReject">ยืนัน</label>
-            <label for="reject-modal" class="btn">ยกเลิก</label>
+            <label for="reject-modal" class="btn" @click="confirmReject">Confirm</label>
+            <label for="reject-modal" class="btn">Cancel</label>
           </div>
         </div>
       </div>
@@ -357,7 +357,7 @@ onMounted(() => {
                       {{ formatCurrency(getExpenseTypeTotal(items)) }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500">
-                      {{ items.length }} รายการ
+                      {{ items.length }} items
                     </td>
                   </tr>
                 </tbody>
@@ -368,7 +368,7 @@ onMounted(() => {
                       {{ formatCurrency(expenseResource.doc?.total || 0) }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500">
-                      {{ expenseResource.doc?.expense_request_item?.length || 0 }} รายการ
+                      {{ expenseResource.doc?.expense_request_item?.length || 0 }} items
                     </td>
                   </tr>
                 </tfoot>
@@ -414,7 +414,7 @@ onMounted(() => {
                       {{ formatCurrency(getProjectTotal(items)) }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500">
-                      {{ items.length }} รายการ
+                      {{ items.length }} items
                     </td>
                   </tr>
                 </tbody>
@@ -425,7 +425,7 @@ onMounted(() => {
                       {{ formatCurrency(expenseResource.doc?.total || 0) }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500">
-                      {{ expenseResource.doc?.expense_request_item?.length || 0 }} รายการ
+                      {{ expenseResource.doc?.expense_request_item?.length || 0 }} items
                     </td>
                   </tr>
                 </tfoot>
