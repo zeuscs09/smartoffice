@@ -16,6 +16,17 @@ const toast = useToast()
 const workflowResource = createResource({
   url: 'frappe.model.workflow.get_transitions',
   auto: false,
+  transform: (data) => {
+    const uniqueTransitions = data.reduce((acc, transition) => {
+      const key = `${transition.state}-${transition.action}-${transition.next_state}`
+      if (!acc[key]) {
+        acc[key] = transition
+      }
+      return acc
+    }, {})
+    
+    return Object.values(uniqueTransitions)
+  }
 })
 
 const expenseResource = createDocumentResource({

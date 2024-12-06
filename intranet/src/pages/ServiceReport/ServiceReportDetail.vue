@@ -115,6 +115,25 @@
                                 <p class="text-sm text-gray-500">Project Code</p>
                                 <p class="font-medium">{{ serviceReportResource.doc.project_code }}</p>
                             </div>
+                            <!-- เพิ่มส่วนข้อมูลติดต่อ -->
+                            <template v-if="serviceReportResource.doc.contact_name">
+                                <div>
+                                    <p class="text-sm text-gray-500">Contact Person</p>
+                                    <p class="font-medium">{{ serviceReportResource.doc.contact_name }}</p>
+                                </div>
+                            </template>
+                            <template v-if="serviceReportResource.doc.contact_mobile">
+                                <div>
+                                    <p class="text-sm text-gray-500">Contact Mobile</p>
+                                    <p class="font-medium">{{ serviceReportResource.doc.contact_mobile }}</p>
+                                </div>
+                            </template>
+                            <template v-if="serviceReportResource.doc.contact_email">
+                                <div>
+                                    <p class="text-sm text-gray-500">Contact Email</p>
+                                    <p class="font-medium">{{ serviceReportResource.doc.contact_email }}</p>
+                                </div>
+                            </template>
                         </div>
                     </div>
 
@@ -132,7 +151,6 @@
                                 <p class="text-sm text-gray-500">Job Type</p>
                                 <p class="font-medium break-words">{{ serviceReportResource.doc.job_type }}</p>
                             </div>
-
                             <div class="col-span-2 sm:col-span-1">
                                 <p class="text-sm text-gray-500">Start Time</p>
                                 <p class="font-medium">{{ serviceReportResource.doc.job_start_on }}</p>
@@ -141,9 +159,19 @@
                                 <p class="text-sm text-gray-500">Finish Time</p>
                                 <p class="font-medium">{{ serviceReportResource.doc.job_finish }}</p>
                             </div>
-                            <div v-if="serviceReportResource.doc.is_holiday" class="col-span-2 sm:col-span-1">
+                            <div v-if="serviceReportResource.doc.is_holiday" class="col-span-2">
                                 <p class="text-sm text-gray-500">Holiday</p>
                                 <p class="font-medium">{{ serviceReportResource.doc.holiday_description }}</p>
+                            </div>
+                            <!-- Duration -->
+                            <div class="col-span-2 sm:col-span-1">
+                                <p class="text-sm text-gray-500">Duration (Hours)</p>
+                                <p class="font-medium">{{ (serviceReportResource.doc.duration / 3600).toFixed(2) }}</p>
+                            </div>
+                            <!-- Overnight -->
+                            <div v-if="serviceReportResource.doc.over_night" class="col-span-2 sm:col-span-1">
+                                <p class="text-sm text-gray-500">Overnight</p>
+                                <p class="font-medium text-yellow-600">Yes</p>
                             </div>
                         </div>
                     </div>
@@ -240,7 +268,7 @@ const applyWorkflowResource = createResource({
     url: 'frappe.model.workflow.apply_workflow',
     auto: false,
     onSuccess: () => {
-        // รีโหลดข้อมูลเอกสารหลังจาก apply workflow สำเร็จ
+        // รีโหลดข้อมูลเกสารหลังจาก apply workflow สำเร็จ
         serviceReportResource.reload()
     },
 })
