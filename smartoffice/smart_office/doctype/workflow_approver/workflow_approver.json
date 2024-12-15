@@ -65,16 +65,19 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "receive_date",
    "fieldtype": "Datetime",
    "label": "Receive Date"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "action_date",
    "fieldtype": "Datetime",
    "label": "Action Date"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "duration",
    "fieldtype": "Duration",
    "label": "Duration"
@@ -83,7 +86,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-10-25 16:28:50.407698",
+ "modified": "2024-12-14 09:06:12.842816",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "Workflow Approver",

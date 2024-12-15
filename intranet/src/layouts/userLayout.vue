@@ -92,18 +92,34 @@
                                         </svg>
                                     </div>
                                 </button>
-                                <button class="btn btn-ghost btn-circle tooltip tooltip-bottom" 
-                                    data-tip="Accounting Report"
-                                    @click="openReport('Accounting Report')">
-                                    <div class="indicator">
-                                        <svg class="h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M21 11.5H3M21 11.5C21.8284 11.5 22.5 12.1716 22.5 13V19C22.5 19.8284 21.8284 20.5 21 20.5H3C2.17157 20.5 1.5 19.8284 1.5 19V13C1.5 12.1716 2.17157 11.5 3 11.5M21 11.5V9C21 8.17157 20.3284 7.5 19.5 7.5H4.5C3.67157 7.5 3 8.17157 3 9V11.5M12 15.5V17.5M8 15.5V17.5M16 15.5V17.5" 
-                                                stroke="currentColor" 
-                                                stroke-width="1.5" 
-                                                stroke-linecap="round"/>
-                                        </svg>
-                                    </div>
-                                </button>
+                                <div class="dropdown dropdown-hover dropdown-bottom">
+                                    <label tabindex="0" class="btn btn-ghost btn-circle">
+                                        <div class="indicator">
+                                            <svg class="h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M20 12V4C20 2.89543 19.1046 2 18 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V18.5" 
+                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                <path d="M15 11H8M12 16H8M16 6H8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                            </svg>
+                                        </div>
+                                    </label>
+                                    <ul tabindex="0" 
+                                        class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52"
+                                        style="margin-top: 0.5rem">
+                                        <li>
+                                            <router-link :to="{ name: 'ManhourReport' }" class="text-sm">
+                                                <Clock class="w-4 h-4" />
+                                                Manhour Report
+                                            </router-link>
+                                        </li>
+                                        <li>
+                                            <router-link :to="{ name: 'ExpenseReport' }" class="text-sm">
+                                                <Receipt class="w-4 h-4" />
+                                                Expense Report
+                                            </router-link>
+                                        </li>
+                                      
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -288,6 +304,7 @@ import { useRouter } from 'vue-router'
 import { session } from '../data/session'
 import { createResource } from 'frappe-ui'
 import { ref, onMounted, computed, watch } from 'vue'
+import { Clock, Receipt, Calculator } from 'lucide-vue-next'
 
 const router = useRouter()
 const fullName = ref('')

@@ -8,7 +8,7 @@ def get_advance_entry_by_user(page=1, page_size=10, search=None, status=None, st
     page_size = int(page_size)
     offset = (page - 1) * page_size
     
-    conditions = ["(ae.owner = %s or ae.approver like %s)"]
+    conditions = ["(ae.owner = %s OR approver.users like %s)"]
     values = [user, f"%{user}%"]
     
     if search:
@@ -42,14 +42,26 @@ def get_advance_entry_by_user(page=1, page_size=10, search=None, status=None, st
         ae.total_amount,
         ae.owner,
         ae.service_date,
+        ae.to,
         ae.reference_code,
         ae.approver,
         ae.total_amount,
         ae.creation,
         ae.workflow_state,
+        approver.users as approvers,
+        CASE WHEN ae.workflow_state in ('Approved','Rejected') THEN '' ELSE ae.next_action END AS next_action,
         COUNT(*) OVER () as ttl_records
     FROM 
-        `tabSMO Advance Entry` ae
+        `tabSMO Advance Entry` ae inner join
+        (
+            SELECT parent, 
+                GROUP_CONCAT(user_id ORDER BY idx SEPARATOR ', ') AS users
+            FROM `tabWorkflow Approver`
+            where 
+            parenttype ='SMO Advance Entry'
+                    and parentfield ='approvers'
+                    GROUP BY parent
+        ) as approver on ae.name =approver.parent
     WHERE 
         {where_clause}
     {sort_clause}

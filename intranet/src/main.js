@@ -3,7 +3,7 @@ import './index.css'
 import { createApp } from 'vue'
 import router from './router'
 import App from './App.vue'
-import { formatDate, formatCurrency } from './utils/formatters'
+import { formatDate, formatCurrency, formatDuration } from './utils/formatters'
 
 import {
   setConfig,
@@ -24,6 +24,7 @@ app.use(resourcesPlugin)
 app.use(pinia)
 app.provide('formatDate', formatDate)
 app.provide('formatCurrency', formatCurrency)
+app.provide('formatDuration', formatDuration)
 // app.use(FrappeUI)
 
 app.mount('#app')

@@ -37,6 +37,7 @@
                 <select class="select select-bordered w-full max-w-xs" v-model="statusFilter" @change="handleFilter">
                     <option value="">All</option>
                     <option value="Draft">Draft</option>
+                    <option value="Admin Review">Admin Review</option>
                     <option value="Approval Review">Approval Review</option>
                     <option value="Approved">Approve</option>
                     <option value="Rejected">Reject</option>

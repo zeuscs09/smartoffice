@@ -122,7 +122,8 @@
    "read_only": 1
   },
   {
-   "fetch_from": "task.contact_name",
+   "fetch_from": "task.contact_person",
+   "fetch_if_empty": 1,
    "fieldname": "contact_person",
    "fieldtype": "Data",
    "label": "Contact Person"
@@ -144,6 +145,7 @@
   },
   {
    "fetch_from": "task.contact_mobile",
+   "fetch_if_empty": 1,
    "fieldname": "contact_mobile",
    "fieldtype": "Data",
    "label": "Contact Mobile"
@@ -433,7 +435,7 @@
    "link_fieldname": "service_report"
   }
  ],
- "modified": "2024-12-05 21:56:05.942026",
+ "modified": "2024-12-15 16:00:40.352937",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Service Report",

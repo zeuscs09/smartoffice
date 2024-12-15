@@ -12,7 +12,8 @@
   "customer_otp_template",
   "jwt_secret_key",
   "flow_section",
-  "admin"
+  "admin_user",
+  "finance_user"
  ],
  "fields": [
   {
@@ -63,16 +64,22 @@
    "label": "Flow"
   },
   {
-   "fieldname": "admin",
+   "fieldname": "admin_user",
    "fieldtype": "Link",
    "label": "Admin",
+   "options": "User"
+  },
+  {
+   "fieldname": "finance_user",
+   "fieldtype": "Link",
+   "label": "Finance",
    "options": "User"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-12-05 01:12:02.228587",
+ "modified": "2024-12-09 20:47:35.337931",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "Smart Office Setting",

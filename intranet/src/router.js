@@ -89,6 +89,29 @@ const routes = [
     name: 'ServiceReportDetail',
     path: '/service-report/:id',
     component: () => import('@/pages/ServiceReport/ServiceReportDetail.vue'),
+  },
+  {
+    path: '/reports',
+    name: 'Reports',
+    redirect: '/reports/manhour',
+    children: [
+      {
+        name: 'ManhourReport',
+        path: 'manhour',
+        component: () => import('@/pages/Reports/ManhourReport.vue'),
+      },
+      {
+        name: 'ExpenseReport',
+        path: 'expense',
+        component: () => import('@/pages/Reports/ExpenseReport.vue'),
+      }
+      // เตรียมไว้สำหรับรายงานอื่นๆ ในอนาคต
+      // {
+      //   name: 'NewReport',
+      //   path: 'new-report',
+      //   component: () => import('@/pages/Reports/NewReport.vue'),
+      // }
+    ]
   }
 ]
 

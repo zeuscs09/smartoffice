@@ -31,7 +31,7 @@ frappe.ui.form.on("SMO Expense Request", {
     ];
 
     if (frm.is_new()) {
-      // ฟอร์มนี้เป็นฟอร์มใหม่และยังไม่เคยบันทึก
+      // ฟอร์��นี้เป็นฟอร์มใหม่และยังไม่เคยบันทึก
       // ดึงเดือนปัจจุบัน
       const currentMonth = new Date().getMonth(); // ดึง index ของเดือน (เริ่มจาก 0)
       const fullMonthName = monthNames[currentMonth]; // ชื่อเดือนเต็ม
@@ -365,19 +365,46 @@ function render_summary(data, callback) {
 
     // เริ่มต้นสร้าง HTML สำหรับตารางโดยใช้ Bootstrap
     let html = `
-    <table class="table table-bordered table-striped">
-      <thead class="thead-dark">
-        <tr>
-          <th>Service Date</th>
-          <th>Customer</th>
-          <th>Project</th>
-          <th>Receipt Date</th>
-          ${expenseTypes.map((type) => `<th>${type.desc}</th>`).join("")}
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody>
-  `;
+    <style>
+      .expense-table-container {
+        overflow-x: auto;
+        max-width: 100%;
+        margin: 15px 0;
+      }
+      .expense-table {
+        width: 100%;
+        font-size: 0.9em;
+        border-collapse: collapse;
+      }
+      .expense-table th,
+      .expense-table td {
+        padding: 8px;
+        border: 1px solid #ddd;
+      }
+      .expense-table thead th {
+        background-color: #f8f9fa;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
+      .expense-table tbody tr:hover {
+        background-color: #f5f5f5;
+      }
+    </style>
+    <div class="expense-table-container">
+      <table class="table table-bordered table-striped expense-table">
+        <thead class="thead-dark">
+          <tr>
+            <th>Service Date</th>
+            <th>Customer</th>
+            <th>Project</th>
+            <th>Receipt Date</th>
+            ${expenseTypes.map((type) => `<th>${type.desc}</th>`).join("")}
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
 
     // ตัวแปรสำหรับเก็บผลรวมของแต่ละประเภท
     let grandTotals = expenseTypes.reduce((acc, type) => {
@@ -429,6 +456,7 @@ function render_summary(data, callback) {
         </tr>
       </tfoot>
     </table>
+    </div>
   `;
 
     return callback(html);

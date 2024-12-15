@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, watch, computed, inject } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createDocumentResource, createResource } from 'frappe-ui'
@@ -8,6 +8,7 @@ import { session } from '@/data/session'
 import { useToast } from '@/composables/useToast'
 import ExpenseChart from '@/components/ExpenseChart.vue'
 import { useExpenseTypes } from '@/composables/useExpenseTypes'
+import ApproversGrid from '@/components/ApproversGrid.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -48,8 +49,34 @@ const rejectReason = ref('')
 const applyTransition = async (transition) => {
   try {
     if (transition.action === 'Reject') {
-      expenseResource.doc.reject_reason = rejectReason.value
-      await expenseResource.setValue.submit(expenseResource.doc)
+      try {
+        const response = await fetch(`/api/method/smartoffice.api.expense.update_reject_reason`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            doctype: 'SMO Expense Request',
+            docname: route.params.id,
+            reject_reason: rejectReason.value
+          })
+        })
+
+        const data = await response.json()
+        
+        if (!response.ok) {
+          // ตรวจสอบข้อความ error จาก server
+          const errorMessage = data._server_messages 
+            ? JSON.parse(JSON.parse(data._server_messages)[0]).message 
+            : 'ไม่สามารถบันทึกเหตุผลการ Reject ได้'
+          
+          toast.error(errorMessage)
+          return
+        }
+      } catch (error) {
+        toast.error('เกิดข้อผิดพลาดในการบันทึกเหตุผลการ Reject')
+        return
+      }
     }
 
     await applyWorkflowResource.submit({
@@ -57,14 +84,39 @@ const applyTransition = async (transition) => {
       action: transition.action,
     })
     
-    toast.success('Saved successfully')
+    toast.success('บันทึกข้อมูลสำเร็จ')
     
   } catch (error) {
-    let errorMessage = 'An error occurred during the operation'
-    if (applyWorkflowResource.error.messages) {
+    let errorMessage = 'เกิดข้อผิดพลาดในการดำเนินการ'
+    if (applyWorkflowResource.error?.messages) {
       errorMessage = applyWorkflowResource.error.messages.join(', ')
     }
     toast.error(errorMessage)
+  }
+}
+
+const cancelDocumentResource = createResource({
+  url: 'frappe.desk.form.save.cancel',
+  auto: false,
+  onSuccess: () => {
+    expenseResource.reload()
+    toast.success('เอกสารถูกยกเลิกเรียบร้อยแล้ว')
+  },
+  onError: (error) => {
+    toast.error(error.messages?.join(', ') || 'ไม่สามารถยกเลิกเอกสารได้')
+  }
+})
+
+const goCancel = async () => {
+  try {
+    await cancelDocumentResource.submit({
+      doctype: 'SMO Expense Request',
+      name: route.params.id,
+      workflow_state_fieldname: 'workflow_state',
+      workflow_state: 'Rejected'
+    })
+  } catch (error) {
+    console.error('Error cancelling document:', error)
   }
 }
 
@@ -196,6 +248,41 @@ const totals = computed(() => {
   }, {})
 })
 
+const groupedAttachments = computed(() => {
+  if (!expenseResource.doc?.expense_request_item) return []
+  
+  const attachmentMap = new Map()
+  
+  expenseResource.doc.expense_request_item.forEach(item => {
+    const objectData = JSON.parse(item.object_data || '{}')
+    if (!objectData.attachment) return // ข้ามรายการที่ไม่มีเอกสารแนบ
+    
+    const key = `${objectData.service_date}-${objectData.customer_name}-${objectData.project_name}`
+    
+    if (!attachmentMap.has(key)) {
+      attachmentMap.set(key, {
+        service_date: objectData.service_date,
+        customer_name: objectData.customer_name,
+        project_name: objectData.project_name,
+        attachments: []
+      })
+    }
+    
+    const record = attachmentMap.get(key)
+    record.attachments.push({
+      file_url: objectData.attachment,
+      expense_type: objectData.expense_type_desc,
+      receipt_date: objectData.receipt_date,
+      total_cost: objectData.total_cost
+    })
+  })
+  
+  return Array.from(attachmentMap.values()).sort((a, b) => 
+    `${a.service_date}${a.customer_name}${a.project_name}`
+      .localeCompare(`${b.service_date}${b.customer_name}${b.project_name}`)
+  )
+})
+
 // inject formatters
 const formatDate = inject('formatDate')
 const formatCurrency = inject('formatCurrency')
@@ -204,6 +291,120 @@ const { expenseTypes, loading: loadingExpenseTypes, fetchExpenseTypes } = useExp
 
 onMounted(() => {
   fetchExpenseTypes()
+})
+
+// เพิ่มฟังก์ชันสำหรับการพิมพ์
+const printAttachments = () => {
+  const printWindow = window.open('', '_blank')
+  if (!printWindow) return
+  
+  const tableRows = attachmentsList.value.map(item => `
+    <tr>
+      <td>${formatDate(item.service_date)}</td>
+      <td>${item.customer_name}</td>
+      <td>${item.project_name}</td>
+      <td>${item.expense_type_desc}</td>
+      <td>${formatDate(item.receipt_date)}</td>
+      <td class="text-right">${formatCurrency(item.total_cost)}</td>
+    </tr>
+  `).join('')
+
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Expense Attachments - ${expenseResource.doc?.name}</title>
+        <style>
+          body { 
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            font-size: 12px;
+          }
+          h2 { 
+            margin-bottom: 20px;
+            font-size: 14px;
+          }
+          table { 
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+          }
+          th, td { 
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+          }
+          th {
+            background-color: #f8f9fa !important;
+            -webkit-print-color-adjust: exact;
+          }
+          .text-right {
+            text-align: right;
+          }
+          tfoot td {
+            font-weight: bold;
+          }
+        </style>
+      </head>
+      <body>
+        <h2>Expense Attachments - ${expenseResource.doc?.name}</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Service Date</th>
+              <th>Customer</th>
+              <th>Project</th>
+              <th>Expense Type</th>
+              <th>Receipt Date</th>
+              <th class="text-right">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="5">Total</td>
+              <td class="text-right">${formatCurrency(totalAmount.value)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </body>
+    </html>
+  `)
+  
+  printWindow.document.close()
+  printWindow.print()
+}
+
+// ปรับ computed property สำหรับแสดงในตาราง
+const attachmentsList = computed(() => {
+  if (!expenseResource.doc?.expense_request_item) return []
+  
+  return expenseResource.doc.expense_request_item
+    .filter(item => {
+      const objectData = JSON.parse(item.object_data || '{}')
+      return objectData.attachment // กรองเฉพาะรายการที่มีเอกสารแนบ
+    })
+    .map(item => {
+      const objectData = JSON.parse(item.object_data || '{}')
+      return {
+        service_date: objectData.service_date,
+        customer_name: objectData.customer_name,
+        project_name: objectData.project_name,
+        expense_type_desc: objectData.expense_type_desc,
+        receipt_date: objectData.receipt_date,
+        total_cost: objectData.total_cost,
+        file_url: objectData.attachment
+      }
+    })
+    .sort((a, b) => 
+      `${a.service_date}${a.customer_name}${a.project_name}`
+        .localeCompare(`${b.service_date}${b.customer_name}${b.project_name}`)
+    )
+})
+
+const totalAmount = computed(() => {
+  return attachmentsList.value.reduce((sum, item) => sum + (item.total_cost || 0), 0)
 })
 </script>
 
@@ -233,10 +434,17 @@ onMounted(() => {
           </button>
           <div class="flex gap-4">
             <button 
-              v-if="expenseResource.doc?.workflow_state === 'Draft' && session.user === expenseResource.doc?.owner"
+              v-if="(expenseResource.doc?.workflow_state === 'Draft'  )&& session.user === expenseResource.doc?.owner"
               @click="goEdit"
               class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
               Edit
+            </button>
+            <button 
+              v-if="(expenseResource.doc?.workflow_state === 'Rejected' && expenseResource.doc?.docstatus !==2 )&& session.user === expenseResource.doc?.owner"
+              @click="goCancel"
+              :disabled="cancelDocumentResource.loading"
+              class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded disabled:opacity-50">
+              {{ cancelDocumentResource.loading ? 'กำลังยกเลิก...' : 'Cancel Document' }}
             </button>
             <button 
               v-for="transition in workflowResource.data" 
@@ -245,7 +453,7 @@ onMounted(() => {
               :disabled="applyWorkflowResource.loading"
               :class="{
                 'bg-blue-500 hover:bg-blue-600': transition.action === 'Request Approve',
-                'bg-green-500 hover:bg-green-600': transition.action === 'Approve',
+                'bg-green-500 hover:bg-green-600': transition.action === 'Approve' || transition.action === 'Final Approve',
                 'bg-red-500 hover:bg-red-600': transition.action === 'Reject',
                 'opacity-50 cursor-not-allowed': applyWorkflowResource.loading,
                 'text-white font-medium px-4 py-2 rounded-md transition-colors': true
@@ -269,7 +477,7 @@ onMounted(() => {
                 <div :class="{
                   'inline-flex border rounded-md px-2 py-1': true,
                   'bg-gray-100 border-gray-200 text-gray-700': expenseResource.doc.workflow_state === 'Draft',
-                  'bg-yellow-100 border-yellow-200 text-yellow-700': expenseResource.doc.workflow_state === 'Approval Review',
+                  'bg-yellow-100 border-yellow-200 text-yellow-700': expenseResource.doc.workflow_state === 'Approval Review' || expenseResource.doc.workflow_state === 'Pending Approval',
                   'bg-green-100 border-green-200 text-green-700': expenseResource.doc.workflow_state === 'Approved',
                   'bg-red-100 border-red-200 text-red-700': expenseResource.doc.workflow_state === 'Rejected'
                 }">
@@ -291,10 +499,7 @@ onMounted(() => {
                   <p class="text-sm text-gray-500">Period</p>
                   <p class="font-medium">{{ expenseResource.doc.period }}</p>
                 </div>
-                <div>
-                  <p class="text-sm text-gray-500">Department</p>
-                  <p class="font-medium">{{ expenseResource.doc.department }}</p>
-                </div>
+              
               </div>
 
               <!-- Document Info -->
@@ -523,49 +728,134 @@ onMounted(() => {
           </div>
         </div>
 
-         <!-- Approvers Card Grid -->
-         <div class="bg-white rounded-lg shadow p-6">
-          <h2 class="text-lg font-medium text-gray-900 mb-4">Approvers</h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div v-for="approver in expenseResource.doc.approvers" :key="approver.name"
-              class="flex items-center space-x-4 p-4 rounded-lg border border-gray-200"
-              :class="{
-                'bg-green-50 border-green-200': approver.status === 'Approved',
-                'bg-red-50 border-red-200': approver.status === 'Rejected',
-                'bg-gray-50 border-gray-200 opacity-50': approver.status === 'Pending',
-              }">
-              <UserAvatar :email="approver.user_id" size="md" />
-              <div>
-                <p class="font-medium text-gray-900">{{ approver.user_id }}</p>
-                <p class="text-sm text-gray-500">{{ approver.approver_role }}</p>
-                <div class="flex items-center gap-2 mt-1">
-                  <span :class="{
-                    'px-2 py-0.5 text-xs font-medium rounded-full': true,
-                    'bg-green-100 text-green-800': approver.status === 'Approved',
-                    'bg-red-100 text-red-800': approver.status === 'Rejected',
-                    'bg-gray-100 text-gray-800': approver.status === 'Pending'
-                  }">
-                    {{ approver.status }}
-                  </span>
-                  <span v-if="approver.action_date" class="text-xs text-gray-500">
-                    {{ approver.action_date?.split('.')[0]?.replace('T', ' ') }}
-                  </span>
-                </div>
-                <p v-if="approver.comment" class="text-sm text-gray-600 mt-1">
-                  Comment: {{ approver.comment }}
-                </p>
-                <p v-if="approver.duration" class="text-xs text-gray-500 mt-1">
-                  Duration: {{ Math.round(approver.duration) }} seconds
-                </p>
-              </div>
+        <!-- แทนที่ส่วนแสดงผลเดิมในส่วนของ Attachments tab ด้วยโค้ดนี้ -->
+        <div class="bg-white rounded-lg shadow mt-6">
+          <div class="border-b border-gray-200">
+            <div class="flex justify-between items-center px-6 py-4">
+              <h2 class="text-lg font-medium text-gray-900">Attachments</h2>
+              <button 
+                @click="printAttachments"
+                class="no-print inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                Print
+              </button>
+            </div>
+          </div>
+          
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200" id="attachments-table">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Service Date
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Customer
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Project
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Expense Type
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Receipt Date
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Amount
+                  </th>
+                  <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider no-print">
+                    Attachment
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr v-for="(item, index) in attachmentsList" :key="index">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {{ formatDate(item.service_date) }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {{ item.customer_name }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {{ item.project_name }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {{ item.expense_type_desc }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {{ formatDate(item.receipt_date) }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">
+                    {{ formatCurrency(item.total_cost) }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-center no-print">
+                    <a 
+                      :href="item.file_url" 
+                      target="_blank"
+                      class="text-blue-600 hover:text-blue-900"
+                    >
+                      View
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot class="bg-gray-50">
+                <tr>
+                  <td colspan="5" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    Total
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right text-blue-600">
+                    {{ formatCurrency(totalAmount) }}
+                  </td>
+                  <td class="no-print"></td>
+                </tr>
+              </tfoot>
+            </table>
+
+            <!-- แสดงข้อความเมื่อไม่มีเอกสารแนบ -->
+            <div v-if="attachmentsList.length === 0" class="text-center py-8">
+              <p class="text-gray-500">ไม่พบเอกสารแนบ</p>
             </div>
           </div>
         </div>
+
+         <!-- Approvers Card Grid -->
+         <ApproversGrid 
+          :approvers="expenseResource.doc.approvers"
+        />
       </div>
     </div>
   </UserLayout>
 </template>
 
 <style scoped>
-
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-only {
+    display: block !important;
+  }
+  
+  table { 
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  th, td { 
+    border: 1px solid #000;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  th {
+    background-color: #f8f9fa !important;
+    -webkit-print-color-adjust: exact;
+  }
+}
 </style>

@@ -8,6 +8,7 @@ import { useRouter } from 'vue-router'
 import UserAvatar from '@/components/UserAvatar.vue'
 import { session } from '@/data/session'
 import { useToast } from '@/composables/useToast'
+import ApproversGrid from '@/components/ApproversGrid.vue'
 
 const router = useRouter()
 
@@ -17,25 +18,36 @@ const route = useRoute()
 // const workflowStore = useWorkFlowStore()
 
 const workflowResource = createResource({
-      url: 'frappe.model.workflow.get_transitions',
-      auto: false,
-    })
+  url: 'frappe.model.workflow.get_transitions',
+  auto: false,
+  transform: (data) => {
+    const uniqueTransitions = data.reduce((acc, transition) => {
+      const key = `${transition.state}-${transition.action}-${transition.next_state}`
+      if (!acc[key]) {
+        acc[key] = transition
+      }
+      return acc
+    }, {})
+
+    return Object.values(uniqueTransitions)
+  }
+})
 const expenseResource = createDocumentResource({
-    doctype: 'SMO Expense Entry',
-    name: route.params.id,
-    auto: true,
+  doctype: 'SMO Expense Entry',
+  name: route.params.id,
+  auto: true,
 })
 
 const formatWorkingHours = (seconds) => {
   if (!seconds) return '-'
-  
+
   const hours = Math.floor(seconds / 3600)
   const minutes = Math.floor((seconds % 3600) / 60)
-  
+
   if (minutes === 0) {
     return `${hours} ชั่วโมง`
   }
-  
+
   return `${hours} ชั่วโมง ${minutes} นาที`
 }
 
@@ -46,39 +58,57 @@ const applyWorkflowResource = createResource({
     // รีโหลดข้อมูลเอกสารหลังจาก apply workflow สำเร็จ
     expenseResource.reload()
   },
+  onError: (error) => {
+    console.log("error in resource",error.messages)
+  }
 })
 
 const rejectReason = ref('')
 
 const toast = useToast()
 
+
 const applyTransition = async (transition) => {
   try {
     if (transition.action === 'Reject') {
-      expenseResource.doc.reject_reason = rejectReason.value
-      await expenseResource.setValue.submit(expenseResource.doc)
-    }
+      // เพิ่มการจัดการ error สำหรับ API call
+      const response = await fetch(`/api/method/smartoffice.api.expense.update_reject_reason`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          doctype: 'SMO Expense Entry',
+          docname: route.params.id,
+          reject_reason: rejectReason.value
+        })
+      })
 
+      // ตรวจสอบ response status
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'ไม่สามารถบันทึกเหตุผลการ Reject ได้')
+      }
+
+      // ถ้าบันทึกเหตุผลสำเร็จ จึงดำเนินการ workflow ต่อ
+
+    }
     await applyWorkflowResource.submit({
       doc: expenseResource.doc,
       action: transition.action,
     })
-    
-    // แสดง success message
-  
-    toast.success('บันทึกข้อมูลสำเร็จ')
-    
+
+
+    toast.success('บันทึกสำเร็จ')
+
   } catch (error) {
-  
-    let errorMessage = 'เกิดข้อผิดพลาดในการดำเนินการ'
-    console.log("debig",applyWorkflowResource.error.messages)
-    if (applyWorkflowResource.error.messages) {
-     errorMessage = applyWorkflowResource.error.messages.join(', ')
-    }
-    
+    console.error('Error:', error)
+    const errorMessage = error.messages.join(' ') || 'เกิดข้อผิดพลาดในการดำเนินการ'
     toast.error(errorMessage)
+    return // ยกเลิกการทำงานถ้าเกิด error
   }
 }
+
 const goBack = () => {
   router.go(-1)
 }
@@ -86,7 +116,7 @@ watch(() => expenseResource.doc, (newDoc) => {
   if (newDoc) {
 
     workflowResource.fetch({
-        doc: newDoc
+      doc: newDoc
     })
   }
 }, { immediate: true })
@@ -102,16 +132,20 @@ const handleTransition = (transition) => {
 
 const confirmReject = async () => {
   if (!rejectReason.value) {
-    alert('กรุณาใส่เหตุผลในการ Reject')
+    alert('กรุณาใ���่เหตุผลในการ Reject')
     return
   }
   expenseResource.doc.reject_reason = rejectReason.value
   await applyTransition({ action: 'Reject' })
 }
 
-const goEdit = () => { 
-  window.open(`/app/smo-expense-entry/${route.params.id}?from_page=/intranet`, '_blank') 
+const goEdit = () => {
+  window.open(`/app/smo-expense-entry/${route.params.id}?from_page=/intranet`, '_blank')
 }
+
+// ฟังก์ชันสำหรับแปลงวันที่ให้อยู่ในรูปแบบที่ถูกต้อง
+
+
 </script>
 
 <template>
@@ -124,7 +158,8 @@ const goEdit = () => {
       <div class="modal">
         <div class="modal-box">
           <h3 class="font-bold text-lg">กรุณาใส่เหตุผลในการ Reject</h3>
-          <textarea v-model="rejectReason" class="textarea textarea-bordered w-full mt-4" placeholder="เหตุผล..."></textarea>
+          <textarea v-model="rejectReason" class="textarea textarea-bordered w-full mt-4"
+            placeholder="เหตุผล..."></textarea>
           <div class="modal-action">
             <label for="reject-modal" class="btn" @click="confirmReject">ยืนยัน</label>
             <label for="reject-modal" class="btn">ยกเลิก</label>
@@ -135,27 +170,20 @@ const goEdit = () => {
       <!-- Workflow Transitions -->
       <div class="bg-white rounded-lg shadow p-6 mb-6">
         <div class="flex justify-between items-center">
-          <button 
-            @click="goBack"
-            class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+          <button @click="goBack" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
             Back
           </button>
           <div class="flex gap-4">
-            <button 
-              v-if="expenseResource.doc.workflow_state === 'Draft' && session.user === expenseResource.doc.owner"
-              @click="goEdit"
-              class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+            <button v-if="expenseResource.doc.workflow_state === 'Draft' && session.user === expenseResource.doc.owner"
+              @click="goEdit" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
               Edit
             </button>
-            <button 
-              v-for="transition in workflowResource.data" 
-              :key="transition.name"
-              @click="handleTransition(transition)"
-              :disabled="applyWorkflowResource.loading"
-              :class="{
-                'bg-blue-500 hover:bg-blue-600': transition.action === 'Request Approve',
-                'bg-green-500 hover:bg-green-600': transition.action === 'Approve',
+            <button v-for="transition in workflowResource.data" :key="transition.name"
+              @click="handleTransition(transition)" :disabled="applyWorkflowResource.loading" :class="{
+                'bg-blue-500 hover:bg-blue-600': transition.action === 'Request Approve' || transition.action === 'Submit',
+                'bg-green-500 hover:bg-green-600': transition.action === 'Approve' || transition.action === 'Final Approve',
                 'bg-red-500 hover:bg-red-600': transition.action === 'Reject',
+                'bg-gray-500 hover:bg-gray-600': !['Request Approve', 'Approve', 'Reject', 'Submit'].includes(transition.action),
                 'opacity-50 cursor-not-allowed': applyWorkflowResource.loading,
                 'text-white font-medium px-4 py-2 rounded-md transition-colors': true
               }">
@@ -166,7 +194,7 @@ const goEdit = () => {
       </div>
 
       <div v-if="expenseResource.doc" class="space-y-6">
-       
+
         <!-- Header Card -->
         <div class="bg-white rounded-lg shadow p-4 sm:p-6">
           <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
@@ -179,7 +207,7 @@ const goEdit = () => {
                 <div :class="{
                   'inline-flex border rounded-md px-2 py-1': true,
                   'bg-gray-100 border-gray-200 text-gray-700': expenseResource.doc.workflow_state === 'Draft',
-                  'bg-yellow-100 border-yellow-200 text-yellow-700': expenseResource.doc.workflow_state === 'Approval Review',
+                  'bg-yellow-100 border-yellow-200 text-yellow-700': expenseResource.doc.workflow_state === 'Approval Review' || expenseResource.doc.workflow_state === 'Admin Review',
                   'bg-green-100 border-green-200 text-green-700': expenseResource.doc.workflow_state === 'Approved',
                   'bg-red-100 border-red-200 text-red-700': expenseResource.doc.workflow_state === 'Rejected'
                 }">
@@ -192,10 +220,7 @@ const goEdit = () => {
               <!-- Document Info -->
               <div class="mt-2 space-y-2">
                 <div class="flex items-center gap-2">
-                  <UserAvatar 
-                    :email="expenseResource.doc.owner" 
-                    size="sm"
-                  />
+                  <UserAvatar :email="expenseResource.doc.owner" size="sm" />
                   <div class="flex flex-col">
                     <p class="text-xs sm:text-sm text-gray-600">
                       Created by: {{ expenseResource.doc.owner }}
@@ -206,8 +231,8 @@ const goEdit = () => {
                   </div>
                 </div>
               </div>
-              <p v-if="expenseResource.doc.workflow_state === 'Rejected' && expenseResource.doc.reject_reason" 
-                 class="mt-2 text-xs sm:text-sm text-red-600">
+              <p v-if="expenseResource.doc.workflow_state === 'Rejected' && expenseResource.doc.reject_reason"
+                class="mt-2 text-xs sm:text-sm text-red-600">
                 Reject Reason: {{ expenseResource.doc.reject_reason }}
               </p>
             </div>
@@ -220,7 +245,7 @@ const goEdit = () => {
           </div>
         </div>
 
-       
+
 
         <!-- Info Cards Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -288,28 +313,28 @@ const goEdit = () => {
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50">
                 <tr>
-                  <th scope="col" 
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Expense Type
                   </th>
-                  <th scope="col" 
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Description
                   </th>
-                  <th scope="col" 
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Receipt Date
                   </th>
-                  <th scope="col" 
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Paid By
                   </th>
-                  <th scope="col" 
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Amount
                   </th>
-                  <th scope="col" 
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     ไฟล์แนบ
                   </th>
                 </tr>
@@ -347,17 +372,14 @@ const goEdit = () => {
                     {{ formatCurrency(item.total_cost) }}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <a 
-                      v-if="item.attachment"
-                      :href="`/api/method/frappe.utils.file_manager.download_file?file_url=${item.attachment}`"
-                      target="_blank"
-                      class="inline-flex items-center text-blue-600 hover:text-blue-800"
-                    >
+                    <a v-if="item.attachment"
+                      :href="`${item.attachment}`"
+                      target="_blank" class="inline-flex items-center text-blue-600 hover:text-blue-800">
                       <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
-                      ดาวน์โหลด
+                      เปิดดู
                     </a>
                   </td>
                 </tr>
@@ -374,6 +396,9 @@ const goEdit = () => {
             </table>
           </div>
         </div>
+
+        <!-- Approvers Card Grid -->
+        <ApproversGrid :approvers="expenseResource.doc.approvers" />
       </div>
     </div>
   </UserLayout>

@@ -20,16 +20,6 @@ class SMOServiceReport(Document):
 		pass
 	
 	def on_submit(self):
-		
-		self.create_timesheet()
-  
-		# ปิด ToDo ที่เชื่อมโยงกับ SMO Task
-		
-		
-		# Redirect logic will be handled in JavaScript
-	
-	def on_update(self):
-		frappe.errprint(f"Workflow State: {self.workflow_state}")
 		if self.workflow_state == "Customer Review":
 			if self.from_todo:
 				todo = frappe.get_doc("ToDo", self.from_todo)
@@ -37,7 +27,18 @@ class SMOServiceReport(Document):
 				todo.flags.ignore_permissions = True
 				todo.save()
 			self._update_task_status()
-			self.notify_customer()
+		self.create_timesheet()
+  
+		# ปิด ToDo ที่เชื่อมโยงกับ SMO Task
+		
+		
+		# Redirect logic will be handled in JavaScript
+	
+	# def on_update(self):
+	# 	frappe.errprint(f"Workflow State: {self.workflow_state}")
+		
+		# 	self.notify_customer()
+		
 
 	def on_cancel(self):
 		self._update_task_status("On Hold")

@@ -6,6 +6,7 @@ import UserLayout from '@/layouts/userLayout.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import { session } from '@/data/session'
 import { useToast } from '@/composables/useToast'
+import ApproversGrid from '@/components/ApproversGrid.vue'
 
 const formatDate = inject('formatDate')
 const formatCurrency = inject('formatCurrency')
@@ -38,8 +39,34 @@ const rejectReason = ref('')
 const applyTransition = async (transition) => {
   try {
     if (transition.action === 'Reject') {
-      advanceResource.doc.reject_reason = rejectReason.value
-      await advanceResource.setValue.submit(advanceResource.doc)
+      try {
+        const response = await fetch(`/api/method/smartoffice.api.expense.update_reject_reason`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            doctype: 'SMO Advance Entry',
+            docname: route.params.id,
+            reject_reason: rejectReason.value
+          })
+        })
+
+        const data = await response.json()
+        
+        if (!response.ok) {
+          // ตรวจสอบข้อความ error จาก server
+          const errorMessage = data._server_messages 
+            ? JSON.parse(JSON.parse(data._server_messages)[0]).message 
+            : 'ไม่สามารถบันทึกเหตุผลการ Reject ได้'
+          
+          toast.error(errorMessage)
+          return
+        }
+      } catch (error) {
+        toast.error('เกิดข้อผิดพลาดในการบันทึกเหตุผลการ Reject')
+        return
+      }
     }
 
     await applyWorkflowResource.submit({
@@ -47,11 +74,12 @@ const applyTransition = async (transition) => {
       action: transition.action,
     })
     
-    toast.success('Saved successfully')
+    toast.success('บันทึกข้อมูลสำเร็จ')
     
   } catch (error) {
-    let errorMessage = 'An error occurred during the operation'
-    if (applyWorkflowResource.error.messages) {
+    console.log(error)
+    let errorMessage = 'เกิดข้อผิดพลาดในการดำเนินการ'
+    if (applyWorkflowResource.error?.messages) {
       errorMessage = applyWorkflowResource.error.messages.join(', ')
     }
     toast.error(errorMessage)
@@ -89,6 +117,10 @@ const confirmReject = async () => {
 
 const goEdit = () => {
   window.open(`/app/smo-advance-entry/${route.params.id}?from_page=/intranet`, '_blank')
+}
+
+window.refresh_table = () => {
+  advanceResource.reload()
 }
 </script>
 
@@ -129,8 +161,8 @@ const goEdit = () => {
               @click="handleTransition(transition)"
               :disabled="applyWorkflowResource.loading"
               :class="{
-                'bg-blue-500 hover:bg-blue-600': transition.action === 'Request Approve',
-                'bg-green-500 hover:bg-green-600': transition.action === 'Approve',
+                'bg-blue-500 hover:bg-blue-600': transition.action === 'Request Approve' || transition.action === 'Submit',
+                'bg-green-500 hover:bg-green-600': transition.action === 'Approve' || transition.action === 'Final Approve',
                 'bg-red-500 hover:bg-red-600': transition.action === 'Reject',
                 'opacity-50 cursor-not-allowed': applyWorkflowResource.loading,
                 'text-white font-medium px-4 py-2 rounded-md transition-colors': true
@@ -154,7 +186,7 @@ const goEdit = () => {
                 <div :class="{
                   'inline-flex border rounded-md px-2 py-1': true,
                   'bg-gray-100 border-gray-200 text-gray-700': advanceResource.doc.workflow_state === 'Draft',
-                  'bg-yellow-100 border-yellow-200 text-yellow-700': advanceResource.doc.workflow_state === 'Approval Review',
+                  'bg-yellow-100 border-yellow-200 text-yellow-700': advanceResource.doc.workflow_state === 'Approval Review' || advanceResource.doc.workflow_state === 'Pending Approval',
                   'bg-green-100 border-green-200 text-green-700': advanceResource.doc.workflow_state === 'Approved',
                   'bg-red-100 border-red-200 text-red-700': advanceResource.doc.workflow_state === 'Rejected'
                 }">
@@ -306,15 +338,30 @@ const goEdit = () => {
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <a 
                       v-if="item.attachment"
-                      :href="`/api/method/frappe.utils.file_manager.download_file?file_url=${item.attachment}`"
+                      :href="`${item.attachment}`"
                       target="_blank"
                       class="inline-flex items-center text-blue-600 hover:text-blue-800"
                     >
-                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      <svg 
+                        class="w-4 h-4 mr-1" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path 
+                          stroke-linecap="round" 
+                          stroke-linejoin="round" 
+                          stroke-width="2" 
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                        <path 
+                          stroke-linecap="round" 
+                          stroke-linejoin="round" 
+                          stroke-width="2"
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        />
                       </svg>
-                      Download
+                      View
                     </a>
                   </td>
                 </tr>
@@ -351,6 +398,11 @@ const goEdit = () => {
             </table>
           </div>
         </div>
+
+          <!-- Approvers Card Grid -->
+         <ApproversGrid 
+          :approvers="advanceResource.doc.approvers"
+        />
       </div>
     </div>
   </UserLayout>

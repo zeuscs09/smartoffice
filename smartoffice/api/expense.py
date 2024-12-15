@@ -35,6 +35,8 @@ def get_expense_entries(month, year,request_by,period):
             ei.total_cost,
             ei.total_day,
             ei.name AS expense_item,
+            ei.attachment,
+         
             ee.service_date
         FROM
             `tabSMO Expense Entry` ee
@@ -84,6 +86,7 @@ def get_user_expense_entries(page, page_size):
             ee.customer,
             cus.customer_name ,
             ee.total_amount,
+           
             COUNT(*) OVER () as ttl_records
         FROM `tabSMO Expense Entry` ee
         inner join `tabCustomer` cus on ee.customer =cus.name
@@ -146,13 +149,15 @@ def get_expense_request_by_user(page=1, page_size=10, search=None, status=None, 
         CASE WHEN er.workflow_state in ('Approved','Rejected') THEN '' ELSE er.next_action END AS next_action
     FROM 
         `tabSMO Expense Request` er inner join
-        (SELECT parent, 
-       GROUP_CONCAT(user_id ORDER BY idx SEPARATOR ', ') AS users
-FROM `tabWorkflow Approver`
-where 
-parenttype ='SMO Expense Request'
-        and parentfield ='approvers'
-        GROUP BY parent) as approver on er.name =approver.parent
+        (
+            SELECT parent, 
+                GROUP_CONCAT(user_id ORDER BY idx SEPARATOR ', ') AS users
+            FROM `tabWorkflow Approver`
+            where 
+                parenttype ='SMO Expense Request'
+                and parentfield ='approvers'
+            GROUP BY parent
+        ) as approver on er.name =approver.parent
     WHERE 
         {where_clause}
     {sort_clause}
@@ -179,12 +184,13 @@ parenttype ='SMO Expense Request'
 
 @frappe.whitelist()
 def get_expense_entry_by_user(page=1, page_size=10, search=None, status=None, start_date=None, end_date=None, sort_field=None, sort_order=None):
+    
     user = frappe.session.user
     page = int(page)
     page_size = int(page_size)
     offset = (page - 1) * page_size
     
-    conditions = ["(ee.owner = %s OR ee.approver like %s)"]
+    conditions = ["(ee.owner = %s OR approver.users like %s)"]
     values = [user, f"%{user}%"]
     
     if search:
@@ -216,13 +222,25 @@ def get_expense_entry_by_user(page=1, page_size=10, search=None, status=None, st
         ee.project_name,
         ee.total_amount,
         ee.owner,
-        ee.approver,
+       
+        ee.next_action,
         ee.service_date,
         ee.project_code,
         ee.project_name,
+      
+        approver.users as approvers,
         COUNT(*) OVER () as ttl_records
     FROM 
-        `tabSMO Expense Entry` ee
+        `tabSMO Expense Entry` ee  inner join
+        (
+            SELECT parent, 
+                GROUP_CONCAT(user_id ORDER BY idx SEPARATOR ', ') AS users
+            FROM `tabWorkflow Approver`
+            where 
+            parenttype ='SMO Expense Entry'
+                    and parentfield ='approvers'
+                    GROUP BY parent
+        ) as approver on ee.name =approver.parent
     WHERE 
         {where_clause}
     {sort_clause}
@@ -245,4 +263,26 @@ def get_expense_entry_by_user(page=1, page_size=10, search=None, status=None, st
         "page": page,
         "page_size": page_size,
         "total_pages": -(-total_count // page_size)  # การหารปัดขึ้น
+    }
+
+
+@frappe.whitelist()
+def update_reject_reason(doctype,docname, reject_reason):
+    # ตรวจสอบสิทธิ์
+    if not frappe.has_permission(doctype, "write"):
+        frappe.throw("ไม่มีสิทธิ์ในการแก้ไขข้อมูล")
+        
+    # อัพเดทค่าโดยตรงที่ DB
+    frappe.db.set_value(doctype, 
+        docname,
+        'reject_reason',
+        reject_reason,
+        update_modified=False
+    )
+    
+    frappe.db.commit()
+    
+    return {
+        "status": "success",
+        "message": "บันทึกเหตุผลการปฏิเสธเรียบร้อยแล้ว"
     }

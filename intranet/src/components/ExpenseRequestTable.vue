@@ -5,7 +5,7 @@
       <table class="table table-zebra w-full">
         <thead>
           <tr>
-            <th class="cursor-pointer" @click="toggleSort('name')">
+            <th class="cursor-pointer" @click="toggleSort('name')" style="min-width: 252px;">
               No.
               <span class="ml-1" v-if="sortable">
                 <span :class="{ 'text-primary': sortField === 'name' }">
@@ -92,7 +92,12 @@
               <UserAvatar :email="doc.request_by" />
             </td>
             <td>
-              <UserAvatar v-if="doc.next_action" :email="doc.next_action" />
+              <div v-if="doc.next_action">
+                <div class="flex items-center gap-2">
+                  <UserAvatar :email="doc.next_action" />
+                  <span class="text-xs text-gray-500">{{ doc.next_action }}</span>
+                </div>
+              </div>
             </td>
             <td>
               <div class="cursor-pointer" @click="showTimeline(doc.name)">
@@ -153,19 +158,28 @@
               </p>
             </div>
             <div class="grid grid-cols-1 gap-2 mt-2">
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-2 p-2 bg-gray-100 rounded-md">
                 <UserAvatar :email="doc.request_by" />
-                <span class="text-xs text-gray-500"> Request Date: {{ formatDate(doc.creation) }}</span>
+                <span class="text-xs text-gray-500">Request Date: {{ formatDate(doc.creation) }}</span>
               </div>
-              <div class="flex justify-between items-center">
-                <p class="font-semibold">Next Action:</p>
-                <UserAvatar v-if="doc.next_action" :email="doc.next_action" />
-                <span v-else>-</span>
-              </div>
-              <div class="flex justify-between items-center">
-                <p class="font-semibold">Approver:</p>
-                <div class="cursor-pointer" @click="showTimeline(doc.name)">
-                  <UserAvatar :email="doc.approvers" />
+              <div class="grid grid-cols-2 gap-4 bg-gray-100 p-2 rounded-md">
+                <div class="space-y-1">
+                  <p class="text-xs text-gray-600">Next Action:</p>
+                  <div>
+                    <div v-if="doc.next_action">
+                      <div class="flex items-center gap-2">
+                        <UserAvatar :email="doc.next_action" />
+                        <span class="text-xs text-gray-500">{{ doc.next_action }}</span>
+                      </div>
+                    </div>
+                    <span v-else>-</span>
+                  </div>
+                </div>
+                <div class="space-y-1">
+                  <p class="text-xs text-gray-600">Approver:</p>
+                  <div class="cursor-pointer" @click="showTimeline(doc.name)">
+                    <UserAvatar :email="doc.approvers" />
+                  </div>
                 </div>
               </div>
             </div>

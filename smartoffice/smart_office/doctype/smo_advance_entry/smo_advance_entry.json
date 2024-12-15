@@ -9,17 +9,18 @@
   "details_tab",
   "doc_detail_section",
   "naming_series",
-  "service_date",
-  "total_amount",
-  "reject_reason",
-  "column_break_ifjs",
   "customer",
   "customer_site",
+  "project",
+  "project_name",
+  "project_code",
+  "total_amount",
+  "column_break_ifjs",
+  "service_date",
+  "to",
   "site_name",
   "customer_name",
-  "project",
-  "project_code",
-  "project_name",
+  "reject_reason",
   "section_break_xllw",
   "distance_depart",
   "distance_return",
@@ -27,13 +28,17 @@
   "config_taxi_init",
   "advance_info",
   "reference_code_finance",
+  "column_break_cxiw",
   "reference_code_accounting",
   "advance_amount",
-  "column_break_cxiw",
-  "approve_by",
-  "approver",
   "expense_items_section",
   "expense_item",
+  "section_approvers",
+  "column_break_kujy",
+  "approvers",
+  "column_break_keqs",
+  "next_action",
+  "max_level",
   "section_break_fabx",
   "amended_from",
   "from_page",
@@ -57,7 +62,7 @@
   {
    "fieldname": "service_date",
    "fieldtype": "Date",
-   "label": "Service Date"
+   "label": "Service Date From"
   },
   {
    "fieldname": "customer",
@@ -160,21 +165,6 @@
    "no_copy": 1
   },
   {
-   "fieldname": "approve_by",
-   "fieldtype": "Link",
-   "label": "Checked By",
-   "link_filters": "[[\"Employee\",\"grade\",\"=\",\"220 - Finance Staff\"]]",
-   "options": "Employee",
-   "reqd": 1
-  },
-  {
-   "fetch_from": "approve_by.user_id",
-   "fieldname": "approver",
-   "fieldtype": "Data",
-   "label": "Checker Name",
-   "print_hide": 1
-  },
-  {
    "fetch_from": "customer.customer_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
@@ -244,13 +234,52 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Site Name"
+  },
+  {
+   "fieldname": "to",
+   "fieldtype": "Date",
+   "label": "To"
+  },
+  {
+   "fieldname": "approvers",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Approvers",
+   "options": "Workflow Approver"
+  },
+  {
+   "fieldname": "next_action",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Next User"
+  },
+  {
+   "fieldname": "column_break_keqs",
+   "fieldtype": "Column Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "max_level",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Max Level"
+  },
+  {
+   "fieldname": "section_approvers",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "column_break_kujy",
+   "fieldtype": "Column Break",
+   "hidden": 1
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-12-06 06:40:36.335810",
+ "modified": "2024-12-15 17:38:50.261396",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Advance Entry",
@@ -279,6 +308,58 @@
    "read": 1,
    "report": 1,
    "role": "Employee",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "VP",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "SVP",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "EVP",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "CEO",
    "share": 1,
    "submit": 1,
    "write": 1

@@ -69,7 +69,17 @@ def get_mail_box(page=1, page_size=10, search=None, status=None, start_date=None
     total_count = result[0].total_count if result else 0
 
     for row in result:
-        row['link'] = frappe.utils.get_url_to_form(row['document_type'], row['document_name'])
+        if row['document_type'] == 'SMO Advance Entry':
+            row['link'] = f"/advance-entry/{row['document_name']}"
+        elif row['document_type'] == 'SMO Expense Request':
+            row['link'] = f"/expense-request/{row['document_name']}"
+        elif row['document_type'] == 'SMO Expense Entry':
+            row['link'] = f"/expense-entry/{row['document_name']}"
+        elif row['document_type'] == 'SMO Service Report':
+            row['link'] = f"/service-report/{row['document_name']}"
+        else:
+            row['link'] = frappe.utils.get_url_to_form(row['document_type'], row['document_name'])
+        
         doctype_meta = frappe.get_meta(row['document_type'])
         row['doctype_description'] = doctype_meta.description if doctype_meta else row['document_type']
 
@@ -97,7 +107,7 @@ def update_notification_read(name):
         
         frappe.db.commit()
         
-        return {"success": True, "message": "การแจ้งเตือนถูกทำเครื่องหมายว่าอ่านแล้ว"}
+        return {"success": True, "message": "การแจ้งเตือนถูกทำเครื่องหมายว่าอ่��นแล้ว"}
     except frappe.DoesNotExistError:
         frappe.db.rollback()
         return {"success": False, "message": "ไม่พบการแจ้งเตือนที่ระบุ"}

@@ -34,14 +34,13 @@
   {
    "fieldname": "flow_type",
    "fieldtype": "Select",
-   "hidden": 1,
    "label": "Flow Type",
-   "options": "Expense Request\nExpense Entry"
+   "options": "Expense Request\nExpense Entry\nAdvance Entry"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-19 13:08:02.617342",
+ "modified": "2024-12-13 23:04:56.587232",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "Approval Limit",

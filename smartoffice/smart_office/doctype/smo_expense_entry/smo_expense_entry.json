@@ -18,22 +18,25 @@
   "customer_site",
   "site_name",
   "project",
-  "project_code",
-  "project_name",
   "column_break_xeie",
-  "working_hour",
   "ot_rate",
   "over_night_rate",
+  "project_code",
+  "project_name",
   "distance_depart",
   "distance_return",
   "config_taxi_init",
   "config_taxi_rate",
+  "working_hour",
   "total_amount",
   "expense_item_section",
   "auto_expense",
   "expense_item",
-  "section_break_nfeq",
-  "approver",
+  "section_break_mxen",
+  "approvers",
+  "next_action",
+  "max_level",
+  "column_break_lfix",
   "reject_reason",
   "section_break_fvul",
   "amended_from",
@@ -158,7 +161,6 @@
    "default": "0",
    "fieldname": "config_taxi_init",
    "fieldtype": "Int",
-   "hidden": 1,
    "label": "Taxi Initial",
    "read_only": 1
   },
@@ -219,16 +221,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "section_break_nfeq",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "approver",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Approver"
-  },
-  {
    "fetch_from": "customer.customer_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
@@ -249,9 +241,8 @@
   },
   {
    "allow_on_submit": 1,
-   "depends_on": "reject_reason",
    "fieldname": "reject_reason",
-   "fieldtype": "Small Text",
+   "fieldtype": "Data",
    "label": "Reject Reason",
    "no_copy": 1
   },
@@ -282,13 +273,39 @@
    "fieldname": "auto_expense",
    "fieldtype": "Button",
    "label": "Auto Expense"
+  },
+  {
+   "fieldname": "section_break_mxen",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "approvers",
+   "fieldtype": "Table",
+   "label": "Approvers",
+   "options": "Workflow Approver"
+  },
+  {
+   "fieldname": "max_level",
+   "fieldtype": "Int",
+   "label": "Max Level"
+  },
+  {
+   "fieldname": "next_action",
+   "fieldtype": "Data",
+   "label": "Next User"
+  },
+  {
+   "fieldname": "column_break_lfix",
+   "fieldtype": "Column Break"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-12-05 21:13:32.931877",
+ "modified": "2024-12-15 16:14:41.119857",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Entry",
@@ -328,13 +345,6 @@
    "if_owner": 1,
    "read": 1,
    "report": 1,
-   "role": "Employee",
-   "select": 1,
-   "submit": 1,
-   "write": 1
-  },
-  {
-   "read": 1,
    "role": "Employee",
    "select": 1,
    "submit": 1,

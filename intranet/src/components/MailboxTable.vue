@@ -39,7 +39,7 @@
                 </span>
               </span>
             </th>
-            <th>Request By</th>
+            <th>From</th>
 
           </tr>
         </thead>
@@ -144,7 +144,9 @@ import { ref, computed } from 'vue'
 import { defineProps, defineEmits, inject } from 'vue'
 import UserAvatar from './UserAvatar.vue'
 import { createResource } from 'frappe-ui'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 
 const props = defineProps({
   data: {
@@ -198,7 +200,8 @@ const sortedData = computed(() => {
 
 const viewDocument = async (link: string, mailId: string) => {
   await updateRead(mailId)
-  window.open(`${link}?from_page=mailbox`, '_blank')
+  //window.open(`${link}?from_page=mailbox`, '_blank')
+  router.push({ path: link })
 }
 
 // ฟังก์ชันสำหรับอัปเดตสถานะการอ่านและการเห็น

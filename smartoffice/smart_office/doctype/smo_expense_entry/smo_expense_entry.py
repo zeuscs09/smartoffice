@@ -4,7 +4,7 @@
 import frappe
 from frappe.model.document import Document
 from frappe import _
-
+from smartoffice.utils.approval_utils import get_approval_chain,get_next_action
 def is_user_in_team(user, team_name):
     # ดึงข้อมูลทีมจากฐานข้อมูล
     team_members = frappe.get_all("SMO Working Team", filters={"parent": team_name,"parenttype":"SMO Service Report","parentfield":"team","user":user}, fields=["user"])
@@ -15,11 +15,21 @@ def is_user_in_team(user, team_name):
 class SMOExpenseEntry(Document):
 
 	def validate(self):
-		
+     
+		frappe.errprint(self.workflow_state);
 		# ตรวจสอบว่า user ที่ล็อกอินอยู่ในทีมที่เกี่ยวข้องหรือไม่
-		if not is_user_in_team(frappe.session.user, self.service_report):
-			frappe.throw(_(f"ไม่สามารถเลือก Service report {self.service_report} เนื่องจากไม่ได้เป็นส่วนหนึ่งของทีมที่เกี่ยวข้อง"))
+		if self.workflow_state == "Draft":
+			if not is_user_in_team(frappe.session.user, self.service_report):
+				frappe.throw(_(f"ไม่สามารถเลือก Service report {self.service_report} เนื่องจากไม่ได้เป็นส่วหนึ่งของทีมที่เกี่ยวข้อง"))
+			self.set_approvers()
+			self.reject_reason = None
+				
 		
+		# elif self.workflow_state=="Rejected":
+		# 	self.next_action = frappe.session.user
+		# elif self.workflow_state=="Approved":
+		# 	self.next_action = ""
+   
 		total_cost = 0
 		seen_expense = set()
 		
@@ -43,7 +53,7 @@ class SMOExpenseEntry(Document):
 						frappe.throw(f"Duplicate expense found: {doc_expense_type.description} ")
 				seen_expense.add(item_key)
     
-			# สร้าง reminder string จากค่าที่มีอยู่เท่านั้น
+			# สร้าง reminder string จาค่าที่มีอยู่เท่านั้น
 			reminder_parts = []
 			if item.system_reminder:
 				reminder_parts.append(item.system_reminder)
@@ -59,12 +69,10 @@ class SMOExpenseEntry(Document):
 			frappe.throw("Total cost is not equal to total amount")
 		# frappe.throw(self.workflow_state)
 		self.validate_expense_claim()
-		if self.workflow_state == "Draft":
-			self.set_approvers()
-			self.reject_reason = None
+	
 			
-		if self.workflow_state == "Approval Review":
-			self.check_service_report_status()
+		# if self.workflow_state == "Approval Review":
+		# 	self.check_service_report_status()
    
 	def validate_expense_claim(self):
 		
@@ -81,6 +89,7 @@ class SMOExpenseEntry(Document):
 						AND ee.service_report = %s
 						AND ei.expense_type = %s
 						and ee.name !=%s
+                        and ei.expense_type   in ('EP001','EP002')
 					GROUP BY ei.expense_type
 				""", (self.service_report, item.expense_type, self.name), as_dict=True)
 				
@@ -95,79 +104,75 @@ class SMOExpenseEntry(Document):
 			
 	def on_update(self):
 		"""สำหรับ Draft และ Approval Review"""
-		if self.workflow_state == "Approval Review":
+		pass
+
+	def on_submit(self):
+     	
+		self.check_service_report_status()
+		# บ���นทึก receive_date ให้ admin (approver คนแรก)
+		first_approver = next((a for a in self.approvers if a.approver_level == 1), None)
+		if first_approver:
+			first_approver.receive_date = frappe.utils.now()
+			first_approver.status = "Pending"
+			first_approver.db_update()
+			# แจ้งเตือน admin
 			self.create_notification(
-				self.approver, 
-				f"มีคำขอเบิกค่าใช้จ่ายใหม่รอการอนุมัติ: {self.name}"
+				first_approver.user_id,
+				f"มีคำขอเบิกค่าใช้จ่ายใหม่รอการตรวจสอบ: {self.name}"
 			)
+		
 
 	def on_update_after_submit(self):
-		"""สำหรับการเปลี่ยนแปลงหลัง submit"""
-		if self.workflow_state == "Rejected":
-			reject_message = f"คำขอเบิกค่าใช้จ่ายของคุณถูกปฏิเสธ: {self.name}"
-			if self.reject_reason:
-				reject_message += f"\nเหตุผล: {self.reject_reason}"
-			self.create_notification(self.owner, reject_message)
-		elif self.workflow_state == "Approved":
-			self.create_notification(
-				self.owner,
-				f"คำขอเบิกค่าใช้จ่ายของคุณได้รับการอนุมัติแล้ว: {self.name}"
-			)
+		# frappe.errprint(self.has_value_changed("workflow_state"));
+		# if self.has_value_changed("workflow_state"):
+		self.set_approver_status()
+		
+			
+			# current_approver.db_update()
+			# self.db_update()
 
 	def set_approvers(self):
 		# เคลียร์ข้อมูลผู้อนุมัติเดิม
-		employee = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, ["name", "grade", "reports_to"], as_dict=True)
 		self.approvers = []
 		self.max_level = 0
 		self.next_action = ""
 		self.workflow_description = ""
 
-		approvers = []
-		current_employee = employee
-		approver_level = 1
+		# ตั้งค่า admin user ก่อน
+		admin_user = frappe.get_doc("Smart Office Setting").admin_user
+		if not admin_user:
+			frappe.throw("Not found admin user")
 
-		# ตรวจสอบว่า requester มี grade มากกว่าหรือเท่ากับ 600 หรือไม่
-		if int(current_employee.grade[:3]) >= 600:
-			# หาผู้อนุมัติที่เป็นหัวหน้าของ requester
-			if current_employee.reports_to:
-					approver = frappe.db.get_value("Employee", current_employee.reports_to, ["name", "user_id", "designation"], as_dict=True)
-					approvers.append({
-						"approver": approver.name,
-						"user_id": approver.user_id,
-						"approver_level": approver_level,
-						"approver_role": approver.designation,
-						"status": "Pending"
-					})
-			else:
-				frappe.throw("ไม่พบผู้อนุมัติสำหรับพนักงานระดับสูง")
-		else:
-			# หาผู้อนุมัติที่มี grade เท่ากับ 600 โดยใช้ reports_to
-			while current_employee and int(current_employee.grade[:3]) < 600:
-				if current_employee.reports_to:
-					current_employee = frappe.db.get_value("Employee", current_employee.reports_to, ["name", "user_id", "grade", "designation", "reports_to"], as_dict=True)
-				else:
-					break
+		# เรียกใช้ approval_utils เพื่อสร้าง approval chain
+		approvers, max_level, next_user = get_approval_chain(
+			total_amount=self.total_amount,
+			request_by=frappe.session.user,
+			flow_type="Expense Entry"
+		)
 
-			if current_employee and int(current_employee.grade[:3]) >= 600:
-				approvers.append({
-					"approver": current_employee.name,
-					"user_id": current_employee.user_id,
-					"approver_level": approver_level,
-					"approver_role": current_employee.designation,
-					"status": "Pending"
-				})
-			else:
-				frappe.throw("ไม่พบผู้อนุมัติที่มี grade เท่ากับหรือมากกว่า 600 ในสายบังคับบัญชา")
+		# เพิ่ม admin user เป็นคนแรก
+		self.append("approvers", {
+			"approver": admin_user,
+			"user_id": admin_user,
+			"approver_level": 1,
+			"approver_role": "Admin",
+			"status": ""
+		})
 
+		# ปรับ level ของ approvers ที่เหลือให้เริ่มจาก 2
+		for approver_data in approvers:
+			self.append("approvers", {
+				"approver": approver_data.approver,
+				"user_id": approver_data.user_id,
+				"approver_level": approver_data.approver_level + 1,  # เพิ่ม level อีก 1
+				"approver_role": approver_data.approver_role,
+				"status": approver_data.status
+			})
 
-		# กำหนด next_action เป็น user_id ของ approver คนแรก
-		self.approver = approvers[0]["user_id"] if approvers else ""
-		if not self.approver:
-			frappe.throw("Not found approver")
+		self.max_level = max_level + 1  # เพิ่ม max_level อีก 1 เนื่องจากเพิ่ม admin
+		self.next_action = admin_user  # กำหนด next_user เป็น admin
 
-	def create_notification(self, user_id, custom_message=None):
-		message = custom_message or f"มีคำขอเบิกค่าใช้จ่ายใหม่รอการอนุมัติ: {self.name}"
-		
+	def create_notification(self, user_id, message):
 		notification = frappe.get_doc({
 			"doctype": "Notification Log",
 			"subject": message,
@@ -198,3 +203,63 @@ class SMOExpenseEntry(Document):
 	def before_cancel(self):
 		if self.workflow_state != "Rejected":
 			frappe.throw("สามารถยกเลิกเอกสารได้เฉพาะกรณีที่ถูกปฏิเสธ (Rejected) เท่านั้น")
+	
+	def set_approver_status(self):
+		current_approver = next((a for a in self.approvers if a.user_id == frappe.session.user), None)
+		
+		if current_approver:
+			if self.workflow_state in ["Pending Approval", "Approved", "Rejected"]:
+				# บันทึกเวลาที่ดำเนินการและสถานะ
+				current_approver.action_date = frappe.utils.now()
+				current_approver.status = "Rejected" if self.workflow_state == "Rejected" else "Approved"
+				
+				# คำนวณระยะเวลาที่ใช้
+				if current_approver.receive_date:
+					duration = frappe.utils.time_diff_in_seconds(
+						current_approver.action_date,
+						current_approver.receive_date
+					)
+					current_approver.duration = duration
+				
+				if self.workflow_state == "Pending Approval":
+					# ใช้ get_next_action เพื่อหาคนถัดไป
+					next_user, next_level, is_last = get_next_action(self.approvers)
+				
+					if next_user:
+						# หา approver คนถัดไปและบันทึก receive_date
+						next_approver = next((a for a in self.approvers if a.user_id == next_user), None)
+						frappe.errprint(next_approver.status);
+						frappe.errprint(next_approver.receive_date);
+						if next_approver:
+							next_approver.receive_date = frappe.utils.now()
+							next_approver.status = "Pending"
+							next_approver.db_update()
+							self.next_action = next_user
+							# แจ้งเตือนผู้อนุมัติคนถัดไป
+							self.create_notification(
+								next_user,
+								f"มีคำขอเบิกค่าใช้จ่ายรอการอนุมัติ: {self.name}"
+							)
+					elif is_last:  # ถ้าเป็นการอนุมัติครั้งสุดท้าย
+						# แจ้งผู้ขอ
+						self.next_action = ""
+						self.create_notification(
+							self.owner,
+							f"คำขอเบิกค่าใช้จ่ายของคุณได้รับการอนุมัติแล้ว: {self.name}"
+						)
+				elif self.workflow_state == "Approved":
+					self.next_action = ""
+					self.create_notification(
+						self.owner,
+						f"คำขอเบิกค่าใช้จ่ายของคุณได้รับการอนุมัติแล้ว: {self.name}"
+					)
+				elif self.workflow_state == "Rejected":
+					# แจ้งเตือนผู้ขอกรณีถูกปฏิเสธ
+					self.next_action = ""
+					current_approver.comment = self.reject_reason
+					reject_message = f"คำขอเบิกค่าใช้จ่ายของคุณถูกปฏิเสธ: {self.name}"
+					if self.reject_reason:
+						reject_message += f"\nเหตุผล: {self.reject_reason}"
+					self.create_notification(self.owner, reject_message)
+				current_approver.db_update()
+				self.db_update()

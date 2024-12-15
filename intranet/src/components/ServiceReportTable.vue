@@ -4,7 +4,7 @@
       <table class="table table-zebra w-full">
         <thead>
           <tr>
-            <th class="cursor-pointer w-32" @click="$emit('sort', 'name')">
+            <th class="cursor-pointer w-32" @click="$emit('sort', 'name')" style="min-width: 252px;">
               No.
               <span class="ml-1" v-if="sortable">
                 <span :class="{ 'text-primary': sortField === 'name' }">

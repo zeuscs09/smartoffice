@@ -5,38 +5,39 @@
             <input type="checkbox" id="reject-modal" class="modal-toggle" />
             <div class="modal">
                 <div class="modal-box">
-                    <h3 class="font-bold text-lg">กรุณาใส่เหตุผลในการ Reject</h3>
-                    <textarea v-model="rejectReason" class="textarea textarea-bordered w-full mt-4"
-                        placeholder="เหตุผล..."></textarea>
+                    <h3 class="font-bold text-lg">Please enter rejection reason</h3>
+                    <textarea v-model="rejectReason" class="textarea textarea-bordered textarea-sm w-full mt-4"
+                        placeholder="Reason..."></textarea>
                     <div class="modal-action">
-                        <label for="reject-modal" class="btn" @click="confirmReject">ยืนยัน</label>
-                        <label for="reject-modal" class="btn">ยกเลิก</label>
+                        <label for="reject-modal" class="btn btn-sm" @click="confirmReject">Confirm</label>
+                        <label for="reject-modal" class="btn btn-sm">Cancel</label>
                     </div>
                 </div>
             </div>
 
             <!-- Workflow Transitions -->
-            <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <div class="bg-white rounded-lg shadow p-4 mb-4">
                 <div class="flex justify-between items-center">
                     <button @click="goBack"
-                        class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                        class="btn btn-sm bg-gray-500 hover:bg-gray-700 text-white">
                         Back
                     </button>
-                    <div class="flex gap-4">
+                    <div class="flex gap-2">
 
                         <button
                             v-if="serviceReportResource.doc.workflow_state === 'Draft' && session.user === serviceReportResource.doc.owner"
                             @click="goEdit"
-                            class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                            class="btn btn-sm bg-green-500 hover:bg-green-600 text-white">
                             Edit
                         </button>
                         <button v-for="transition in workflowResource.data" :key="transition.name"
                             @click="handleTransition(transition)" :disabled="applyWorkflowResource.loading" :class="{
+                                'btn btn-sm': true,
                                 'bg-blue-500 hover:bg-blue-600': transition.action === 'Request Approve',
                                 'bg-green-500 hover:bg-green-600': transition.action === 'Approve',
                                 'bg-red-500 hover:bg-red-600': transition.action === 'Reject',
                                 'opacity-50 cursor-not-allowed': applyWorkflowResource.loading,
-                                'text-white font-medium px-4 py-2 rounded-md transition-colors': true
+                                'text-white': true
                             }">
                             {{ transition.action }}
                         </button>
@@ -321,6 +322,11 @@ const confirmReject = async () => {
 }
 
 const goBack = () => router.go(-1)
+const goEdit = () => window.open(`/app/smo-service-report/${serviceReportResource.doc.name}`, '_blank')
+
+window.refresh_table = () => {
+    serviceReportResource.reload()
+}
 
 watch(() => serviceReportResource.doc, (newDoc) => {
     if (newDoc) {

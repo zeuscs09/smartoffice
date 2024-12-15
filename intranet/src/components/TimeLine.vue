@@ -15,7 +15,7 @@
             <div v-if="event.remark" class="text-xs text-gray-500 italic border-l-4 border-gray-300 pl-2">
               "{{ event.remark }}"
             </div>
-            <div class="badge badge-sm" :class="{
+            <div v-if="event.action" class="badge badge-sm" :class="{
               'badge-success': event.status === 'Approved',
               'badge-error': event.status === 'Rejected',
               'badge-ghost': event.status === 'Pending'
@@ -43,7 +43,7 @@
       <div :class="[
         index % 2 === 0 ? 'timeline-end' : 'timeline-start',
       ]">
-        {{ event.date ? formatDate(event.date) : '' }}
+       <span class="text-xs text-gray-500">{{ event.date ? formatDate(event.date,'shortwithtime') : '' }}</span>
        
         <div v-if="event.duration" class="text-xs text-gray-500 flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-1">
@@ -63,6 +63,7 @@ import UserAvatar from '@/components/UserAvatar.vue'
 
 const formatDate = inject('formatDate') as (date: string) => string
 
+const formatDuration = inject('formatDuration') as (duration: number) => string
 interface TimelineEvent {
   date: string
   action: string
@@ -78,24 +79,24 @@ defineProps<{
   events: TimelineEvent[]
 }>()
 
-// ฟังก์ชันสำหรับจัดรูปแบบระยะเวลา รวมถึงวัน เดือน ปี
-function formatDuration(duration: number): string {
-  const seconds = Math.floor(duration % 60)
-  const minutes = Math.floor((duration / 60) % 60)
-  const hours = Math.floor((duration / 3600) % 24)
-  const days = Math.floor((duration / 86400) % 30)
-  const months = Math.floor((duration / 2592000) % 12)
-  const years = Math.floor(duration / 31536000)
+// // ฟังก์ชันสำหรับจัดรูปแบบระยะเวลา รวมถึงวัน เดือน ปี
+// function formatDuration(duration: number): string {
+//   const seconds = Math.floor(duration % 60)
+//   const minutes = Math.floor((duration / 60) % 60)
+//   const hours = Math.floor((duration / 3600) % 24)
+//   const days = Math.floor((duration / 86400) % 30)
+//   const months = Math.floor((duration / 2592000) % 12)
+//   const years = Math.floor(duration / 31536000)
   
-  let result = []
-  if (years > 0) result.push(`${years} years`)
-  if (months > 0) result.push(`${months} months`)
-  if (days > 0) result.push(`${days} days`)
-  if (hours > 0) result.push(`${hours} hours`)
-  if (minutes > 0) result.push(`${minutes} minutes`)
-  if (seconds > 0) result.push(`${seconds} seconds`)
+//   let result = []
+//   if (years > 0) result.push(`${years} years`)
+//   if (months > 0) result.push(`${months} months`)
+//   if (days > 0) result.push(`${days} days`)
+//   if (hours > 0) result.push(`${hours} hours`)
+//   if (minutes > 0) result.push(`${minutes} minutes`)
+//   if (seconds > 0) result.push(`${seconds} seconds`)
   
-  return result.length > 0 ? result.join(' ') : '0 seconds'
-}
+//   return result.length > 0 ? result.join(' ') : '0 seconds'
+// }
 </script>
 

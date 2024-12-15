@@ -5,7 +5,7 @@
         <table class="table table-zebra w-full">
           <thead>
             <tr>
-              <th class="cursor-pointer" @click="$emit('sort', 'name')">
+              <th class="cursor-pointer" @click="$emit('sort', 'name')" style="min-width: 252px;">
                 No.
                 <span class="ml-1" v-if="sortable">
                   <span :class="{ 'text-primary': sortField === 'name' }">
@@ -40,6 +40,7 @@
                 </span>
               </th>
               <th>Request By</th>
+              <th>Next Action</th>
               <th>Approver</th>
             </tr>
           </thead>
@@ -56,7 +57,7 @@
                 <div class="cursor-pointer" @click="viewDocument(report.name)">
                   {{ report.name }}
                   <br/>
-                 <span class="text-xs text-gray-500">{{ formatDate(report.creation)  }}</span>
+                 <span class="text-xs text-gray-500">Service Date: {{ formatDate(report.service_date)  }} - {{ formatDate(report.to) }}</span>
                 </div>
                 
               </td>
@@ -69,13 +70,13 @@
                 <div class="flex items-center">
                   <span class="w-2 h-6 block mr-2" :class="{
                     'bg-green-500': report.workflow_state === 'Approved',
-                    'bg-yellow-500': report.workflow_state === 'Approval Review',
+                    'bg-yellow-500': report.workflow_state === 'Approval Review' || report.workflow_state === 'Pending Approval',
                     'bg-red-500': report.workflow_state === 'Rejected',
                     'bg-gray-500': report.workflow_state === 'Draft'
                   }"></span>
                   <span class="opacity-75" :class="{
                     'text-green-500': report.workflow_state === 'Approved',
-                    'text-yellow-500': report.workflow_state === 'Approval Review',
+                    'text-yellow-500': report.workflow_state === 'Approval Review' || report.workflow_state === 'Pending Approval',
                     'text-red-500': report.workflow_state === 'Rejected',
                     'text-gray-500': report.workflow_state === 'Draft'
                   }">{{ report.workflow_state }}</span>
@@ -86,8 +87,16 @@
                 <UserAvatar :email="report.owner" />
               </td>
               <td>
+                <div v-if="report.next_action">
+                <div class="flex items-center gap-2">
+                  <UserAvatar :email="report.next_action" />
+                  <span class="text-xs text-gray-500">{{ report.next_action }}</span>
+                </div>
+              </div>
+              </td>
+              <td>
                 <div class="cursor-pointer" @click="showTimeline(report.name)">
-                  <UserAvatar :email="report.approver" />
+                  <UserAvatar :email="report.approvers" />
                 </div>
               </td>
             </tr>
@@ -108,38 +117,50 @@
           <SkeletonCard />
         </div>
         <div v-else-if="data.length > 0">
-          <div v-for="report in data" :key="report.name" class="card bg-base-100 shadow-xl mt-2" >
-            
+          <div v-for="report in data" :key="report.name" class="card bg-base-100 shadow-xl mt-2">
             <div class="card-body">
-                <div @click="viewDocument(report.name)" class="cursor-pointer">
-              <h2 class="card-title" >
-            
-                {{ report.customer_name }} 
-              </h2>
-              <p class="text-sm text-gray-500">
-                Service Date: {{ formatDate(report.service_date) }}
-                <br/>
-                # {{ report.name }}
-              </p>
-              <p class="text-sm text-gray-500">{{ formatCurrency(report.total_amount) }}
-                <span class="inline-flex border rounded-md px-2 py-1" :class="{
-                  'bg-gray-100 border-gray-200 text-gray-700': report.workflow_state === 'Draft',
-                  'bg-yellow-100 border-yellow-200 text-yellow-700': report.workflow_state === 'Approval Review',
-                  'bg-green-100 border-green-200 text-green-700': report.workflow_state === 'Approved',
-                  'bg-red-100 border-red-200 text-red-700': report.workflow_state === 'Rejected'
-                }">{{ report.workflow_state }}</span>
-              </p>
-             </div>
+              <div class="cursor-pointer" @click="viewDocument(report.name)">
+                <h2 class="card-title">
+                  {{ report.customer_name }}
+                </h2>
+                <p class="text-sm text-gray-500">
+                  Service Date: {{ formatDate(report.service_date) }} - {{ formatDate(report.to) }}
+                  <br/>
+                  # {{ report.name }}
+                </p>
+                <p class="text-sm text-gray-500">
+                  {{ formatCurrency(report.total_amount) }}
+                  <span class="inline-flex border rounded-md px-2 py-1" :class="{
+                    'bg-gray-100 border-gray-200 text-gray-700': report.workflow_state === 'Draft',
+                    'bg-yellow-100 border-yellow-200 text-yellow-700': report.workflow_state === 'Approval Review' || report.workflow_state === 'Pending Approval',
+                    'bg-green-100 border-green-200 text-green-700': report.workflow_state === 'Approved',
+                    'bg-red-100 border-red-200 text-red-700': report.workflow_state === 'Rejected'
+                  }">{{ report.workflow_state }}</span>
+                </p>
+              </div>
               <div class="grid grid-cols-1 gap-2 mt-2">
-               
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 p-2 bg-gray-100 rounded-md">
                   <UserAvatar :email="report.owner" />
-                 <span class="text-xs text-gray-500"> Request Date {{ formatDate(report.creation) }}</span>
+                  <span class="text-xs text-gray-500">Request Date: {{ formatDate(report.creation) }}</span>
                 </div>
-                <div class="flex justify-between items-center">
-                  <p class="font-semibold">Approver:</p>
-                  <div class="cursor-pointer" @click="showTimeline(report.name)">
-                    <UserAvatar :email="report.approver" />
+                <div class="grid grid-cols-2 gap-4 bg-gray-100 p-2 rounded-md">
+                  <div class="space-y-1">
+                    <p class="text-xs text-gray-600">Next Action:</p>
+                    <div v-if="report.next_action">
+                      <div class="flex items-center gap-2">
+                        <UserAvatar :email="report.next_action" />
+                        <span class="text-xs text-gray-500">{{ report.next_action }}</span>
+                      </div>
+                    </div>
+                    <span v-else>-</span>
+                  </div>
+                  <div class="space-y-1">
+                    <p class="text-xs text-gray-600">Approver:</p>
+                    <div class="cursor-pointer" @click="showTimeline(report.name)">
+                      <div class="flex items-center gap-2">
+                        <UserAvatar :email="report.approvers" />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -233,44 +254,41 @@
   }
   
   const showTimeline = async (docName: string) => {
-    const expenseRequest = createDocumentResource({
-      doctype: 'SMO Advance Entry',
-      name: docName,
-      auto: false,
-    })
-    timelineEvents.value = []
-  
-    await expenseRequest.reload();
-    console.log(expenseRequest.doc);
-    const creationDate = new Date(expenseRequest.doc.creation);
-    const modifiedDate = new Date(expenseRequest.doc.modified);
+  console.log(docName)
+  const docData = createDocumentResource({
+    doctype: 'SMO Advance Entry',
+    name: docName,
+    auto: false,
+  })
 
-    // คำนวณความแตกต่างในมิลลิวินาที
-    const duration = modifiedDate.getTime() - creationDate.getTime();
-    // แปลงมิลลิวินาทีเป็นวินาที
-    const durationInSeconds = Math.floor(duration / 1000);
-    // เพิ่มเหตุกาณ "สร้างคำขอ" ที่ด้านบนสุดของ timeline
-    timelineEvents.value.push({
-      date: expenseRequest.doc.creation,
-      action: 'Submit Request',
-      status: 'Approved',
-      approve_role: 'Requestor',
-      by: expenseRequest.doc.owner,
-      
-    });
+  await docData.reload();
   
-    timelineEvents.value.push({
-      date: expenseRequest.doc.modified,
-      action: expenseRequest.doc.workflow_state,
-      status: expenseRequest.doc.workflow_state,
-      approve_role: 'Finance',
-      by: expenseRequest.doc.approver,
-      remark: expenseRequest.doc.reject_reason,
-      duration: durationInSeconds
-    });
-  
-    timelineModal.value?.showModal();
-  }
+  // ตรวจสอบว่ามีรายการที่ rejected หรือไม่
+  const hasRejected = docData.doc.approvers.some(approver => approver.status.toLowerCase() === 'rejected');
+
+  timelineEvents.value = docData.doc.approvers
+    .filter(approver => !hasRejected || approver.status.toLowerCase() !== 'pending')
+    .map(approver => ({
+      date:  approver.receive_date,
+      status: approver.status,
+      action: approver.status,
+      approve_role: approver.approver_role,
+      by: approver.user_id,
+      remark: approver.comment,
+      duration: approver.duration
+    }));
+
+  timelineEvents.value.unshift({
+    date: docData.doc.creation,
+    action: 'Submit Request',
+    status: 'Approved',
+    approve_role: 'Requestor',
+    by: docData.doc.owner,
+    remark: ""
+  });
+
+  timelineModal.value?.showModal();
+}
   </script>
   
   <style scoped>

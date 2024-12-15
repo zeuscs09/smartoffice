@@ -22,7 +22,7 @@ frappe.ui.form.on("SMO Advance Entry", {
       $(".menu-btn-group").hide();
       $(".page-icon-group").hide();
 
-      if (window.opener && typeof window.opener.refresh_table === 'function') {
+      if (window.opener && typeof window.opener.refresh_table === "function") {
         window.opener.refresh_table();
       }
       frm.add_custom_button(__("Close"), function () {
@@ -67,10 +67,12 @@ frappe.ui.form.on("SMO Advance Entry", {
       frm.set_df_property("doc_detail_section", "hidden", 0);
       frm.set_df_property("expense_items_section", "hidden", 0);
       frm.set_df_property("advance_info", "hidden", 0);
+      frm.set_df_property("section_approvers", "hidden", 0);
     } else {
       frm.set_df_property("doc_detail_section", "hidden", 1);
       frm.set_df_property("expense_items_section", "hidden", 1);
       frm.set_df_property("advance_info", "hidden", 1);
+      frm.set_df_property("section_approvers", "hidden", 1);
       frm.events.update_html_summary(frm);
     }
 
@@ -131,114 +133,177 @@ frappe.ui.form.on("SMO Advance Entry", {
   update_html_summary(frm) {
     let html = `
       <div style="
-        max-width: 600px;
+        max-width: 1000px;
         margin: 0 auto;
-        padding: 20px;
-        background-color: #fff;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        border-radius: 8px;
         font-family: Arial, sans-serif;
       ">
-        <h2 style="text-align: center; margin-bottom: 20px;">สรุปรายการค่าใช้จ่าย</h2>
-        
-        <div style="margin-bottom: 20px; border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <!-- ส่วนข้อมูลลูกค้า -->
+        <div style="
+          background: white;
+          border-radius: 8px;
+          padding: 20px;
+          margin-bottom: 20px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        ">
+          <h3 style="margin: 0 0 15px 0; color: #666;">Customer Information</h3>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
             <div>
-              <p><strong>ลูกค้า:</strong> ${frm.doc.customer_name || "ไม่ระบุ"}</p>
-              <p><strong>วันที่ให้บริการ:</strong> ${frappe.datetime.str_to_user(frm.doc.service_date) || "ไม่ระบุ"}</p>
-              <p><strong>โครงการ:</strong> ${frm.doc.project_name || "ไม่ระบุ"}</p>
+              <div style="margin-bottom: 12px;">
+                <div style="color: #666; font-size: 0.9em;">Customer</div>
+                <div style="font-weight: 500;">${
+                  frm.doc.customer_name || "-"
+                }</div>
+              </div>
+              <div style="margin-bottom: 12px;">
+                <div style="color: #666; font-size: 0.9em;">Project</div>
+                <div style="font-weight: 500;">${
+                  frm.doc.project_name || "-"
+                }</div>
+              </div>
+              <div>
+                <div style="color: #666; font-size: 0.9em;">Service Date</div>
+                <div style="font-weight: 500;">${
+                  frappe.datetime.str_to_user(frm.doc.service_date) || "-"
+                }</div>
+              </div>
             </div>
             <div>
-              <p><strong>เอกสารอ้างอิงเลขที่:</strong> ${frm.doc.reference_code_finance || "ไม่ระบุ"}</p>
-              <p><strong>ยอดเบิก:</strong> ${new Intl.NumberFormat('th-TH', { 
-                style: 'currency', 
-                currency: 'THB'
-              }).format(frm.doc.advance_amount || 0)}</p>
+              <div style="margin-bottom: 12px;">
+                <div style="color: #666; font-size: 0.9em;">Site</div>
+                <div style="font-weight: 500;">${frm.doc.site_name || "-"}</div>
+              </div>
+              <div style="margin-bottom: 12px;">
+                <div style="color: #666; font-size: 0.9em;">Project Code</div>
+                <div style="font-weight: 500;">${
+                  frm.doc.project_code || "-"
+                }</div>
+              </div>
             </div>
           </div>
         </div>
 
-        <table style="width: 100%; border-collapse: collapse;">
-          <thead>
-            <tr style="border-bottom: 2px solid #ddd;">
-              <th style="text-align: left; padding: 10px;">รายการ</th>
-              <th style="text-align: right; padding: 10px;">จำนวนเงิน</th>
-            </tr>
-          </thead>
-          <tbody>
+        <!-- ส่วนรายละเอียดการเบิก -->
+        <div style="
+          background: white;
+          border-radius: 8px;
+          padding: 20px;
+          margin-bottom: 20px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        ">
+          <h3 style="margin: 0 0 15px 0; color: #666;">Advance Details</h3>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+            <div>
+              <div style="margin-bottom: 12px;">
+                <div style="color: #666; font-size: 0.9em;">Reference Code Finance</div>
+                <div style="font-weight: 500;">${
+                  frm.doc.reference_code_finance || "-"
+                }</div>
+              </div>
+            </div>
+            <div>
+              <div style="margin-bottom: 12px;">
+                <div style="color: #666; font-size: 0.9em;">Reference Code Accounting</div>
+                <div style="font-weight: 500;">${
+                  frm.doc.reference_code_accounting || "-"
+                }</div>
+              </div>
+            </div>
+            <div>
+              <div>
+                <div style="color: #666; font-size: 0.9em;">Advance Amount</div>
+                <div style="font-weight: 500;">${frappe.format(
+                  frm.doc.advance_amount || 0,
+                  { fieldtype: "Currency" }
+                )}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ส่วนรายการค่าใช้จ่าย -->
+        <div style="
+          background: white;
+          border-radius: 8px;
+          padding: 20px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        ">
+          <h3 style="margin: 0 0 15px 0; color: #666;">Expense Items</h3>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="border-bottom: 1px solid #eee;">
+                <th style="text-align: left; padding: 12px 8px; color: #666;">ITEM</th>
+                <th style="text-align: left; padding: 12px 8px; color: #666;">RECEIPT DATE</th>
+                <th style="text-align: right; padding: 12px 8px; color: #666;">AMOUNT</th>
+                <th style="text-align: center; padding: 12px 8px; color: #666;">ATTACHMENT</th>
+              </tr>
+            </thead>
+            <tbody>
     `;
 
     let total = 0;
 
-    // สร้าง HTML จาก child table
+    // สร้างแถวรายการ
     frm.doc.expense_item.forEach((item) => {
+      total += item.total_cost || 0;
       html += `
         <tr style="border-bottom: 1px solid #eee;">
-          <td style="padding: 10px;">
-            ${item.expense_type_name || ""}
-            ${item.description ? `<br><small>${item.description}</small>` : ""}
-            ${
-              item.fuel_detail
-                ? `<br><small>รายละเอียดน้ำมัน: ${item.fuel_detail}</small>`
-                : ""
-            }
-            ${
-              item.fuel_liter
-                ? `<br><small>จำนวนลิตร: ${item.fuel_liter}</small>`
-                : ""
-            }
-            ${
-              item.hotel_name && item.total_day
-                ? `<br><small>โรงแรม: ${item.hotel_name}  ${item.total_day} วัน</small>`
-                : ""
-            }
-            ${
-              item.taxi_depart_distance
-                ? `<br><small>ระยะทางไป: ${item.taxi_depart_distance} กม.</small>`
-                : ""
-            }
-            ${
-              item.taxi_return_distance
-                ? `<br><small>ระยะทางกลับ: ${item.taxi_return_distance} กม.</small>`
-                : ""
-            }
-            ${
-              item.receipt_date
-                ? `<br><small>วันที่ใบเสร็จ: ${frappe.datetime.str_to_user(
-                    item.receipt_date
-                  )}</small>`
-                : ""
-            }
+          <td style="padding: 12px 8px;">
+            <div style="font-weight: 500;">${item.expense_type_name || ""}</div>
+            <div style="color: #666; font-size: 0.9em; margin-top: 4px;">${
+              item.description || ""
+            }</div>
           </td>
-          <td style="text-align: right; padding: 10px;">${frappe.format(
-            item.total_cost,
-            { fieldtype: "Currency" }
-          )}</td>
+          <td style="padding: 12px 8px;">
+            ${frappe.datetime.str_to_user(item.receipt_date) || ""}
+          </td>
+          <td style="text-align: right; padding: 12px 8px;">
+            ${frappe.format(item.total_cost, { fieldtype: "Currency" })}
+          </td>
+          <td style="text-align: center; padding: 12px 8px;">
+            <!-- ส่วนแสดง attachment ถ้ามี -->
+          </td>
         </tr>
       `;
-      total += item.total_cost || 0;
     });
 
-    // เพิ่มแถวรวม และ reject reason (ถ้ามี)
+    // สรุปยอด
     html += `
-          <tr style="border-top: 2px solid #ddd; font-weight: bold;">
-            <td style="padding: 10px;">รวมทั้งหมด</td>
-            <td style="text-align: right; padding: 10px;">${frappe.format(
-              total,
-              { fieldtype: "Currency" }
-            )}</td>
-          </tr>
-        </tbody>
-      </table>
-      ${frm.doc.reject_reason ? `
-        <div style="margin-top: 20px; padding: 10px; background-color: #fff3f3; border: 1px solid #ffcdd2; border-radius: 5px;">
-          <p style="color: #d32f2f; margin: 0;"><strong>เหตุผลที่ปฏิเสธ:</strong> ${frm.doc.reject_reason}</p>
-        </div>
-      ` : ''}
+            <tr style="border-top: 2px solid #eee; font-weight: 500;">
+              <td colspan="2" style="padding: 12px 8px;">Total Expenses</td>
+              <td style="text-align: right; padding: 12px 8px;">${frappe.format(
+                total,
+                { fieldtype: "Currency" }
+              )}</td>
+              <td></td>
+            </tr>
+            <tr style="font-weight: 500;">
+              <td colspan="2" style="padding: 12px 8px;">Advance Amount</td>
+              <td style="text-align: right; padding: 12px 8px;">${frappe.format(
+                frm.doc.advance_amount || 0,
+                { fieldtype: "Currency" }
+              )}</td>
+              <td></td>
+            </tr>
+            <tr style="font-weight: 500; color: ${
+              total - (frm.doc.advance_amount || 0) > 0 ? "#d32f2f" : "#2e7d32"
+            };">
+              <td colspan="2" style="padding: 12px 8px;">Advance ${
+                total - (frm.doc.advance_amount || 0) > 0
+                  ? "Shortfall (Pay More)"
+                  : "Surplus (Return)"
+              }</td>
+              <td style="text-align: right; padding: 12px 8px;">${frappe.format(
+                Math.abs(total - (frm.doc.advance_amount || 0)),
+                { fieldtype: "Currency" }
+              )}</td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
     `;
 
-    // อัพเดท HTML field
     frm.set_df_property("html_summary", "options", html);
     frm.refresh_field("html_summary");
   },
@@ -322,6 +387,20 @@ frappe.ui.form.on("SMO Expense Item", {
 
     frm.trigger("cal_total");
     frm.refresh_field("expense_item");
+
+    // const attach_field =  frappe.meta.get_field(
+    //   "SMO Expense Item",
+    //   "attachment",
+    //   frm.doc.name
+    // );
+    
+		// attach_field.on_attach_click = function () {
+		// 	attach_field.set_upload_options();
+		// 	attach_field.upload_options.restrictions.allowed_file_types = [
+		// 		"application/pdf",
+		// 	];
+		// 	attach_field.file_uploader = new frappe.ui.FileUploader(attach_field.upload_options);
+		// };
   },
   expense_item_remove: function (frm, cdt, cdn) {
     frm.trigger("cal_total");
@@ -353,14 +432,13 @@ frappe.ui.form.on("SMO Expense Item", {
       "total_cost",
       frm.doc.name
     );
-  
 
     // if (row.expense_type == "EP004") {
     //   df.toggle_editable("total_cost", 0);
     // } else {
     //   df.toggle_editable("total_cost", 1);
     // }
-    
+
     frm.trigger("cal_total");
     frm.refresh_field("expense_item");
   },

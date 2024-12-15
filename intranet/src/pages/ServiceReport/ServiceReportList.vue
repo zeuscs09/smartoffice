@@ -28,7 +28,7 @@
                     <option value="">All Status</option>
                     <option value="Draft">Draft</option>
                     <option value="Customer Review">Customer Review</option>
-                    <option value="Customer Approve">Customer Approve</option>
+                    <option value="Customer Approved">Customer Approved</option>
                 </select>
                 <input type="date" class="input input-bordered " v-model="startDate" @change="handleFilter" />
                 <input type="date" class="input input-bordered " v-model="endDate" @change="handleFilter" />

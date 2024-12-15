@@ -64,7 +64,10 @@ class SMOExpenseRequest(Document):
         self.max_level = 0
         self.next_action = ""
         self.workflow_description = ""
-
+        finance_user = frappe.get_doc("Smart Office Setting").finance_user
+        if not finance_user:
+            frappe.throw("Not found finance user")
+            
         employee = frappe.db.get_value("Employee", {"user_id": self.request_by}, ["name", "reports_to", "grade"], as_dict=True)
         total_amount = self.total
         approvers = []
@@ -143,7 +146,15 @@ class SMOExpenseRequest(Document):
         for approver in approvers:
             self.append("approvers", approver)
 
-        self.max_level = len(approvers)
+        self.append("approvers", {
+            "approver": finance_user,
+            "user_id": finance_user,
+            "approver_level": approver_level,
+            "approver_role": "Finance",
+            "status": "Pending"
+        })
+
+        self.max_level = len(approvers) + 1
         
         # กำหนด next_action เป็น user_id ของ approver คนแรก
         self.next_action = self.get_next_action()
