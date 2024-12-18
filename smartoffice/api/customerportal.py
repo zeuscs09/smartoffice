@@ -4,27 +4,49 @@ import jwt
 from datetime import datetime
 
 @frappe.whitelist(allow_guest=True)
+def hello():
+    return "Hello, World!"
+
+@frappe.whitelist(allow_guest=True)
 def check_auth_and_get_reports():
     try:
-        # รับ token จาก header
-        token = frappe.get_request_header('Authorization')
-        if not token:
+        frappe.log_error(message="Starting check_auth_and_get_reports", title="Debug 1")  # Debug log 1
+        
+        # รรวจสอบว่ามี Authorization header หรือไม่
+        if not frappe.request:
+            frappe.log_error(message="No request object", title="Debug 2")  # Debug log 2
             return {
                 "status": "error",
-                "message": "Not authenticated",
+                "message": "Invalid request",
                 "is_authenticated": False
             }
             
+        frappe.log_error(message=f"Request headers: {frappe.request.headers}", title="Debug 3")  # Debug log 3
+        
+        auth_header = frappe.request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            frappe.log_error(message="Invalid auth header", title="Debug 4")  # Debug log 4
+            return {
+                "status": "error",
+                "message": "Invalid Authorization header",
+                "is_authenticated": False
+            }
+        
         # ตรวจสอบ token
-        token = token.replace('Bearer ', '')
+        token = auth_header.replace('Bearer ', '')
+        frappe.log_error(message=f"Token: {token[:10]}...", title="Debug 5")  # Debug log 5
+        
         email = verify_customer_token(token)
         if not email:
+            frappe.log_error(message="Token verification failed", title="Debug 6")  # Debug log 6
             return {
                 "status": "error",
                 "message": "Invalid or expired token",
                 "is_authenticated": False
             }
-       
+            
+        frappe.log_error(message=f"Authenticated email: {email}", title="Debug 7")  # Debug log 7
+        
         # ดึง service reports ที่ยังไม่ได้ approve
         reports = frappe.get_all(
             "SMO Service Report",
@@ -71,7 +93,7 @@ def check_auth_and_get_reports():
         }
         
     except Exception as e:
-        frappe.log_error(frappe.get_traceback(), "Customer Portal Error")
+        frappe.log_error(message=f"Error in check_auth_and_get_reports: {str(e)}\n{frappe.get_traceback()}", title="Customer Portal Error")
         return {
             "status": "error",
             "message": str(e),

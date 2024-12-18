@@ -68,7 +68,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-25 16:51:31.112633",
+ "modified": "2024-12-18 14:54:35.594567",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Customer Site",
@@ -91,10 +91,22 @@
    "email": 1,
    "export": 1,
    "print": 1,
+   "report": 1,
+   "role": "Employee",
+   "select": 1,
+   "share": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Engineer Staff",
-   "share": 1
+   "role": "Project Manager",
+   "share": 1,
+   "write": 1
   }
  ],
  "search_fields": "customer_name, site_name",

@@ -64,10 +64,31 @@ class SMOExpenseRequest(Document):
         self.max_level = 0
         self.next_action = ""
         self.workflow_description = ""
-        finance_user = frappe.get_doc("Smart Office Setting").finance_user
-        if not finance_user:
-            frappe.throw("Not found finance user")
-            
+        finance_designation = frappe.get_doc("Smart Office Setting").finance_user
+        if not finance_designation:
+            frappe.throw("Not found finance designation")
+      
+        finance_employees = frappe.get_all(
+			"Employee",
+			filters={
+				"status": "Active",
+				"designation": finance_designation
+			},
+			fields=["user_id"]
+		)
+
+        if not finance_employees:
+            frappe.throw(f"No employees found with designation: {finance_designation}")
+
+		# กรองเฉพาะ employees ที่มี user_id
+        finance_users = [emp.user_id for emp in finance_employees if emp.user_id]
+		
+        if not finance_users:
+            frappe.throw(f"No user accounts found for employees with designation: {finance_designation}")
+
+		# แปลง list ของ users เป็น string คั่นด้วย comma
+        finance_user_list = ", ".join(finance_users)
+     
         employee = frappe.db.get_value("Employee", {"user_id": self.request_by}, ["name", "reports_to", "grade"], as_dict=True)
         total_amount = self.total
         approvers = []
@@ -94,7 +115,7 @@ class SMOExpenseRequest(Document):
                 current_employee = frappe.db.get_value("Employee", current_employee.reports_to, 
                     ["name", "user_id", "designation", "grade", "reports_to"], as_dict=True)
                 
-                # ตรวจสอบว่าผู้อนุมัตินี้ยังไม่ได้ถูกเพิ่มไปแล้ว
+                # ตรวจสอบว่าผู้อนุมัตินี้ยังไม่ได้ถูกเพิ���มไปแล้ว
                 if not any(approver['approver'] == current_employee.name for approver in approvers):
                     approvers.append({
                         "approver": current_employee.name,
@@ -147,8 +168,8 @@ class SMOExpenseRequest(Document):
             self.append("approvers", approver)
 
         self.append("approvers", {
-            "approver": finance_user,
-            "user_id": finance_user,
+            "approver": finance_user_list,
+            "user_id": finance_user_list,
             "approver_level": approver_level,
             "approver_role": "Finance",
             "status": "Pending"
@@ -181,7 +202,7 @@ class SMOExpenseRequest(Document):
         frappe.errprint(f"Current user: {current_user}")
         
         for approver in self.approvers:
-            if approver.user_id == current_user:
+            if current_user in approver.user_id :
                 frappe.errprint(f"Found current approver: {approver.user_id}")
                 approver.action_date = current_time
                 approver.status = "Rejected" if self.workflow_state == "Rejected" else "Approved"
@@ -234,19 +255,26 @@ class SMOExpenseRequest(Document):
     def create_notification(self, user_id, message=None):
         frappe.errprint(f"=== Start create_notification ===")
         frappe.errprint(f"Creating notification for user: {user_id}")
-        frappe.errprint(f"Document name: {self.name}")
-        frappe.errprint(f"Workflow state: {self.workflow_state}")
         
-        notification = frappe.get_doc({
-            "doctype": "Notification Log", 
-            "subject": message or f"คำขอเบิกค่าใช้จ่ายใหม่รอการอนุมัติ: {self.name}",
-            "for_user": user_id,
-            "type": "Alert",
-            "document_type": self.doctype,
-            "document_name": self.name,
-            "read": 0,
-        })
-        notification.insert(ignore_permissions=True)
+        # แยก user_id ที่มี comma คั่น
+        user_list = [u.strip() for u in user_id.split(',')]
+        
+        for user in user_list:
+            if not user:
+                continue
+            
+            frappe.errprint(f"Creating notification for individual user: {user}")
+            notification = frappe.get_doc({
+                "doctype": "Notification Log", 
+                "subject": message or f"คำขอเบิกค่าใช้จ่ายใหม่รอการอนุมัติ: {self.name}",
+                "for_user": user,
+                "type": "Alert",
+                "document_type": self.doctype,
+                "document_name": self.name,
+                "read": 0,
+            })
+            notification.insert(ignore_permissions=True)
+        
         frappe.errprint(f"=== End create_notification ===")
 
     def set_period_display(self):

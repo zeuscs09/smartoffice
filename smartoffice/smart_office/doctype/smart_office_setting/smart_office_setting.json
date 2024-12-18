@@ -67,19 +67,19 @@
    "fieldname": "admin_user",
    "fieldtype": "Link",
    "label": "Admin",
-   "options": "User"
+   "options": "Designation"
   },
   {
    "fieldname": "finance_user",
    "fieldtype": "Link",
    "label": "Finance",
-   "options": "User"
+   "options": "Designation"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-12-09 20:47:35.337931",
+ "modified": "2024-12-18 16:18:19.347149",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "Smart Office Setting",

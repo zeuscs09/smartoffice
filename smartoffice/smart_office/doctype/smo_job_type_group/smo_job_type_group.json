@@ -19,7 +19,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-22 08:29:06.809133",
+ "modified": "2024-12-18 14:51:04.006010",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Job Type Group",
@@ -40,7 +40,8 @@
   },
   {
    "read": 1,
-   "role": "All"
+   "role": "All",
+   "select": 1
   }
  ],
  "show_title_field_in_link": 1,

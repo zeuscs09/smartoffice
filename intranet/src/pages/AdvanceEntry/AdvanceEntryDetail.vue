@@ -24,6 +24,9 @@ const advanceResource = createDocumentResource({
   doctype: 'SMO Advance Entry',
   name: route.params.id,
   auto: true,
+  onError: (error) => {
+    toast.error(error.messages.join(', '))
+  }
 })
 
 const applyWorkflowResource = createResource({

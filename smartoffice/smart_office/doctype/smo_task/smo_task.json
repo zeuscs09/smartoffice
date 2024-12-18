@@ -352,7 +352,7 @@
    "link_fieldname": "task"
   }
  ],
- "modified": "2024-12-04 22:37:12.032257",
+ "modified": "2024-12-18 14:48:52.185866",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Task",
@@ -368,18 +368,6 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Engineer Staff",
    "share": 1,
    "write": 1
   },

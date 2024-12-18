@@ -20,13 +20,15 @@ class SMOServiceReport(Document):
 		pass
 	
 	def on_submit(self):
-		if self.workflow_state == "Customer Review":
-			if self.from_todo:
-				todo = frappe.get_doc("ToDo", self.from_todo)
-				todo.status = "Closed"
-				todo.flags.ignore_permissions = True
-				todo.save()
-			self._update_task_status()
+		frappe.errprint(_("Notification email sent to customer for review."))
+		# if self.workflow_state == "Customer Review":
+		if self.from_todo:
+			todo = frappe.get_doc("ToDo", self.from_todo)
+			todo.status = "Closed"
+			todo.flags.ignore_permissions = True
+			todo.save()
+		self._update_task_status()
+		self.notify_customer()
 		self.create_timesheet()
   
 		# ปิด ToDo ที่เชื่อมโยงกับ SMO Task

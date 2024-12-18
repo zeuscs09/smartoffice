@@ -47,9 +47,10 @@ class SMOExpenseEntry(Document):
 				else:
 					item.w_edit_return = ""
      
-				item_key = (item.expense_type)  # ปรับตามโครงสร้างข้อมูลจริงของคุณ
+				item_key = (item.expense_type)  # ปรับตามโครงสร���างข้อมูลจริงของคุณ
 				if item_key in seen_expense:
 						doc_expense_type=frappe.get_doc("SMO Expense Type", item.expense_type)
+						
 						frappe.throw(f"Duplicate expense found: {doc_expense_type.description} ")
 				seen_expense.add(item_key)
     
@@ -109,7 +110,7 @@ class SMOExpenseEntry(Document):
 	def on_submit(self):
      	
 		self.check_service_report_status()
-		# บ���นทึก receive_date ให้ admin (approver คนแรก)
+		# บนทึก receive_date ให้ admin (approver คนแรก)
 		first_approver = next((a for a in self.approvers if a.approver_level == 1), None)
 		if first_approver:
 			first_approver.receive_date = frappe.utils.now()
@@ -138,10 +139,32 @@ class SMOExpenseEntry(Document):
 		self.next_action = ""
 		self.workflow_description = ""
 
-		# ตั้งค่า admin user ก่อน
-		admin_user = frappe.get_doc("Smart Office Setting").admin_user
-		if not admin_user:
-			frappe.throw("Not found admin user")
+		# ตึง designation จาก setting
+		admin_designation = frappe.get_doc("Smart Office Setting").admin_user
+		if not admin_designation:
+			frappe.throw("Not found admin designation")
+
+		# ดึง employees ท���้งหมดที่มี designation นี้ และมี user_id
+		admin_employees = frappe.get_all(
+			"Employee",
+			filters={
+				"status": "Active",
+				"designation": admin_designation
+			},
+			fields=["user_id"]
+		)
+
+		if not admin_employees:
+			frappe.throw(f"No employees found with designation: {admin_designation}")
+
+		# กรองเฉพาะ employees ที่มี user_id
+		admin_users = [emp.user_id for emp in admin_employees if emp.user_id]
+		
+		if not admin_users:
+			frappe.throw(f"No user accounts found for employees with designation: {admin_designation}")
+
+		# แปลง list ของ users เป็น string คั่นด้วย comma
+		admin_user_list = ", ".join(admin_users)
 
 		# เรียกใช้ approval_utils เพื่อสร้าง approval chain
 		approvers, max_level, next_user = get_approval_chain(
@@ -150,10 +173,11 @@ class SMOExpenseEntry(Document):
 			flow_type="Expense Entry"
 		)
 
-		# เพิ่ม admin user เป็นคนแรก
+		# เพิ่ม admin users ทั้งหมดเป็นคนแรก
+		
 		self.append("approvers", {
-			"approver": admin_user,
-			"user_id": admin_user,
+			"approver": admin_user_list,
+			"user_id": admin_user_list,
 			"approver_level": 1,
 			"approver_role": "Admin",
 			"status": ""
@@ -170,29 +194,37 @@ class SMOExpenseEntry(Document):
 			})
 
 		self.max_level = max_level + 1  # เพิ่ม max_level อีก 1 เนื่องจากเพิ่ม admin
-		self.next_action = admin_user  # กำหนด next_user เป็น admin
+		self.next_action = admin_user_list  # กำหนด next_user เป็น admin
 
-	def create_notification(self, user_id, message):
-		notification = frappe.get_doc({
-			"doctype": "Notification Log",
-			"subject": message,
-			"for_user": user_id,
-			"type": "Alert",
-			"document_type": self.doctype,
-			"document_name": self.name,
-			"read": 0,
-		})
-		notification.insert(ignore_permissions=True)
+	def create_notification(self, user_ids, message):
+		# ถ้า user_ids เป็น string ที่มี comma ให้แยกเป็น list
+		if isinstance(user_ids, str) and ',' in user_ids:
+			user_list = [u.strip() for u in user_ids.split(',')]
+		else:
+			user_list = [user_ids]
 
-		# ส่งการแจ้งเตือนแบบ realtime
-		frappe.publish_realtime(
-			event='notification',
-			message={
-				'type': 'Alert',
-				'message': message
-			},
-			user=user_id
-		)
+		# สร้าง notification สำหรับแต่ละ user
+		for user_id in user_list:
+			notification = frappe.get_doc({
+				"doctype": "Notification Log",
+				"subject": message,
+				"for_user": user_id,
+				"type": "Alert",
+				"document_type": self.doctype,
+				"document_name": self.name,
+				"read": 0,
+			})
+			notification.insert(ignore_permissions=True)
+
+			# ส่งการแจ้งเตือนแบบ realtime
+			frappe.publish_realtime(
+				event='notification',
+				message={
+					'type': 'Alert',
+					'message': message
+				},
+				user=user_id
+			)
 
 	def check_service_report_status(self):
 		if self.service_report:
@@ -205,7 +237,8 @@ class SMOExpenseEntry(Document):
 			frappe.throw("สามารถยกเลิกเอกสารได้เฉพาะกรณีที่ถูกปฏิเสธ (Rejected) เท่านั้น")
 	
 	def set_approver_status(self):
-		current_approver = next((a for a in self.approvers if a.user_id == frappe.session.user), None)
+		current_approver = next((a for a in self.approvers 
+							   if frappe.session.user in (a.user_id + ", ")), None)
 		
 		if current_approver:
 			if self.workflow_state in ["Pending Approval", "Approved", "Rejected"]:
@@ -213,7 +246,7 @@ class SMOExpenseEntry(Document):
 				current_approver.action_date = frappe.utils.now()
 				current_approver.status = "Rejected" if self.workflow_state == "Rejected" else "Approved"
 				
-				# คำนวณระยะเวลาที่ใช้
+				# คำนวณระ��ะเวลาที่ใช้
 				if current_approver.receive_date:
 					duration = frappe.utils.time_diff_in_seconds(
 						current_approver.action_date,

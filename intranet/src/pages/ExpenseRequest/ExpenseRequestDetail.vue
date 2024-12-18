@@ -452,7 +452,7 @@ const totalAmount = computed(() => {
               @click="handleTransition(transition)"
               :disabled="applyWorkflowResource.loading"
               :class="{
-                'bg-blue-500 hover:bg-blue-600': transition.action === 'Request Approve',
+                'bg-blue-500 hover:bg-blue-600': transition.action === 'Request Approve' || transition.action === 'Submit',
                 'bg-green-500 hover:bg-green-600': transition.action === 'Approve' || transition.action === 'Final Approve',
                 'bg-red-500 hover:bg-red-600': transition.action === 'Reject',
                 'opacity-50 cursor-not-allowed': applyWorkflowResource.loading,

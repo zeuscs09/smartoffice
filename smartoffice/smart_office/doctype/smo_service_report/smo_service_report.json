@@ -435,7 +435,7 @@
    "link_fieldname": "service_report"
   }
  ],
- "modified": "2024-12-15 16:00:40.352937",
+ "modified": "2024-12-18 14:50:37.498894",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Service Report",
@@ -456,6 +456,16 @@
    "write": 1
   },
   {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "select": 1,
+   "share": 1
+  },
+  {
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -463,21 +473,19 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Engineer Staff",
+   "role": "Requester",
+   "select": 1,
    "share": 1,
    "submit": 1,
    "write": 1
   },
   {
-   "amend": 1,
-   "cancel": 1,
-   "create": 1,
-   "delete": 1,
    "email": 1,
-   "if_owner": 1,
+   "export": 1,
    "print": 1,
    "read": 1,
-   "role": "Engineer Staff",
+   "report": 1,
+   "role": "Service Approver",
    "share": 1,
    "submit": 1,
    "write": 1

@@ -65,6 +65,13 @@ class SMOTask(Document):
                 current_date += timedelta(days=1)
     def send_task_email(self):
         try:
+            # เช็คก่อนว่ามี email account หรือไม่
+            if not frappe.db.exists('Email Account', {'default_outgoing': 1}):
+                frappe.msgprint(_("No default outgoing email account found. Email notification will not be sent."))
+                return
+            
+            email_settings = frappe.get_doc('Email Account', {'default_outgoing': 1})
+            
             # แปลง self.start_date เป็น datetime ถ้าจำเป็น
             start_date = self.start_date
             if isinstance(self.start_date, str):
@@ -133,7 +140,7 @@ SEQUENCE:0
 END:VEVENT
 END:VCALENDAR"""
 
-                email_settings = frappe.get_doc('Email Account', {'default_outgoing': 1})
+                
                 
                 email_body = f"""
                 Dear Team,

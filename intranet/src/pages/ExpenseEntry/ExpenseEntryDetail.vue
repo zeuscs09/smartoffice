@@ -36,6 +36,9 @@ const expenseResource = createDocumentResource({
   doctype: 'SMO Expense Entry',
   name: route.params.id,
   auto: true,
+  onError: (error) => {
+    toast.error(error.messages.join(' '))
+  }
 })
 
 const formatWorkingHours = (seconds) => {
@@ -207,7 +210,7 @@ const goEdit = () => {
                 <div :class="{
                   'inline-flex border rounded-md px-2 py-1': true,
                   'bg-gray-100 border-gray-200 text-gray-700': expenseResource.doc.workflow_state === 'Draft',
-                  'bg-yellow-100 border-yellow-200 text-yellow-700': expenseResource.doc.workflow_state === 'Approval Review' || expenseResource.doc.workflow_state === 'Admin Review',
+                  'bg-yellow-100 border-yellow-200 text-yellow-700': expenseResource.doc.workflow_state === 'Approval Review' || expenseResource.doc.workflow_state === 'Pending Approval',
                   'bg-green-100 border-green-200 text-green-700': expenseResource.doc.workflow_state === 'Approved',
                   'bg-red-100 border-red-200 text-red-700': expenseResource.doc.workflow_state === 'Rejected'
                 }">

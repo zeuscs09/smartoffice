@@ -42,7 +42,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-22 05:56:56.148662",
+ "modified": "2024-12-18 14:51:42.656416",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Type",
@@ -65,9 +65,9 @@
    "email": 1,
    "export": 1,
    "print": 1,
-   "read": 1,
    "report": 1,
-   "role": "Engineer Staff",
+   "role": "Employee",
+   "select": 1,
    "share": 1
   }
  ],

@@ -160,7 +160,7 @@ def get_expense_report(year=None, month=None):
                 '' AS CODE,
                 CONCAT(
                     'เคลียร์เงิน Advance ',
-                    reference_code,
+                    reference_code_finance,
                     ' Project ',
                     project_code
                 ) AS REMARKH1,

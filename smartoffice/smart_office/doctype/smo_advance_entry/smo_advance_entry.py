@@ -43,9 +43,27 @@ class SMOAdvanceEntry(Document):
 		self.next_action = ""
 		
 		# ตั้งค่า admin user ก่อน
-		finance_user = frappe.get_doc("Smart Office Setting").finance_user
-		if not finance_user:
-			frappe.throw("Not found finance user")
+		# ตึง designation จาก setting
+		finance_designation = frappe.get_doc("Smart Office Setting").finance_user
+		if not finance_designation:
+			frappe.throw("Not found finance designation")
+
+		# ดึง employees ทั้งหมดที่มี designation นี้ และมี user_id
+		finance_employees = frappe.get_all(
+			"Employee",
+			filters={
+				"status": "Active",
+				"designation": finance_designation
+			},
+			fields=["user_id"]
+		)
+
+		if not finance_employees:
+			frappe.throw(f"No employees found with designation: {finance_designation}")
+  
+		finance_users = [emp.user_id for emp in finance_employees if emp.user_id]
+		if not finance_users:
+			frappe.throw(f"No user accounts found for employees with designation: {finance_designation}")
 
 		# เรียกใช้ approval_utils เพื่อสร้าง approval chain
 		approvers, max_level, next_user = get_approval_chain(
@@ -55,7 +73,7 @@ class SMOAdvanceEntry(Document):
 		)
 
 		
-
+		finance_user_list = ", ".join(finance_users)
 		# ปรับ level ของ approvers ที่เหลือให้เริ่มจาก 2
 		for approver_data in approvers:
 			self.append("approvers", {
@@ -67,8 +85,8 @@ class SMOAdvanceEntry(Document):
 			})
 		# เพิ่ม Finance user เป็นคนสุดท้าย
 		self.append("approvers", {
-			"approver": finance_user,
-			"user_id": finance_user,
+			"approver": finance_user_list,
+			"user_id": finance_user_list,
 			"approver_level": max_level + 1,
 			"approver_role": "Finance",
 			"status": ""
@@ -93,7 +111,7 @@ class SMOAdvanceEntry(Document):
 		self.set_approver_status()
 
 	def set_approver_status(self):
-		current_approver = next((a for a in self.approvers if a.user_id == frappe.session.user), None)
+		current_approver = next((a for a in self.approvers if frappe.session.user in a.user_id), None)
 		
 		if current_approver:
 			if self.workflow_state in ["Pending Approval", "Approved", "Rejected"]:
@@ -155,25 +173,28 @@ class SMOAdvanceEntry(Document):
 
 	def create_notification(self, user_id, message):
 		"""Create notification log entry and send realtime notification"""
-		notification = frappe.get_doc({
-			"doctype": "Notification Log",
-			"subject": message,
-			"for_user": user_id,
-			"type": "Alert",
-			"document_type": self.doctype,
-			"document_name": self.name,
-			"read": 0,
-		})
-		notification.insert(ignore_permissions=True)
+		# แยก user_id ที่คั่นด้วยเครื่องหมายจุลภาค
+		user_list = [u.strip() for u in user_id.split(',') if u.strip()]
+		
+		for single_user in user_list:
+			notification = frappe.get_doc({
+				"doctype": "Notification Log",
+				"subject": message,
+				"for_user": single_user,
+				"type": "Alert",
+				"document_type": self.doctype,
+				"document_name": self.name,
+				"read": 0,
+			})
+			notification.insert(ignore_permissions=True)
 
-		# ส่ง realtime notification พร้อมระบุ user
-		frappe.publish_realtime(
-			event='notification',
-			message={
-				'type': 'Alert',
-				'message': message,
-				'user': user_id  # เพิ่ม user_id เข้าไปใน message
-			},
-			user=user_id  # ระบุ user ที่จะรับ notification
-		)
-		# frappe.msgprint("Notification sent to user: " + user_id)
+			# ส่ง realtime notification สำหรับแต่ละ user
+			frappe.publish_realtime(
+				event='notification',
+				message={
+					'type': 'Alert',
+					'message': message,
+					'user': single_user
+				},
+				user=single_user
+			)
