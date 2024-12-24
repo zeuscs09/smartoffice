@@ -29,6 +29,21 @@ export const session = reactive({
       router.replace(data.default_route || '/')
     },
   }),
+  ldapLogin: createResource({
+    url: 'frappe.integrations.doctype.ldap_settings.ldap_settings.login',
+    makeParams({ username, password }) {
+      return {
+        usr: username,
+        pwd: password,
+      }
+    },
+    onSuccess(data) {
+      userResource.reload()
+      session.user = sessionUser()
+      session.ldapLogin.reset()
+      router.replace(data.default_route || '/')
+    },
+  }),
   logout: createResource({
     url: 'logout',
     onSuccess() {
