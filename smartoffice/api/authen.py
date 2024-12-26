@@ -207,22 +207,14 @@ def send_otp_email(email, otp, reference_code):
         subject = frappe.render_template(email_template.subject, args)
         message = frappe.render_template(email_template.response, args)
         
-        # ใช้ Email Account เริ่มต้น
-        email_account = frappe.get_doc("Email Account", {"default_outgoing": 1})
-        
-        # ส่งอีเมล์โดยตรงผ่าน SMTP จาก Email Account
-        msg = MIMEMultipart()
-        msg['From'] = email_account.email_id
-        msg['To'] = email
-        msg['Subject'] = subject
-        msg.attach(MIMEText(message, 'html'))
-        
-        # ส่งอีเมล์โดยตรงผ่าน SMTP
-        with smtplib.SMTP(email_account.smtp_server, email_account.smtp_port) as server:
-            server.starttls()
-            server.login(email_account.email_id, email_account.get_password())
-            server.send_message(msg)
+        # ใช้ frappe.sendmail แทนการส่งผ่าน SMTP โดยตรง
+        frappe.sendmail(
+            recipients=[email],
+            subject=subject,
+            message=message,
+            delayed=False  # ส่งทันทีไม่ต้องรอคิว
+        )
             
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "OTP Email Sending Error")
-        frappe.throw(_("Failed to send OTP email"))
+        frappe.throw(_("Failed to send OTP email: {0}").format(str(e)))
