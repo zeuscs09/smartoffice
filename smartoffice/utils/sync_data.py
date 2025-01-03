@@ -49,7 +49,7 @@ def sync_vtiger_projects():
                     print(f"Project data from Vtiger: {project}")
                     
                     project_data = {
-                        "project_number": project["project_number"],
+                        "custom_project_number": project["project_number"],
                         "project_name": project["project_name"],
                         "custom_opportunity_id": project["custom_opportunity_id"],
                         "customer": project["customer"],
@@ -86,7 +86,7 @@ def sync_vtiger_projects():
                         frappe.db.commit()
 
                 except Exception as e:
-                    error_msg = str(e)[:100]
+                    error_msg = str(e)
                     frappe.log_error(
                         title=f"Error syncing project {project['project_number']}", 
                         message=error_msg
