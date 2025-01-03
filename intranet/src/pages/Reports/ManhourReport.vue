@@ -70,7 +70,7 @@ const fetchReport = async () => {
 
 // Format duration helper
 const formatHourMinute = (minutes: number) => {
-  return formatDuration(minutes)
+  return formatDuration(minutes * 60)
 }
 
 // เพิ่ม computed properties สำหรับคำนวณ totals
