@@ -56,24 +56,24 @@ def sync_vtiger_projects():
                         "modified": now()
                     }
 
-                    if frappe.db.exists("Project", project["project_code"]):
+                    if frappe.db.exists("Project", project["project_number"]):
                         # Update existing project
-                        doc = frappe.get_doc("Project", project["project_code"])
+                        doc = frappe.get_doc("Project", project["project_number"])
                         doc.update(project_data)
                         doc.save()
                     else:
                         # Create new project
                         doc = frappe.get_doc({
                             "doctype": "Project",
-                            "name": project["project_code"],
-                            "project_code": project["project_code"],
+                            "name": project["project_number"],
+                            "project_number": project["project_number"],
                             **project_data
                         })
                         doc.flags.ignore_mandatory = True
                         doc.insert(ignore_permissions=True)
 
                 except Exception as e:
-                    frappe.log_error(title="Error syncing project", message=f"Error syncing project {project['project_code']}: {str(e)}")
+                    frappe.log_error(title="Error syncing project", message=f"Error syncing project {project['project_number']}: {str(e)}")
                     continue
 
     finally:
