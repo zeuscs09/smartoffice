@@ -183,9 +183,10 @@ END:VCALENDAR"""
                 msg.attach(alt)
 
                 with smtplib.SMTP(email_settings.smtp_server, email_settings.smtp_port) as server:
-                    server.starttls()
+                    if email_settings.use_tls:
+                        server.starttls()
                     # เช็คว่ามี password หรือไม่
-                    if email_settings.get_password():
+                    if email_settings.password:
                         server.login(email_settings.email_id, email_settings.get_password())
                     server.send_message(msg)
 
