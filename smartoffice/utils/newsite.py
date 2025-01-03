@@ -117,8 +117,8 @@ def execute_truncate():
     API endpoint สำหรับเรียกใช้ truncate tables
     เฉพาะ System Manager เท่านั้นที่สามารถเรียกใช้ได้
     """
-    if not frappe.has_permission("System Manager"):
-        frappe.throw(_("ไม่มีสิทธิ์ในการดำเนินการนี้"))
+    if "System Manager" not in frappe.get_roles(frappe.session.user):
+        frappe.throw(_("ต้องมีสิทธิ์ System Manager เท่านั้น"))
         
     result = truncate_all_transaction_tables()
     
