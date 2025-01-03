@@ -45,6 +45,9 @@ def sync_vtiger_projects():
             # Sync ข้อมูลไปยัง Frappe
             for project in projects:
                 try:
+                    # Debug: พิมพ์ค่าที่ได้จาก Vtiger
+                    print(f"Project data from Vtiger: {project}")
+                    
                     project_data = {
                         "project_number": project["project_number"],
                         "project_name": project["project_name"],
@@ -57,23 +60,38 @@ def sync_vtiger_projects():
                     }
 
                     if frappe.db.exists("Project", project["project_number"]):
+                        # Debug: พิมพ์ค่าที่จะ update
+                        print(f"Updating project {project['project_number']} with data: {project_data}")
+                        
                         # Update existing project
-                        doc = frappe.get_doc("Project", project["project_number"])
-                        doc.update(project_data)
-                        doc.save()
+                        frappe.db.set_value(
+                            "Project",
+                            project["project_number"],
+                            project_data,
+                            update_modified=False
+                        )
+                        frappe.db.commit()
                     else:
+                        # Debug: พิมพ์ค่าที่จะ insert
+                        print(f"Inserting new project with data: {project_data}")
+                        
                         # Create new project
                         doc = frappe.get_doc({
                             "doctype": "Project",
                             "name": project["project_number"],
-                            "project_number": project["project_number"],
                             **project_data
                         })
                         doc.flags.ignore_mandatory = True
-                        doc.insert(ignore_permissions=True)
+                        doc.insert(ignore_permissions=True, ignore_if_duplicate=True)
+                        frappe.db.commit()
 
                 except Exception as e:
-                    frappe.log_error(title="Error syncing project", message=f"Error syncing project {project['project_number']}: {str(e)}")
+                    error_msg = str(e)[:100]
+                    frappe.log_error(
+                        title=f"Error syncing project {project['project_number']}", 
+                        message=error_msg
+                    )
+                    print(f"Error syncing project {project['project_number']}: {error_msg}")  # Debug
                     continue
 
     finally:
