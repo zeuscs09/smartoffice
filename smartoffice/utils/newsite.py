@@ -67,7 +67,8 @@ def truncate_all_transaction_tables():
                 print(f"Cleared child table: {child_table}")
             except Exception as e:
                 print(f"Error clearing {child_table}: {str(e)}")
-                    
+        frappe.db.sql("delete from `tabCustomer`")
+        frappe.db.sql("delete from `tabProject`")
         # Truncate parent tables
         for parent_table in parent_tables:
             try:
