@@ -184,7 +184,9 @@ END:VCALENDAR"""
 
                 with smtplib.SMTP(email_settings.smtp_server, email_settings.smtp_port) as server:
                     server.starttls()
-                    server.login(email_settings.email_id, email_settings.get_password())
+                    # เช็คว่ามี password หรือไม่
+                    if email_settings.get_password():
+                        server.login(email_settings.email_id, email_settings.get_password())
                     server.send_message(msg)
 
                 current_date += timedelta(days=1)

@@ -13,7 +13,15 @@
   "jwt_secret_key",
   "flow_section",
   "admin_user",
-  "finance_user"
+  "finance_user",
+  "vtiger_section",
+  "db_host",
+  "db_name",
+  "db_user",
+  "db_password",
+  "column_break_ydln",
+  "sync_project",
+  "sync_customer"
  ],
  "fields": [
   {
@@ -74,12 +82,51 @@
    "fieldtype": "Link",
    "label": "Finance",
    "options": "Designation"
+  },
+  {
+   "fieldname": "vtiger_section",
+   "fieldtype": "Section Break",
+   "label": "vtiger"
+  },
+  {
+   "fieldname": "db_host",
+   "fieldtype": "Data",
+   "label": "DB Host"
+  },
+  {
+   "fieldname": "db_name",
+   "fieldtype": "Data",
+   "label": "DB Name"
+  },
+  {
+   "fieldname": "db_user",
+   "fieldtype": "Data",
+   "label": "DB User"
+  },
+  {
+   "fieldname": "db_password",
+   "fieldtype": "Password",
+   "label": "DB Password"
+  },
+  {
+   "fieldname": "column_break_ydln",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sync_project",
+   "fieldtype": "Button",
+   "label": "Sync Project"
+  },
+  {
+   "fieldname": "sync_customer",
+   "fieldtype": "Button",
+   "label": "Sync Customer"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-12-18 16:18:19.347149",
+ "modified": "2025-01-03 18:13:57.104959",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "Smart Office Setting",

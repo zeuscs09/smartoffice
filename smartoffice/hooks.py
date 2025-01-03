@@ -133,23 +133,14 @@ app_license = "mit"
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"smartoffice.tasks.all"
-# 	],
-# 	"daily": [
-# 		"smartoffice.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"smartoffice.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"smartoffice.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"smartoffice.tasks.monthly"
-# 	],
-# }
+scheduler_events = {
+    "cron": {
+        # รันทุกๆ 2 ชั่วโมง
+        "0 */2 * * *": [
+            "smartoffice.utils.sync_data.daily_sync_vtiger_data"
+        ]
+    }
+}
 
 # Testing
 # -------
