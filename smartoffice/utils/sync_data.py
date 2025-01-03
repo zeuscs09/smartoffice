@@ -36,7 +36,7 @@ def sync_vtiger_projects():
                 from vtiger_project vp
                 inner join vtiger_account va on vp.linktoaccountscontacts = va.accountid 
                 left join vtiger_projectcf vp4 on vp.projectid = vp4.projectid
-                left join vtiger_potentialscf vp2 on vp.projectname = vp2.cf_782
+                left join vtiger_potentialscf vp2 on vp.projectname = vp2.cf_782 and vp2.cf_782 <>''
                 left join vtiger_potential vp3 on vp2.potentialid = vp3.potentialid
             """
             cursor.execute(sql)
