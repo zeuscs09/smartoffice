@@ -99,7 +99,8 @@
    "fieldname": "period",
    "fieldtype": "Select",
    "label": "Period",
-   "options": "All day\nAM\nPM\nNot Specific"
+   "options": "\nAll day\nAM\nPM\nNot Specific",
+   "reqd": 1
   },
   {
    "default": "08:30:30",
@@ -352,7 +353,7 @@
    "link_fieldname": "task"
   }
  ],
- "modified": "2024-12-18 14:48:52.185866",
+ "modified": "2025-01-03 23:39:50.654562",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Task",
