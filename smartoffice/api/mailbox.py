@@ -8,7 +8,7 @@ def get_mail_box(page=1, page_size=10, search=None, status=None, start_date=None
     page_size = int(page_size)
     offset = (page - 1) * page_size
     frappe.errprint(user)
-    conditions = ["for_user = %s", "type = 'Alert'"]
+    conditions = ["for_user = %s", "type = 'Alert'", "document_type <> ''"]
     params = [user]
 
     if search:

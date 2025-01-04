@@ -81,7 +81,6 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Year",
-   "options": "2023\n2024",
    "reqd": 1
   },
   {
@@ -218,7 +217,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-12-18 19:59:24.549757",
+ "modified": "2025-01-05 05:12:39.093662",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Request",
