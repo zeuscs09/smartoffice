@@ -42,11 +42,15 @@ def sync_vtiger_projects():
             cursor.execute(sql)
             projects = cursor.fetchall()
 
+            # เพิ่มตัวแปรสำหรับนับ
+            success_count = 0
+            error_count = 0
+
             # Sync ข้อมูลไปยัง Frappe
             for project in projects:
                 try:
                     # Debug: พิมพ์ค่าที่ได้จาก Vtiger
-                    print(f"Project data from Vtiger: {project}")
+                    # print(f"Project data from Vtiger: {project}")
                     
                     project_data = {
                         "custom_project_number": project["project_number"],
@@ -61,7 +65,7 @@ def sync_vtiger_projects():
 
                     if frappe.db.exists("Project", project["project_number"]):
                         # Debug: พิมพ์ค่าที่จะ update
-                        print(f"Updating project {project['project_number']} with data: {project_data}")
+                        # print(f"Updating project {project['project_number']} with data: {project_data}")
                         
                         # Update existing project
                         frappe.db.set_value(
@@ -73,7 +77,7 @@ def sync_vtiger_projects():
                         frappe.db.commit()
                     else:
                         # Debug: พิมพ์ค่าที่จะ insert
-                        print(f"Inserting new project with data: {project_data}")
+                        # print(f"Inserting new project with data: {project_data}")
                         
                         # Create new project
                         doc = frappe.get_doc({
@@ -84,8 +88,11 @@ def sync_vtiger_projects():
                         doc.flags.ignore_mandatory = True
                         doc.insert(ignore_permissions=True, ignore_if_duplicate=True)
                         frappe.db.commit()
-
+                    
+                    success_count += 1
+                
                 except Exception as e:
+                    error_count += 1
                     error_msg = str(e)
                     frappe.log_error(
                         title=f"Error syncing project {project['project_number']}", 
@@ -93,7 +100,13 @@ def sync_vtiger_projects():
                     )
                     print(f"Error syncing project {project['project_number']}: {error_msg}")  # Debug
                     continue
-
+            
+            # แสดงสรุปหลังจาก sync เสร็จ
+            print(f"\nProject Sync Summary:")
+            print(f"Total Projects: {len(projects)}")
+            print(f"Successfully Synced: {success_count}")
+            print(f"Failed: {error_count}")
+                    
     finally:
         connection.close()
 
@@ -129,10 +142,14 @@ def sync_vtiger_customers():
             cursor.execute(sql)
             customers = cursor.fetchall()
 
+            # เพิ่มตัวแปรสำหรับนับ
+            success_count = 0
+            error_count = 0
+            
             for customer in customers:
                 try:
                     # Debug: พิมพ์ค่าที่ได้จาก Vtiger
-                    frappe.errprint(f"Customer data from Vtiger: {customer}")
+                   
                     
                     # ตรวจสอบและสร้าง Customer Group ถ้ายังไม่มี
                     if customer["customer_group"] and not frappe.db.exists("Customer Group", customer["customer_group"]):
@@ -156,7 +173,7 @@ def sync_vtiger_customers():
                     
                     if frappe.db.exists("Customer", customer["name"]):
                         # Debug: พิมพ์ค่าที่จะ update
-                        frappe.errprint(f"Updating customer {customer['name']} with data: {customer_data}")
+                      
                         
                         # Update existing customer
                         frappe.db.set_value(
@@ -168,7 +185,7 @@ def sync_vtiger_customers():
                         frappe.db.commit()
                     else:
                         # Debug: พิมพ์ค่าที่จะ insert
-                        print(f"Inserting new customer with data: {customer_data}")
+                      
                         
                         # Create new customer
                         doc = frappe.get_doc({
@@ -179,15 +196,37 @@ def sync_vtiger_customers():
                         doc.flags.ignore_mandatory = True
                         doc.insert(ignore_permissions=True, ignore_if_duplicate=True)
                         frappe.db.commit()
+                        
+                        # ตรวจสอบว่ามี Customer Site หรือไม่
+                        if not frappe.db.exists("SMO Customer Site", {"customer": customer["name"]}):
+                            # สร้าง Customer Site HQ
+                            site_doc = frappe.get_doc({
+                                "doctype": "SMO Customer Site",
+                                "customer": customer["name"],
+                                "site_name": "HQ",
+                                "depart_km": 0,
+                                "return_km": 0
+                            })
+                            site_doc.insert(ignore_permissions=True)
+                            frappe.db.commit()
+                    
+                    success_count += 1
 
                 except Exception as e:
+                    error_count += 1
                     error_msg = str(e)[:100]
                     frappe.log_error(
                         title=f"Error syncing customer {customer['name']}", 
                         message=error_msg
                     )
-                    print(f"Error syncing customer {customer['name']}: {error_msg}")  # Debug
+                    print(f"Error syncing customer {customer['name']}: {error_msg}")
                     continue
+            
+            # แสดงสรุปหลังจาก sync เสร็จ
+            print(f"\nCustomer Sync Summary:")
+            print(f"Total Customers: {len(customers)}")
+            print(f"Successfully Synced: {success_count}")
+            print(f"Failed: {error_count}")
 
     finally:
         connection.close()
