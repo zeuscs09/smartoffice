@@ -279,7 +279,7 @@
                         Advance Request
                     </a>
                 </li>
-                <li>
+                <!-- <li>
                     <a @click="openReport('Accounting Report')" 
                        class="flex items-center gap-3">
                         <svg class="h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -290,8 +290,19 @@
                         </svg>
                         Accounting Report
                     </a>
-                </li>
-
+                </li> -->
+                <li>
+                                            <router-link :to="{ name: 'ManhourReport' }" class="text-sm">
+                                                <Clock class="w-4 h-4" />
+                                                Manhour Report
+                                            </router-link>
+                                        </li>
+                                        <li>
+                                            <router-link :to="{ name: 'ExpenseReport' }" class="text-sm">
+                                                <Receipt class="w-4 h-4" />
+                                                Expense Report
+                                            </router-link>
+                                        </li>
             </ul>
         </div>
     </div>

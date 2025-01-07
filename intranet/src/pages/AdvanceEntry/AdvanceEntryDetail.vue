@@ -153,7 +153,7 @@ window.refresh_table = () => {
           </button>
           <div class="flex gap-4">
             <button 
-              v-if="advanceResource.doc.workflow_state === 'Draft' && session.user === advanceResource.doc.owner"
+              v-if="(advanceResource.doc.workflow_state === 'Draft' || advanceResource.doc.workflow_state === 'Rejected') && session.user === advanceResource.doc.owner"
               @click="goEdit"
               class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
               Edit

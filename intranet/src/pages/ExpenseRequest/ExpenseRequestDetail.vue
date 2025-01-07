@@ -434,18 +434,18 @@ const totalAmount = computed(() => {
           </button>
           <div class="flex gap-4">
             <button 
-              v-if="(expenseResource.doc?.workflow_state === 'Draft'  )&& session.user === expenseResource.doc?.owner"
+              v-if="(expenseResource.doc?.workflow_state === 'Draft' || expenseResource.doc?.workflow_state === 'Rejected') && session.user === expenseResource.doc?.owner"
               @click="goEdit"
               class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
               Edit
             </button>
-            <button 
+            <!-- <button 
               v-if="(expenseResource.doc?.workflow_state === 'Rejected' && expenseResource.doc?.docstatus !==2 )&& session.user === expenseResource.doc?.owner"
               @click="goCancel"
               :disabled="cancelDocumentResource.loading"
               class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded disabled:opacity-50">
               {{ cancelDocumentResource.loading ? 'กำลังยกเลิก...' : 'Cancel Document' }}
-            </button>
+            </button> -->
             <button 
               v-for="transition in workflowResource.data" 
               :key="transition.name"

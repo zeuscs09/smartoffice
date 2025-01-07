@@ -135,7 +135,7 @@ const handleTransition = (transition) => {
 
 const confirmReject = async () => {
   if (!rejectReason.value) {
-    alert('กรุณาใ���่เหตุผลในการ Reject')
+    alert('กรุณาใส่เหตุผลในการ Reject')
     return
   }
   expenseResource.doc.reject_reason = rejectReason.value
@@ -177,8 +177,11 @@ const goEdit = () => {
             Back
           </button>
           <div class="flex gap-4">
-            <button v-if="expenseResource.doc.workflow_state === 'Draft' && session.user === expenseResource.doc.owner"
-              @click="goEdit" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+            <button 
+              v-if="(expenseResource.doc.workflow_state === 'Draft' || expenseResource.doc.workflow_state === 'Rejected') && session.user === expenseResource.doc.owner"
+              @click="goEdit" 
+              class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+            >
               Edit
             </button>
             <button v-for="transition in workflowResource.data" :key="transition.name"
