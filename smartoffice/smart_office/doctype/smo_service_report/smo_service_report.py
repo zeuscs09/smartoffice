@@ -175,6 +175,7 @@ class SMOServiceReport(Document):
 				sender=sender["email"],
 				subject=args.subject,
 				message=args.message,
+      			delayed=False  # ส่งทันทีไม่ต้องรอคิว
 			)
 			frappe.msgprint(_("Email sent to {0}").format(contact))
 		except frappe.OutgoingEmailError:
