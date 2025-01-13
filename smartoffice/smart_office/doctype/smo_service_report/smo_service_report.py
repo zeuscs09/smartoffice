@@ -43,10 +43,10 @@ class SMOServiceReport(Document):
 		
 
 	def on_cancel(self):
-		self._update_task_status("On Hold")
+		self._update_task_status("Open")
 
 	def after_delete(self):
-		self._update_task_status("On Hold")
+		self._update_task_status("Open")
 
 	def validate(self):
 		if self.workflow_state == "Draft":
@@ -78,7 +78,7 @@ class SMOServiceReport(Document):
 		finish_date = getdate(self.finish_date_input)
 		self.over_night = (finish_date - start_date).days > 0
 
-	def _update_task_status(self):
+	def _update_task_status(self, status=None):
 		if self.task:
 			todos = frappe.get_all("ToDo", 
 				filters={
@@ -91,9 +91,12 @@ class SMOServiceReport(Document):
 			frappe.errprint(f"Todos: {todos}")
 			for todo_name in todos:
 				todo = frappe.get_doc("ToDo", todo_name)
-				todo.status = "Closed"
+				todo.status = status or "Closed"
 				todo.flags.ignore_permissions = True
 				todo.save()
+			
+			# ถ้ามี status ส่งมา ให้อัพเดท task status ด้วย
+			
 
 	def create_timesheet(self):
 		for item in self.team:

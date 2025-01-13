@@ -25,7 +25,7 @@
                     <div class="flex gap-2">
 
                         <button
-                            v-if="serviceReportResource.doc.workflow_state === 'Draft' && session.user === serviceReportResource.doc.owner"
+                            v-if="(serviceReportResource.doc.workflow_state === 'Draft' || serviceReportResource.doc.workflow_state === 'Customer Reject') && session.user === serviceReportResource.doc.owner"
                             @click="goEdit"
                             class="btn btn-sm bg-green-500 hover:bg-green-600 text-white">
                             Edit
