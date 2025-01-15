@@ -37,13 +37,21 @@ class SMOExpenseEntry(Document):
 			
 			# ตรวจสอบรายการซ้ำเฉพาะ expense_type EXP001, EXP002
 			if item.expense_type in ["EP001", "EP002"]:
-				if item.cal_taxi_depart_distance != item.taxi_depart_distance:
-					item.w_edit_depart = f"Edit Distance from {format(float(item.cal_taxi_depart_distance), '.2f')} to {format(float(item.taxi_depart_distance), '.2f')}"
+    			# ตรวจสอบ depart distance
+				if item.cal_taxi_depart_distance is not None and item.taxi_depart_distance is not None:
+					if float(item.cal_taxi_depart_distance) != float(item.taxi_depart_distance):
+						item.w_edit_depart = f"Edit Distance from {format(float(item.cal_taxi_depart_distance), '.2f')} to {format(float(item.taxi_depart_distance), '.2f')}"
+					else:
+						item.w_edit_depart = ""
 				else:
 					item.w_edit_depart = ""
-     
-				if item.cal_taxi_return_distance != item.taxi_return_distance:
-					item.w_edit_return = f"Edit Distance from {format(float(item.cal_taxi_return_distance), '.2f')} to {format(float(item.taxi_return_distance), '.2f')}"
+
+				# ตรวจสอบ return distance
+				if item.cal_taxi_return_distance is not None and item.taxi_return_distance is not None:
+					if float(item.cal_taxi_return_distance) != float(item.taxi_return_distance):
+						item.w_edit_return = f"Edit Distance from {format(float(item.cal_taxi_return_distance), '.2f')} to {format(float(item.taxi_return_distance), '.2f')}"
+					else:
+						item.w_edit_return = ""
 				else:
 					item.w_edit_return = ""
      
