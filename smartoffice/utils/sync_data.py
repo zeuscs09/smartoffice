@@ -31,7 +31,7 @@ def sync_vtiger_projects():
                     vp4.cf_734 project_name,
                     vp3.potential_no custom_opportunity_id,
                     va.account_no customer,
-                    va.accountname customer_name,
+                    va.accountname custom_customer_name,
                     vp.projecttype project_type,
                     vp.projectstatus
                 from vtiger_project vp
@@ -58,7 +58,7 @@ def sync_vtiger_projects():
                         "project_name": project["project_name"],
                         "custom_opportunity_id": project["custom_opportunity_id"],
                         "customer": project["customer"],
-                        "custom_customer_name": project["customer_name"],
+                        "custom_customer_name": project["custom_customer_name"],
                         "project_type": project["project_type"],
                         "status": project["projectstatus"],
                         "custom_project_code": project["project_code"],
