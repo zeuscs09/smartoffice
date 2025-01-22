@@ -87,8 +87,14 @@ def get_todos_with_smo_tasks(page=1, page_size=10, search=None, status=None, sta
         COALESCE(t.status, 'Draft') as status, 
         COALESCE(t.allocated_to, s.assign_to) as allocated_to, 
         s.name as reference_name,
-        s.project_name as project, 
-        s.project_code,
+        CASE 
+            WHEN COALESCE(s.project_name, '') = '' THEN s.opportunity_name 
+            ELSE s.project_name 
+        END as project,
+        CASE 
+            WHEN COALESCE(s.project_code, '') = '' THEN s.opportunity 
+            ELSE s.project_code 
+        END as project_code,
         s.site, 
         s.contact_person as contact_person, 
         s.contact_mobile as contact_phone, 

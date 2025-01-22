@@ -233,9 +233,109 @@ def sync_vtiger_customers():
     finally:
         connection.close()
 
+def sync_vtiger_opportunity():
+    # ดึงการตั้งค่าจาก Smart Office Setting
+    settings = frappe.get_single("Smart Office Setting")
+    
+    # แยก host และ port (ถ้ามี)
+    host_parts = settings.db_host.split(':')
+    host = host_parts[0]
+    port = int(host_parts[1]) if len(host_parts) > 1 else 3306
+    
+    # เชื่อมต่อกับ MariaDB
+    connection = pymysql.connect(
+        host=host,
+        port=port,
+        user=settings.db_user,
+        password=settings.get_password('db_password'),
+        database=settings.db_name
+    )
+    
+    try:
+        with connection.cursor(pymysql.cursors.DictCursor) as cursor:
+            sql = """
+                select 
+                    va.account_no as party_name,
+                    'Customer' as opportunity_from,
+                    potential_no as name,
+                    amount as opportunity_amount,
+                    sales_stage,
+                    potentialname custom_opportunity_name
+                from 
+                    vtiger_potential po inner join
+                    vtiger_account va on po.related_to = va.accountid 
+            """
+            cursor.execute(sql)
+            opportunities = cursor.fetchall()
+
+            # เพิ่มตัวแปรสำหรับนับ
+            success_count = 0
+            error_count = 0
+            
+            for opportunity in opportunities:
+                try:
+                    # ตรวจสอบและสร้าง Sales Stage ถ้ายังไม่มี
+                    if opportunity["sales_stage"] and not frappe.db.exists("Sales Stage", opportunity["sales_stage"]):
+                        sales_stage = frappe.get_doc({
+                            "doctype": "Sales Stage",
+                            "stage_name": opportunity["sales_stage"]
+                        })
+                        sales_stage.insert(ignore_permissions=True)
+                        frappe.db.commit()
+
+                    opportunity_data = {
+                        "opportunity_from": opportunity["opportunity_from"],
+                        "party_name": opportunity["party_name"],
+                        "opportunity_amount": opportunity["opportunity_amount"],
+                        "sales_stage": opportunity["sales_stage"],
+                        "custom_opportunity_name": opportunity["custom_opportunity_name"],
+                        "modified": now()
+                    }
+
+                    if frappe.db.exists("Opportunity", opportunity["name"]):
+                        # Update existing opportunity
+                        frappe.db.set_value(
+                            "Opportunity",
+                            opportunity["name"],
+                            opportunity_data,
+                            update_modified=False
+                        )
+                        frappe.db.commit()
+                    else:
+                        # Create new opportunity
+                        doc = frappe.get_doc({
+                            "doctype": "Opportunity",
+                            "name": opportunity["name"],
+                            **opportunity_data
+                        })
+                        doc.flags.ignore_mandatory = True
+                        doc.insert(ignore_permissions=True, ignore_if_duplicate=True)
+                        frappe.db.commit()
+                    
+                    success_count += 1
+
+                except Exception as e:
+                    error_count += 1
+                    error_msg = str(e)
+                    frappe.log_error(
+                        title=f"Error syncing opportunity {opportunity['name']}", 
+                        message=error_msg
+                    )
+                    print(f"Error syncing opportunity {opportunity['name']}: {error_msg}")
+                    continue
+            
+            # แสดงสรุปหลังจาก sync เสร็จ
+            print(f"\nOpportunity Sync Summary:")
+            print(f"Total Opportunities: {len(opportunities)}")
+            print(f"Successfully Synced: {success_count}")
+            print(f"Failed: {error_count}")
+
+    finally:
+        connection.close()
+
 def daily_sync_vtiger_data():
     """
-    ฟังก์ชันสำหรับ sync ข้อมูลจาก Vtiger โดย sync customers ก่อนแล้วค่อย sync projects
+    ฟังก์ชันสำหรับ sync ข้อมูลจาก Vtiger โดย sync customers ก่อนแล้วค่อย sync projects และ opportunities
     """
     try:
         # Sync Customers ก่อน
@@ -246,6 +346,9 @@ def daily_sync_vtiger_data():
         
         # Sync Projects
         sync_vtiger_projects()
+
+        # Sync Opportunities
+        sync_vtiger_opportunity()
         
         frappe.logger().info("Scheduled Vtiger sync completed successfully")
         

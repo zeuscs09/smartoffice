@@ -20,8 +20,9 @@
   "db_user",
   "db_password",
   "column_break_ydln",
+  "sync_customer",
   "sync_project",
-  "sync_customer"
+  "sync_opportunity"
  ],
  "fields": [
   {
@@ -121,12 +122,17 @@
    "fieldname": "sync_customer",
    "fieldtype": "Button",
    "label": "Sync Customer"
+  },
+  {
+   "fieldname": "sync_opportunity",
+   "fieldtype": "Button",
+   "label": "Sync Opportunity"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-01-03 18:13:57.104959",
+ "modified": "2025-01-22 15:31:45.947737",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "Smart Office Setting",

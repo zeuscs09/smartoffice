@@ -57,8 +57,16 @@
 
                         <div class="space-y-4">
                             <h2 class="text-xl font-semibold text-gray-700 mb-3">Project Information</h2>
-                            <InfoItem label="Project Code" :value="task.doc.project_code" />
-                            <InfoItem label="Project" :value="task.doc.project_name" />
+                            <InfoItem 
+                               
+                                :value="task.doc.project_code || task.doc.opportunity" 
+                                :label="task.doc.project_code ? 'Project Code' : 'Opportunity'" 
+                            />
+                            <InfoItem 
+                                
+                                :value="task.doc.project_name || task.doc.opportunity_name" 
+                                :label="task.doc.project_name ? 'Project' : 'Opportunity'" 
+                            />
                             <InfoItem label="Customer" :value="task.doc.customer_name" />
                             <InfoItem label="Contact Person" :value="task.doc.contact_name" />
                             <InfoItem label="Contact Mobile" :value="task.doc.contact_mobile" />

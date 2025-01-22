@@ -35,3 +35,15 @@ def sync_customer_from_vtiger():
         is_async=True
     )
     return "Sync process started in background"
+
+@frappe.whitelist()
+def sync_opportunity_from_vtiger():
+    """
+    Sync opportunities from Vtiger to ERPNext
+    """
+    frappe.enqueue(
+        'smartoffice.utils.sync_data.sync_vtiger_opportunity',
+        queue='long',
+        timeout=3000
+    )
+    return True

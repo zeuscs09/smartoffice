@@ -30,5 +30,17 @@ frappe.ui.form.on("Smart Office Setting", {
 				}, 5);
 			}
 		});
+	},
+
+	sync_opportunity: function(frm) {
+		frappe.call({
+			method: 'smartoffice.api.setting.sync_opportunity_from_vtiger',
+			callback: function(r) {
+				frappe.show_alert({
+					message: __('Sync Opportunity Started'),
+					indicator: 'green'
+				}, 5);
+			}
+		});
 	}
 });

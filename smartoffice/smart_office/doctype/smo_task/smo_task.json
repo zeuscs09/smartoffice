@@ -20,6 +20,9 @@
   "project",
   "project_code",
   "project_name",
+  "opportunity",
+  "customer_opportunity",
+  "opportunity_name",
   "customer",
   "customer_name",
   "contact_person",
@@ -139,13 +142,14 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.job_group!=\"JT-01\"",
    "fieldname": "project",
    "fieldtype": "Link",
    "in_preview": 1,
    "label": "Project",
    "link_filters": "[[\"Project\",\"custom_project_status\",\"not in\",[\"completed\",\"Cancelled\",null]]]",
+   "mandatory_depends_on": "eval:doc.job_group!=\"JT-01\"",
    "options": "Project",
-   "reqd": 1,
    "search_index": 1
   },
   {
@@ -233,12 +237,14 @@
    "search_index": 1
   },
   {
+   "depends_on": "eval:doc.job_group!=\"JT-01\"",
    "fetch_from": "project.project_name",
    "fetch_if_empty": 1,
    "fieldname": "project_name",
    "fieldtype": "Data",
    "hidden": 1,
-   "label": "Project Name"
+   "label": "Project Name",
+   "mandatory_depends_on": "eval:doc.job_group!=\"JT-01\""
   },
   {
    "fetch_from": "contact_person.full_name",
@@ -266,10 +272,12 @@
    "print_hide": 1
   },
   {
+   "depends_on": "eval:doc.job_group!=\"JT-01\"",
    "fetch_from": "project.custom_project_code",
    "fieldname": "project_code",
    "fieldtype": "Data",
    "label": "Project Code",
+   "mandatory_depends_on": "eval:doc.job_group!=\"JT-01\"",
    "read_only": 1
   },
   {
@@ -342,6 +350,31 @@
    "fieldtype": "Select",
    "label": "Minute",
    "options": "00\n10\n20\n30\n40\n50"
+  },
+  {
+   "depends_on": "eval:doc.job_group==\"JT-01\"",
+   "fieldname": "opportunity",
+   "fieldtype": "Link",
+   "label": "Opportunity",
+   "mandatory_depends_on": "eval:doc.job_group==\"JT-01\"",
+   "options": "Opportunity"
+  },
+  {
+   "depends_on": "eval:doc.job_group==\"JT-01\"",
+   "fetch_from": "opportunity.custom_opportunity_name",
+   "fetch_if_empty": 1,
+   "fieldname": "opportunity_name",
+   "fieldtype": "Data",
+   "label": "Opportunity Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "opportunity.party_name",
+   "fieldname": "customer_opportunity",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Customer Opportunity",
+   "options": "Customer"
   }
  ],
  "hide_toolbar": 1,
@@ -353,7 +386,7 @@
    "link_fieldname": "task"
   }
  ],
- "modified": "2025-01-03 23:39:50.654562",
+ "modified": "2025-01-22 16:04:21.962810",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Task",

@@ -44,7 +44,12 @@ class SMOTask(Document):
 
     def create_todos(self):
         start_date = datetime.strptime(self.start_date, '%Y-%m-%d')
-        end_date = datetime.strptime(self.finish_date or self.start_date, '%Y-%m-%d')
+        
+        # ถ้า expected_time_use น้อยกว่า 24 ชั่วโมง (86400 วินาที) ให้ใช้ start_date เป็น end_date
+        if self.expected_time_use <= 86400:  # 24 * 60 * 60 วินาที
+            end_date = start_date
+        else:
+            end_date = datetime.strptime(self.finish_date or self.start_date, '%Y-%m-%d')
         
         for team_member in self.team:
             current_date = start_date

@@ -40,7 +40,9 @@ frappe.ui.form.on("SMO Task", {
       recalculateEndTime(frm);
     }
   },
-  
+  customer_opportunity(frm) {
+    frm.set_value("customer", frm.doc.customer_opportunity);
+  },
   start_hour_input: function(frm) {
     recalculateEndTime(frm);
   },
@@ -100,6 +102,13 @@ frappe.ui.form.on("SMO Task", {
         },
       };
     });
+
+    console.log(frm.doc.job_group);
+    
+    frm.set_value("project", "");
+    frm.set_value("opportunity", "");
+    frm.set_value("customer", "");
+
   },
   
   // job_type(frm) {
