@@ -135,8 +135,8 @@ app_license = "mit"
 
 scheduler_events = {
     "cron": {
-        # รันทุกๆ 2 ชั่วโมง
-        "0 */2 * * *": [
+        # รันทุกวันตอนเที่ยงคืน
+        "0 0 * * *": [
             "smartoffice.utils.sync_data.daily_sync_vtiger_data"
         ]
     }
