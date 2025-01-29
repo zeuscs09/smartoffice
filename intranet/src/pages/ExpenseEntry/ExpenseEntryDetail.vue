@@ -147,7 +147,20 @@ const goEdit = () => {
 }
 
 // ฟังก์ชันสำหรับแปลงวันที่ให้อยู่ในรูปแบบที่ถูกต้อง
+const formatServiceDate = (startDate, finishDate) => {
+  const start = new Date(startDate)
+  const finish = new Date(finishDate)
+  
+  const formatTime = (date) => {
+    return date.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
+  }
 
+  if (start.toDateString() === finish.toDateString()) {
+    return `${start.toLocaleDateString('th-TH')} ${formatTime(start)} - ${formatTime(finish)}`
+  } else {
+    return `${start.toLocaleDateString('th-TH')} ${formatTime(start)} - ${finish.toLocaleDateString('th-TH')} ${formatTime(finish)}`
+  }
+}
 
 </script>
 
@@ -292,7 +305,9 @@ const goEdit = () => {
               </div>
               <div>
                 <p class="text-sm text-gray-500">Service Date</p>
-                <p class="font-medium">{{ expenseResource.doc.service_date }}</p>
+                <p class="font-medium">
+                  {{ formatServiceDate(expenseResource.doc.service_date, expenseResource.doc.finish_date) }}
+                </p>
               </div>
               <div>
                 <p class="text-sm text-gray-500">Working Hours</p>

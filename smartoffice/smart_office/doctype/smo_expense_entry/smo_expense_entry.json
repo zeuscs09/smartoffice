@@ -151,9 +151,10 @@
    "label": "Is Request"
   },
   {
+   "allow_on_submit": 1,
    "fetch_from": "service_report.job_start_on",
    "fieldname": "service_date",
-   "fieldtype": "Date",
+   "fieldtype": "Datetime",
    "label": "Service Date",
    "read_only": 1
   },
@@ -195,10 +196,11 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval:doc.over_night==1",
-   "fetch_from": "service_report.finish_date_input",
+   "fetch_from": "service_report.job_finish",
    "fieldname": "finish_date",
-   "fieldtype": "Date",
+   "fieldtype": "Datetime",
    "label": "Finish Date",
    "read_only": 1
   },
@@ -305,7 +307,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-12-18 18:42:23.592058",
+ "modified": "2025-01-29 15:11:09.450220",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Entry",
