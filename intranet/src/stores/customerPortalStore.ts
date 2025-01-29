@@ -29,7 +29,7 @@ const customerAxios = axios.create()
 customerAxios.interceptors.request.use((config) => {
   const token = localStorage.getItem('customerToken')
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+    config.headers['x-authen-code'] = `${token}`
   }
   return config
 })

@@ -10,22 +10,22 @@ def hello():
 @frappe.whitelist(allow_guest=True)
 def check_auth_and_get_reports():
     try:
-        frappe.log_error(message="Starting check_auth_and_get_reports", title="Debug 1")  # Debug log 1
+        # frappe.log_error(message="Starting check_auth_and_get_reports", title="Debug 1")  # Debug log 1
         
         # รรวจสอบว่ามี Authorization header หรือไม่
         if not frappe.request:
-            frappe.log_error(message="No request object", title="Debug 2")  # Debug log 2
+            # frappe.log_error(message="No request object", title="Debug 2")  # Debug log 2
             return {
                 "status": "error",
                 "message": "Invalid request",
                 "is_authenticated": False
             }
             
-        frappe.log_error(message=f"Request headers: {frappe.request.headers}", title="Debug 3")  # Debug log 3
+        # frappe.log_error(message=f"Request headers: {frappe.request.headers}", title="Debug 3")  # Debug log 3
         
-        auth_header = frappe.request.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith('Bearer '):
-            frappe.log_error(message="Invalid auth header", title="Debug 4")  # Debug log 4
+        auth_header = frappe.request.headers.get('x-authen-code')
+        if not auth_header or auth_header == "":
+            # frappe.log_error(message="Invalid auth header", title="Debug 4")  # Debug log 4
             return {
                 "status": "error",
                 "message": "Invalid Authorization header",
@@ -34,38 +34,36 @@ def check_auth_and_get_reports():
         
         # ตรวจสอบ token
         token = auth_header.replace('Bearer ', '')
-        frappe.log_error(message=f"Token: {token[:10]}...", title="Debug 5")  # Debug log 5
+        # frappe.log_error(message=f"Token: {token[:10]}...", title="Debug 5")  # Debug log 5
         
         email = verify_customer_token(token)
         if not email:
-            frappe.log_error(message="Token verification failed", title="Debug 6")  # Debug log 6
+            # frappe.log_error(message="Token verification failed", title="Debug 6")  # Debug log 6
             return {
                 "status": "error",
                 "message": "Invalid or expired token",
                 "is_authenticated": False
             }
             
-        frappe.log_error(message=f"Authenticated email: {email}", title="Debug 7")  # Debug log 7
+        # frappe.log_error(message=f"Authenticated email: {email}", title="Debug 7")  # Debug log 7
         
         # ดึง service reports ที่ยังไม่ได้ approve
-        reports = frappe.get_all(
-            "SMO Service Report",
-            filters={
-                "contact_email": email,
-                "workflow_state": "Customer Review"
-            },
-            fields=[
-                "name",
-                "project_code",
-                "project_name",
-                "start_date_input",
-                "duration",
-                "owner",
-                "creation",
-                "modified"
-            ],
-            order_by="creation desc"
-        )
+        reports = frappe.db.sql("""
+            SELECT 
+                name, 
+                project_code, 
+                project_name, 
+                start_date_input, 
+                duration, 
+                owner, 
+                creation, 
+                modified
+            FROM `tabSMO Service Report`
+            WHERE 
+                contact_email = %(email)s 
+                AND workflow_state = 'Customer Review'
+            ORDER BY creation DESC
+        """, {"email": email}, as_dict=True)
         
         # แปลง datetime เป็น string และ duration เป็นชั่วโมง
         for report in reports:
@@ -103,7 +101,8 @@ def check_auth_and_get_reports():
 def verify_customer_token(token):
     try:
         # ใช้ SECRET_KEY เดียวกับที่ใช้สร้าง token
-        SECRET_KEY = frappe.get_doc("Smart Office Setting").get_password("jwt_secret_key")
+        #SECRET_KEY = frappe.get_doc("Smart Office Setting").get_password("jwt_secret_key")
+        SECRET_KEY="tps_smartoffice"
         payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
         email = payload.get('email')
         exp = payload.get('exp')
