@@ -126,8 +126,8 @@ def get_user_service_reports(page, page_size, search=None, status=None, start_da
     page_size = int(page_size)
     offset = (page - 1) * page_size
     
-    conditions = ["wt.users LIKE %s"]
-    values = [f"%{user}%"]
+    conditions = ["(wt.users LIKE %s OR sr.report_to = %s)"]
+    values = [f"%{user}%", user]
     
     if search:
         conditions.append("(sr.name LIKE %s OR sr.task_name LIKE %s OR sr.customer_name LIKE %s OR wt.users LIKE %s)")
