@@ -233,9 +233,16 @@ const formatServiceDate = (startDate, finishDate) => {
                   <p class="text-xs sm:text-sm font-medium">{{ expenseResource.doc.workflow_state }}</p>
                 </div>
               </div>
-              <p class="mt-1 text-xs sm:text-sm text-gray-600">
-                Service Report: {{ expenseResource.doc.service_report }}
-              </p>
+              <div class="mt-1 text-xs sm:text-sm text-gray-600">
+                Service Report: 
+                <a 
+                  :href="`/app/smo-service-report/${expenseResource.doc.service_report}`" 
+                  target="_blank"
+                  class="text-blue-600 hover:text-blue-800"
+                >
+                  {{ expenseResource.doc.service_report }}
+                </a>
+              </div>
               <!-- Document Info -->
               <div class="mt-2 space-y-2">
                 <div class="flex items-center gap-2">
@@ -301,7 +308,16 @@ const formatServiceDate = (startDate, finishDate) => {
             <div class="grid grid-cols-2 gap-y-4">
               <div>
                 <p class="text-sm text-gray-500">Service Report No.</p>
-                <p class="font-medium">{{ expenseResource.doc.service_report }}</p>
+                <p class="font-medium">
+                  <a 
+                    :href="`/app/smo-service-report/${expenseResource.doc.service_report}`" 
+                    target="_blank"
+                    class="text-blue-600 hover:text-blue-800"
+                  >
+                    {{ expenseResource.doc.service_report }}
+                  </a>
+                 
+                </p>
               </div>
               <div>
                 <p class="text-sm text-gray-500">Service Date</p>

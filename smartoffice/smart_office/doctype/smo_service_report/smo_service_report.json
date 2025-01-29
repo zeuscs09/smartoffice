@@ -203,6 +203,7 @@
    "label": "Solution / Service Description"
   },
   {
+   "fetch_from": "task.detail",
    "fieldname": "solutions",
    "fieldtype": "Long Text"
   },
@@ -442,7 +443,7 @@
    "link_fieldname": "service_report"
   }
  ],
- "modified": "2025-01-29 14:19:49.984502",
+ "modified": "2025-01-29 15:27:18.724496",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Service Report",
