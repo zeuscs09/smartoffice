@@ -119,7 +119,8 @@ def verify_customer_token(token):
 def approve_service_report(report_name):
     try:
         # Check token from header
-        token = frappe.get_request_header('Authorization')
+        auth_header = frappe.request.headers.get('x-authen-code')
+        token = auth_header
         if not token:
             return {
                 "status": "error",
@@ -173,7 +174,8 @@ def approve_service_report(report_name):
 def reject_service_report(report_name, reason=None):
     try:
         # Check token from header
-        token = frappe.get_request_header('Authorization')
+        auth_header = frappe.request.headers.get('x-authen-code')
+        token = auth_header
         if not token:
             return {
                 "status": "error",
