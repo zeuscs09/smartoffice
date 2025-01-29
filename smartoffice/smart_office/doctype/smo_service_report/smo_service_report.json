@@ -59,7 +59,8 @@
   "approval_salt",
   "approval_timestamp",
   "from_page",
-  "from_todo"
+  "from_todo",
+  "report_to"
  ],
  "fields": [
   {
@@ -423,6 +424,12 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Site Name"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "report_to",
+   "fieldtype": "Data",
+   "label": "Report To"
   }
  ],
  "hide_toolbar": 1,
@@ -435,7 +442,7 @@
    "link_fieldname": "service_report"
   }
  ],
- "modified": "2024-12-18 14:50:37.498894",
+ "modified": "2025-01-29 14:19:49.984502",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Service Report",

@@ -54,6 +54,7 @@ class SMOServiceReport(Document):
 			self._calculate_duration()
 			self._check_overnight()
 			self._set_approval_data()
+			self._set_report_to(frappe.session.user)
 
 	def _check_holiday(self):
 		check_date = getdate(self.job_start_on)
@@ -200,4 +201,18 @@ class SMOServiceReport(Document):
 			self.approval_hash = hash_value
 			self.approval_salt = salt
 			self.approval_timestamp = timestamp
+   
+	def _set_report_to(self, user_id):
+		report_to = frappe.db.get_value("Employee", {"user_id": user_id}, "reports_to")
+		report_to_userid = frappe.db.get_value("Employee", {"name": report_to}, "user_id")
+		if report_to:
+			self.report_to = report_to_userid
+		else:
+			frappe.msgprint(_("Please set report to in Employee."))
+	def update_report_to(self):
+		self._set_report_to(self.owner)
+		
+		self.save(ignore_permissions=True)  # บันทึกโดยไม่ตรวจสอบสิทธิ์
+
+		
 
