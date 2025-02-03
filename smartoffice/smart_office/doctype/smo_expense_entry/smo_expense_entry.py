@@ -241,8 +241,9 @@ class SMOExpenseEntry(Document):
 				frappe.throw(_("ไม่สามารถส่งรายการค่าใช้จ่ายได้ เนื่องจากลูกค้ายังไม่อนุมัติ Service Report"))
 
 	def before_cancel(self):
-		if self.workflow_state != "Rejected":
-			frappe.throw("สามารถยกเลิกเอกสารได้เฉพาะกรณีที่ถูกปฏิเสธ (Rejected) เท่านั้น")
+		# if self.workflow_state != "Rejected":
+		# 	frappe.throw("สามารถยกเลิกเอกสารได้เฉพาะกรณีที่ถูกปฏิเสธ (Rejected) เท่านั้น")
+		pass
 	
 	def set_approver_status(self):
 		current_approver = next((a for a in self.approvers 
