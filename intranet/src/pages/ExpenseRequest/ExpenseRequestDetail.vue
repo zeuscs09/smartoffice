@@ -216,6 +216,7 @@ const groupedExpenseItems = computed(() => {
     if (!expenseMap.has(key)) {
       expenseMap.set(key, {
         key,
+        project: objectData.project,
         service_date: objectData.service_date,
         customer_name: objectData.customer_name,
         project_name: objectData.project_name,
@@ -665,6 +666,9 @@ const totalAmount = computed(() => {
                     Service Date
                   </th>
                   <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">
+                    Project Code
+                  </th>
+                  <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">
                     Customer
                   </th>
                   <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">
@@ -688,6 +692,7 @@ const totalAmount = computed(() => {
               <tbody class="bg-white divide-y divide-gray-200">
                 <tr v-for="item in groupedExpenseItems" :key="item.key">
                   <td class="px-3 py-4 text-sm text-gray-900 whitespace-nowrap">{{ formatDate(item.service_date) }}</td>
+                  <td class="px-3 py-4 text-sm text-gray-900 whitespace-nowrap">{{ item.project }}</td>
                   <td class="px-3 py-4 text-sm text-gray-900 whitespace-nowrap">{{ item.customer_name }}</td>
                   <td class="px-3 py-4 text-sm text-gray-900 whitespace-nowrap">{{ item.project_name }}</td>
                   <td class="px-3 py-4 text-sm text-gray-900 whitespace-nowrap">{{ formatDate(item.receipt_date) }}</td>
@@ -708,7 +713,7 @@ const totalAmount = computed(() => {
                   <td>&nbsp;</td>
                   <td>&nbsp;</td>
                   <td>&nbsp;</td>
-                  
+                  <td>&nbsp;</td>
                   <td class="px-3 py-4 text-sm font-medium text-gray-900 whitespace-nowrap sticky left-0 bg-gray-50">
                     Grand Total
                   </td>

@@ -17,7 +17,22 @@ class SMOTask(Document):
     def validate(self):
         self.assign_to = self.get_assigned_users()
         self.title = f"{self.name} - {self.task_name}"
+        
         self.set_times()
+        
+        # ถ้าไม่มี project แต่มี opcode ให้ค้นหา project จาก opcode
+        if not self.project and self.opportunity:
+            project = frappe.get_value("Project", 
+                filters={"custom_opportunity_id": self.opportunity},
+                as_dict=True
+            )
+            if project:
+                self.project = project.name
+                project_doc = frappe.get_doc("Project", project.name)
+                self.project_code = project_doc.name
+                self.project_name = project_doc.project_name
+            else:
+                frappe.throw(_(f"No project found for opcode: {self.opportunity}"))
         
     def set_times(self):
         # คำนวณ start_time และ to_time จาก input

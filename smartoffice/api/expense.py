@@ -37,7 +37,8 @@ def get_expense_entries(month, year,request_by,period):
             ei.name AS expense_item,
             ei.attachment,
          
-            ee.service_date
+            ee.service_date,
+            ee.project
         FROM
             `tabSMO Expense Entry` ee
         INNER JOIN
@@ -53,8 +54,8 @@ def get_expense_entries(month, year,request_by,period):
         WHERE
             ee.is_request = 0 and
             ee.workflow_state = 'approved'
-            AND MONTH(ee.creation) = %(month)s
-            AND YEAR(ee.creation) = %(year)s
+            AND MONTH(ee.service_date) = %(month)s
+            AND YEAR(ee.service_date) = %(year)s
             AND ee.owner = %(request_by)s
             AND (
                 %(period)s != 'Mid month'
