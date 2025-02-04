@@ -9,6 +9,7 @@ import { useToast } from '@/composables/useToast'
 import ExpenseChart from '@/components/ExpenseChart.vue'
 import { useExpenseTypes } from '@/composables/useExpenseTypes'
 import ApproversGrid from '@/components/ApproversGrid.vue'
+import * as XLSX from 'xlsx'
 
 const router = useRouter()
 const route = useRoute()
@@ -570,6 +571,203 @@ const attachmentsList = computed(() => {
 const totalAmount = computed(() => {
   return attachmentsList.value.reduce((sum, item) => sum + (item.total_cost || 0), 0)
 })
+
+// เพิ่มฟังก์ชันสำหรับ Export Excel
+const exportToExcel = () => {
+  // สร้าง styles ที่ใช้บ่อย
+  const styles = {
+    header: {
+      font: { bold: true, color: { rgb: "FFFFFF" } },
+      fill: { patternType: 'solid', fgColor: { rgb: "1F4E78" } },  // น้ำเงินเข้ม
+      alignment: { horizontal: 'left', vertical: 'center' },
+      border: {
+        top: { style: 'thin', color: { rgb: "000000" } },
+        bottom: { style: 'thin', color: { rgb: "000000" } },
+        left: { style: 'thin', color: { rgb: "000000" } },
+        right: { style: 'thin', color: { rgb: "000000" } }
+      }
+    },
+    headerValue: {
+      font: { bold: true, size: 11 },
+      fill: { patternType: 'solid', fgColor: { rgb: "F2F2F2" } },  // สีเทาอ่อน
+      alignment: { horizontal: 'left', vertical: 'center' },
+      border: {
+        top: { style: 'thin', color: { rgb: "000000" } },
+        bottom: { style: 'thin', color: { rgb: "000000" } },
+        left: { style: 'thin', color: { rgb: "000000" } },
+        right: { style: 'thin', color: { rgb: "000000" } }
+      }
+    },
+    tableHeader: {
+      font: { bold: true, color: { rgb: "FFFFFF" } },
+      fill: { patternType: 'solid', fgColor: { rgb: "366092" } },  // น้ำเงินกลาง
+      alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+      border: {
+        top: { style: 'thin', color: { rgb: "000000" } },
+        bottom: { style: 'thin', color: { rgb: "000000" } },
+        left: { style: 'thin', color: { rgb: "000000" } },
+        right: { style: 'thin', color: { rgb: "000000" } }
+      }
+    },
+    cell: {
+      alignment: { vertical: 'center' },
+      fill: { patternType: 'solid', fgColor: { rgb: "FFFFFF" } },
+      border: {
+        top: { style: 'thin', color: { rgb: "000000" } },
+        bottom: { style: 'thin', color: { rgb: "000000" } },
+        left: { style: 'thin', color: { rgb: "000000" } },
+        right: { style: 'thin', color: { rgb: "000000" } }
+      }
+    },
+    numericCell: {
+      alignment: { horizontal: 'right', vertical: 'center' },
+      fill: { patternType: 'solid', fgColor: { rgb: "FFFFFF" } },
+      numFmt: '#,##0.00',
+      border: {
+        top: { style: 'thin', color: { rgb: "000000" } },
+        bottom: { style: 'thin', color: { rgb: "000000" } },
+        left: { style: 'thin', color: { rgb: "000000" } },
+        right: { style: 'thin', color: { rgb: "000000" } }
+      }
+    },
+    footer: {
+      font: { bold: true },
+      fill: { patternType: 'solid', fgColor: { rgb: "DCE6F1" } },  // สีฟ้าอ่อน
+      alignment: { horizontal: 'left', vertical: 'center' },
+      border: {
+        top: { style: 'thin', color: { rgb: "000000" } },
+        bottom: { style: 'double', color: { rgb: "000000" } },
+        left: { style: 'thin', color: { rgb: "000000" } },
+        right: { style: 'thin', color: { rgb: "000000" } }
+      }
+    },
+    footerNumeric: {
+      font: { bold: true },
+      fill: { patternType: 'solid', fgColor: { rgb: "DCE6F1" } },  // สีฟ้าอ่อน
+      alignment: { horizontal: 'right', vertical: 'center' },
+      numFmt: '#,##0.00',
+      border: {
+        top: { style: 'thin', color: { rgb: "000000" } },
+        bottom: { style: 'double', color: { rgb: "000000" } },
+        left: { style: 'thin', color: { rgb: "000000" } },
+        right: { style: 'thin', color: { rgb: "000000" } }
+      }
+    }
+  }
+
+  // สร้าง title และ header information
+  const headerInfo = [
+    ['EXPENSE REQUEST DETAILS', expenseResource.doc?.name],
+    [''],  // blank row
+    ['Year', expenseResource.doc?.year],
+    ['Month', expenseResource.doc?.month],
+    ['Period', expenseResource.doc?.period],
+    ['Request by', expenseResource.doc?.request_by],
+    ['Created on', expenseResource.doc?.creation?.split('.')[0]?.replace('T', ' ')],
+    ['Status', expenseResource.doc?.workflow_state],
+    ['Total Amount', formatCurrency(expenseResource.doc?.total || 0)],
+    ['']  // blank row
+  ]
+
+  // สร้าง table headers
+  const tableHeaders = [
+    ['Service Date', 'Project Code', 'Customer', 'Project', 'Receipt Date',
+     ...expenseTypes.value.map(type => type.description),
+     'Total'
+    ]
+  ]
+
+  // สร้าง data rows
+  const dataRows = groupedExpenseItems.value.map(item => [
+    formatDate(item.service_date),
+    item.project || '',
+    item.customer_name,
+    item.project_name,
+    formatDate(item.receipt_date),
+    ...expenseTypes.value.map(type => item[type.name] || 0),
+    item.total
+  ])
+
+  // สร้าง footer row
+  const footerRow = [
+    ['Grand Total', '', '', '', '',
+     ...expenseTypes.value.map(type => totals.value[type.name] || 0),
+     totals.value.total || 0
+    ]
+  ]
+
+  // รวมทุก rows เข้าด้วยกัน
+  const allRows = [...headerInfo, ...tableHeaders, ...dataRows, ...footerRow]
+
+  // สร้าง workbook และ worksheet
+  const wb = XLSX.utils.book_new()
+  const ws = XLSX.utils.aoa_to_sheet(allRows)
+
+  // กำหนดความกว้างคอลัมน์
+  ws['!cols'] = [
+    { wch: 12 },  // Service Date
+    { wch: 15 },  // Project Code
+    { wch: 30 },  // Customer
+    { wch: 30 },  // Project
+    { wch: 12 },  // Receipt Date
+    ...expenseTypes.value.map(() => ({ wch: 15 })),  // Expense columns
+    { wch: 15 }   // Total
+  ]
+
+  // กำหนด row height
+  ws['!rows'] = Array(allRows.length).fill({ hpt: 25 })  // 25 points height
+
+  // Apply styles for title and header info
+  for (let R = 0; R < headerInfo.length; R++) {
+    for (let C = 0; C < 2; C++) {
+      const cellRef = XLSX.utils.encode_cell({ r: R, c: C })
+      if (!ws[cellRef]) continue
+      
+      if (R === 0) {  // Title row
+        ws[cellRef].s = {
+          ...styles.header,
+          font: { ...styles.header.font, size: 14 }
+        }
+      } else if (R > 1) {  // Header info (skip blank row)
+        ws[cellRef].s = C === 0 ? styles.header : styles.headerValue
+      }
+    }
+  }
+
+  // Apply styles for table headers
+  const tableHeaderRowIndex = headerInfo.length
+  for (let C = 0; C < tableHeaders[0].length; C++) {
+    const cellRef = XLSX.utils.encode_cell({ r: tableHeaderRowIndex, c: C })
+    if (!ws[cellRef]) continue
+    ws[cellRef].s = styles.tableHeader
+  }
+
+  // Apply styles for data rows
+  for (let R = 0; R < dataRows.length; R++) {
+    const rowIndex = tableHeaderRowIndex + 1 + R
+    for (let C = 0; C < dataRows[R].length; C++) {
+      const cellRef = XLSX.utils.encode_cell({ r: rowIndex, c: C })
+      if (!ws[cellRef]) continue
+      ws[cellRef].s = C >= 5 ? styles.numericCell : styles.cell
+    }
+  }
+
+  // Apply styles for footer row
+  const footerRowIndex = tableHeaderRowIndex + 1 + dataRows.length
+  for (let C = 0; C < footerRow[0].length; C++) {
+    const cellRef = XLSX.utils.encode_cell({ r: footerRowIndex, c: C })
+    if (!ws[cellRef]) continue
+    ws[cellRef].s = C >= 5 ? styles.footerNumeric : styles.footer
+  }
+
+  // Merge cells for title
+  ws['!merges'] = [
+    { s: { r: 0, c: 0 }, e: { r: 0, c: tableHeaders[0].length - 1 } }
+  ]
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Expense Details')
+  XLSX.writeFile(wb, `expense-${expenseResource.doc?.name}.xlsx`)
+}
 </script>
 
 <template>
@@ -694,15 +892,26 @@ const totalAmount = computed(() => {
                 {{ formatCurrency(expenseResource.doc.total) }}
               </p>
             </div>
-            <button 
-              @click="printExpenseDetails"
-              class="no-print inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-            >
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-              </svg>
-              Print Details
-            </button>
+            <div class="flex gap-2">
+              <button 
+                @click="printExpenseDetails"
+                class="no-print inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                Print Details
+              </button>
+              <button 
+                @click="exportToExcel"
+                class="no-print inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Export Excel
+              </button>
+            </div>
           </div>
         </div>
 
