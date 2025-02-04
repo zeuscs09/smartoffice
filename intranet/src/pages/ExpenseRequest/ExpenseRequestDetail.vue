@@ -294,6 +294,169 @@ onMounted(() => {
   fetchExpenseTypes()
 })
 
+// เพิ่มฟังก์ชันสำหรับการพิมพ์ข้อมูลทั้งหมด
+const printExpenseDetails = () => {
+  const printWindow = window.open('', '_blank')
+  if (!printWindow) return
+
+  const expenseItemRows = groupedExpenseItems.value.map(item => `
+    <tr>
+      <td>${formatDate(item.service_date)}</td>
+      <td>${item.project || ''}</td>
+      <td>${item.customer_name}</td>
+      <td>${item.project_name}</td>
+      <td>${formatDate(item.receipt_date)}</td>
+      ${expenseTypes.value.map(type => `
+        <td class="text-right">${formatCurrency(item[type.name] || 0)}</td>
+      `).join('')}
+      <td class="text-right">${formatCurrency(item.total)}</td>
+    </tr>
+  `).join('')
+
+  const expenseTypeHeaders = expenseTypes.value.map(type => 
+    `<th class="text-right">${type.description}</th>`
+  ).join('')
+
+  const expenseTypeTotals = expenseTypes.value.map(type => 
+    `<td class="text-right">${formatCurrency(totals.value[type.name] || 0)}</td>`
+  ).join('')
+
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Expense Details - ${expenseResource.doc?.name}</title>
+        <style>
+          @page {
+            size: landscape;
+            margin: 10mm;
+          }
+          body { 
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 15px;
+            font-size: 12px;
+          }
+          .header {
+            margin-bottom: 20px;
+          }
+          .header-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+          }
+          .header-item {
+            display: flex;
+            gap: 10px;
+          }
+          .header-label {
+            color: #666;
+            min-width: 80px;
+          }
+          .header-value {
+            font-weight: 500;
+          }
+          .doc-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+          }
+          .total-amount {
+            text-align: right;
+            font-weight: bold;
+            color: #1d4ed8;
+            margin: 10px 0;
+          }
+          table { 
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+            font-size: 11px;
+          }
+          th, td { 
+            border: 1px solid #000;
+            padding: 6px;
+            text-align: left;
+          }
+          th {
+            background-color: #f8f9fa !important;
+            -webkit-print-color-adjust: exact;
+          }
+          .text-right {
+            text-align: right;
+          }
+          tfoot td {
+            font-weight: bold;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="doc-title">
+            Expense Request - ${expenseResource.doc?.name}
+          </div>
+          <div class="header-grid">
+            <div class="header-item">
+              <span class="header-label">Year:</span>
+              <span class="header-value">${expenseResource.doc?.year}</span>
+            </div>
+            <div class="header-item">
+              <span class="header-label">Month:</span>
+              <span class="header-value">${expenseResource.doc?.month}</span>
+            </div>
+            <div class="header-item">
+              <span class="header-label">Period:</span>
+              <span class="header-value">${expenseResource.doc?.period}</span>
+            </div>
+            <div class="header-item">
+              <span class="header-label">Request by:</span>
+              <span class="header-value">${expenseResource.doc?.request_by}</span>
+            </div>
+            <div class="header-item">
+              <span class="header-label">Created on:</span>
+              <span class="header-value">${expenseResource.doc?.creation?.split('.')[0]?.replace('T', ' ')}</span>
+            </div>
+            <div class="header-item">
+              <span class="header-label">Status:</span>
+              <span class="header-value">${expenseResource.doc?.workflow_state}</span>
+            </div>
+          </div>
+          <div class="total-amount">
+            Total Amount: ${formatCurrency(expenseResource.doc?.total || 0)}
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Service Date</th>
+              <th>Project Code</th>
+              <th>Customer</th>
+              <th>Project</th>
+              <th>Receipt Date</th>
+              ${expenseTypeHeaders}
+              <th class="text-right">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${expenseItemRows}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="5">Grand Total</td>
+              ${expenseTypeTotals}
+              <td class="text-right">${formatCurrency(totals.value.total || 0)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </body>
+    </html>
+  `)
+  
+  printWindow.document.close()
+  printWindow.print()
+}
+
 // เพิ่มฟังก์ชันสำหรับการพิมพ์
 const printAttachments = () => {
   const printWindow = window.open('', '_blank')
@@ -531,6 +694,15 @@ const totalAmount = computed(() => {
                 {{ formatCurrency(expenseResource.doc.total) }}
               </p>
             </div>
+            <button 
+              @click="printExpenseDetails"
+              class="no-print inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            >
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+              </svg>
+              Print Details
+            </button>
           </div>
         </div>
 
