@@ -38,7 +38,7 @@ def get_expense_entries(month, year,request_by,period):
             ei.attachment,
          
             ee.service_date,
-            ee.project
+            ep.custom_project_code project
         FROM
             `tabSMO Expense Entry` ee
         INNER JOIN
