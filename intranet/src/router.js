@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { session } from './data/session'
 import { userResource } from '@/data/user'
+import { usePermissions } from './composables/usePermissions'
 
 const routes = [
   {
@@ -99,19 +100,26 @@ const routes = [
         name: 'ManhourReport',
         path: 'manhour',
         component: () => import('@/pages/Reports/ManhourReport.vue'),
+        meta: {
+          requiresAuth: true,
+          permission: 'manhourReport'
+        }
       },
       {
         name: 'ExpenseReport',
         path: 'expense',
         component: () => import('@/pages/Reports/ExpenseReport.vue'),
+        meta: {
+          requiresAuth: true,
+          permission: 'expenseReport'
+        }
       }
-      // เตรียมไว้สำหรับรายงานอื่นๆ ในอนาคต
-      // {
-      //   name: 'NewReport',
-      //   path: 'new-report',
-      //   component: () => import('@/pages/Reports/NewReport.vue'),
-      // }
     ]
+  },
+  {
+    path: '/access-denied',
+    name: 'AccessDenied',
+    component: () => import('@/pages/AccessDenied.vue')
   }
 ]
 
@@ -133,6 +141,17 @@ const isCustomerAuthenticated = () => {
 }
 
 router.beforeEach(async (to, from, next) => {
+  const { menuPermissions } = usePermissions()
+
+  if (to.meta.permission) {
+    const hasPermission = menuPermissions.value[to.meta.permission]
+    
+    if (!hasPermission) {
+      next({ name: 'AccessDenied' })
+      return
+    }
+  }
+
   if (to.matched.some(record => record.meta.requiresCustomerAuth)) {
     if (!isCustomerAuthenticated()) {
       next({ name: 'CustomerLogin' })
