@@ -3,7 +3,6 @@
 
 frappe.ui.form.on("SMO Expense Entry", {
   onload(frm) {
-  
     frm.set_query(
       "input_expense_types",
       "expense_item",
@@ -19,21 +18,24 @@ frappe.ui.form.on("SMO Expense Entry", {
   },
   refresh(frm) {
     if (frm.doc.from_page || frappe.utils.get_query_params().from_page) {
-      $(".navbar").css("visibility", "hidden");
-      $(".menu-btn-group").hide();
-      $(".page-icon-group").hide();
+      // ตรวจสอบว่าผู้ใช้มีสิทธิ์ System Manager หรือไม่
+      if (!frappe.user.has_role("System Manager")) {
+        $(".navbar").css("visibility", "hidden");
+        $(".menu-btn-group").hide();
+        $(".page-icon-group").hide();
+        if (frm.doc.workflow_state !== "Rejected") {
+          frm.page.btn_secondary.hide();
+        } else {
+          frm.page.btn_secondary.show();
+        }
+      }
+
       if (window.opener && typeof window.opener.refresh_table === "function") {
         window.opener.refresh_table();
       }
       frm.add_custom_button(__("Close"), function () {
         window.close();
       });
-
-      if (frm.doc.workflow_state !== "Rejected") {
-        frm.page.btn_secondary.hide();
-      } else {
-        frm.page.btn_secondary.show();
-      }
     }
     // if(frappe.utils.get_query_params().from){
     //   $('.navbar').hide();

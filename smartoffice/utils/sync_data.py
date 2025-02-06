@@ -260,10 +260,12 @@ def sync_vtiger_opportunity():
                     potential_no as name,
                     amount as opportunity_amount,
                     sales_stage,
-                    potentialname custom_opportunity_name
+                    potentialname custom_opportunity_name,
+                    pj.cf_782 project_code
                 from 
                     vtiger_potential po inner join
                     vtiger_account va on po.related_to = va.accountid 
+                        left join vtiger_potentialscf pj on po.potentialid = pj.potentialid                      
             """
             cursor.execute(sql)
             opportunities = cursor.fetchall()

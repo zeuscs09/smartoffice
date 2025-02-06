@@ -43,6 +43,8 @@ class SMOServiceReport(Document):
 		
 
 	def on_cancel(self):
+		self.workflow_state = "Rejected"
+		self.db_update()
 		self._update_task_status("Open")
 
 	def after_delete(self):

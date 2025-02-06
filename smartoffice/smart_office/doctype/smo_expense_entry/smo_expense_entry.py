@@ -55,7 +55,7 @@ class SMOExpenseEntry(Document):
 				else:
 					item.w_edit_return = ""
      
-				item_key = (item.expense_type)  # ปรับตามโครงสร���างข้อมูลจริงของคุณ
+				item_key = (item.expense_type)  # ปรับตามโครงสรางข้อมูลจริงของคุณ
 				if item_key in seen_expense:
 						doc_expense_type=frappe.get_doc("SMO Expense Type", item.expense_type)
 						
@@ -152,7 +152,7 @@ class SMOExpenseEntry(Document):
 		if not admin_designation:
 			frappe.throw("Not found admin designation")
 
-		# ดึง employees ท���้งหมดที่มี designation นี้ และมี user_id
+		# ดึง employees ทั้งหมดที่มี designation นี้ และมี user_id
 		admin_employees = frappe.get_all(
 			"Employee",
 			filters={
@@ -241,9 +241,9 @@ class SMOExpenseEntry(Document):
 				frappe.throw(_("ไม่สามารถส่งรายการค่าใช้จ่ายได้ เนื่องจากลูกค้ายังไม่อนุมัติ Service Report"))
 
 	def before_cancel(self):
-		# if self.workflow_state != "Rejected":
-		# 	frappe.throw("สามารถยกเลิกเอกสารได้เฉพาะกรณีที่ถูกปฏิเสธ (Rejected) เท่านั้น")
-		pass
+		# อัพเดท workflow_state เป็น Rejected
+		self.workflow_state = "Rejected"
+		self.db_update()
 	
 	def set_approver_status(self):
 		current_approver = next((a for a in self.approvers 
@@ -255,7 +255,7 @@ class SMOExpenseEntry(Document):
 				current_approver.action_date = frappe.utils.now()
 				current_approver.status = "Rejected" if self.workflow_state == "Rejected" else "Approved"
 				
-				# คำนวณระ��ะเวลาที่ใช้
+				# คำนวณระยะเวลาที่ใช้
 				if current_approver.receive_date:
 					duration = frappe.utils.time_diff_in_seconds(
 						current_approver.action_date,
