@@ -287,6 +287,6 @@ class SMOExpenseRequest(Document):
         last_day = calendar.monthrange(date_obj.year, date_obj.month)[1]
         # กำหนดรูปแบบการแสดงผลตาม period
         if self.period == "Mid month":
-            self.period_display = f"01/{date_obj.strftime('%m')}/{str(date_obj.year)[2:]}-15/{date_obj.strftime('%m')}/{str(date_obj.year)[2:]} รอบที่ 1"
+            self.period_display = f"01/{date_obj.strftime('%m')}/{str(date_obj.year)[2:]}-15/{date_obj.strftime('%m')}/{str(date_obj.year)[2:]}"
         else:  # End of month
-            self.period_display = f"01/{date_obj.strftime('%m')}/{str(date_obj.year)[2:]}-{last_day}/{date_obj.strftime('%m')}/{str(date_obj.year)[2:]} รอบที่ 2"
+            self.period_display = f"01/{date_obj.strftime('%m')}/{str(date_obj.year)[2:]}-{last_day}/{date_obj.strftime('%m')}/{str(date_obj.year)[2:]}"
