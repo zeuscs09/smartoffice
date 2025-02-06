@@ -23,9 +23,12 @@ export function formatDate(dateString: string, format: 'short' | 'long' | 'short
 }
 
 export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'THB'
+  if (amount === 0) return '-';
+  
+  return new Intl.NumberFormat('th-TH', {
+    style: 'decimal',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
   }).format(amount);
 }
 

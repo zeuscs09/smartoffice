@@ -10,6 +10,7 @@ import ExpenseChart from '@/components/ExpenseChart.vue'
 import { useExpenseTypes } from '@/composables/useExpenseTypes'
 import ApproversGrid from '@/components/ApproversGrid.vue'
 import * as XLSX from 'xlsx'
+import ExpenseEntryChips from '@/components/ExpenseEntryChips.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -223,6 +224,7 @@ const groupedExpenseItems = computed(() => {
         project_name: objectData.project_name,
         receipt_date: objectData.receipt_date,
         total: 0,
+        expenseEntries: new Set(),
         ...Object.fromEntries(expenseTypes.value.map(type => [type.name, 0]))
       })
     }
@@ -230,9 +232,13 @@ const groupedExpenseItems = computed(() => {
     const record = expenseMap.get(key)
     record[objectData.expense_type] = (record[objectData.expense_type] || 0) + objectData.total_cost
     record.total += objectData.total_cost
+    record.expenseEntries.add(item.expense)
   })
   
-  return Array.from(expenseMap.values()).sort((a, b) => {
+  return Array.from(expenseMap.values()).map(item => ({
+    ...item,
+    expenseEntries: Array.from(item.expenseEntries)
+  })).sort((a, b) => {
     return `${a.service_date}${a.customer_name}${a.project_name}${a.receipt_date}`
       .localeCompare(`${b.service_date}${b.customer_name}${b.project_name}${b.receipt_date}`)
   })
@@ -307,6 +313,7 @@ const printExpenseDetails = () => {
       <td>${item.customer_name}</td>
       <td>${item.project_name}</td>
       <td>${formatDate(item.receipt_date)}</td>
+      <td>${item.expenseEntries.join(', ')}</td>
       ${expenseTypes.value.map(type => `
         <td class="text-right">${formatCurrency(item[type.name] || 0)}</td>
       `).join('')}
@@ -435,6 +442,7 @@ const printExpenseDetails = () => {
               <th>Customer</th>
               <th>Project</th>
               <th>Receipt Date</th>
+              <th>Expense Entries</th>
               ${expenseTypeHeaders}
               <th class="text-right">Total</th>
             </tr>
@@ -444,7 +452,7 @@ const printExpenseDetails = () => {
           </tbody>
           <tfoot>
             <tr>
-              <td colspan="5">Grand Total</td>
+              <td colspan="6">Grand Total</td>
               ${expenseTypeTotals}
               <td class="text-right">${formatCurrency(totals.value.total || 0)}</td>
             </tr>
@@ -1058,6 +1066,9 @@ const exportToExcel = () => {
                   <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">
                     Receipt Date
                   </th>
+                  <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">
+                    Expense Entries
+                  </th>
                   <th 
                     v-for="type in expenseTypes" 
                     :key="type.name"
@@ -1077,6 +1088,9 @@ const exportToExcel = () => {
                   <td class="px-3 py-4 text-sm text-gray-900 whitespace-nowrap">{{ item.customer_name }}</td>
                   <td class="px-3 py-4 text-sm text-gray-900 whitespace-nowrap">{{ item.project_name }}</td>
                   <td class="px-3 py-4 text-sm text-gray-900 whitespace-nowrap">{{ formatDate(item.receipt_date) }}</td>
+                  <td class="px-3 py-4 text-sm text-gray-900 whitespace-nowrap">
+                    <ExpenseEntryChips :entries="item.expenseEntries" />
+                  </td>
                   <td 
                     v-for="type in expenseTypes" 
                     :key="type.name"
@@ -1091,6 +1105,7 @@ const exportToExcel = () => {
               </tbody>
               <tfoot class="bg-gray-50">
                 <tr>
+                  <td>&nbsp;</td>
                   <td>&nbsp;</td>
                   <td>&nbsp;</td>
                   <td>&nbsp;</td>

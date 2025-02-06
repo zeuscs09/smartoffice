@@ -25,8 +25,10 @@
                             <img :src="cachedAppLogo" alt="App Logo" class="h-8 cursor-pointer mr-4"
                                 @click="router.push('/')" />
                             <div class="hidden lg:flex space-x-2">
-                                <button class="btn btn-ghost btn-circle tooltip tooltip-bottom"
-                                    @click="router.push({ name: 'ServiceReportList' })" data-tip="Service Report">
+                                <button v-if="menuPermissions.serviceReport" 
+                                        class="btn btn-ghost btn-circle tooltip tooltip-bottom"
+                                        @click="router.push({ name: 'ServiceReportList' })" 
+                                        data-tip="Service Report">
                                     <div class="indicator">
                                         <svg class="h-6" fill="#000000" viewBox="0 0 512 512" data-name="Layer 1"
                                             id="Layer_1" xmlns="http://www.w3.org/2000/svg">
@@ -42,8 +44,10 @@
                                         </svg>
                                     </div>
                                 </button>
-                                <button class="btn btn-ghost btn-circle tooltip tooltip-bottom" data-tip="Expense Entry"
-                                    @click="router.push({ name: 'ExpenseEntryList' })">
+                                <button v-if="menuPermissions.expenseEntry" 
+                                        class="btn btn-ghost btn-circle tooltip tooltip-bottom"
+                                        @click="router.push({ name: 'ExpenseEntryList' })" 
+                                        data-tip="Expense Entry">
                                     <div class="indicator">
                                         <svg class="h-6" viewBox="0 0 76 76" xmlns="http://www.w3.org/2000/svg"
                                             xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full"
@@ -60,8 +64,10 @@
                                         </svg>
                                     </div>
                                 </button>
-                                <button class="btn btn-ghost btn-circle tooltip tooltip-bottom"
-                                    data-tip="Expense Request" @click="router.push({ name: 'ExpenseRequestList' })">
+                                <button v-if="menuPermissions.expenseRequest" 
+                                        class="btn btn-ghost btn-circle tooltip tooltip-bottom"
+                                        @click="router.push({ name: 'ExpenseRequestList' })" 
+                                        data-tip="Expense Request">
                                     <div class="indicator">
                                         <svg class="h-6" fill="#000000" viewBox="0 0 16 16" id="request-refund-16px"
                                             xmlns="http://www.w3.org/2000/svg">
@@ -76,8 +82,10 @@
                                         </svg>
                                     </div>
                                 </button>
-                                <button class="btn btn-ghost btn-circle tooltip tooltip-bottom"
-                                    data-tip="Advance Request" @click="router.push({ name: 'AdvanceRequestList' })">
+                                <button v-if="menuPermissions.advanceRequest" 
+                                        class="btn btn-ghost btn-circle tooltip tooltip-bottom"
+                                        @click="router.push({ name: 'AdvanceRequestList' })" 
+                                        data-tip="Advance Request">
                                     <div class="indicator">
                                         <svg class="h-6" fill="#000000" viewBox="-2.5 0 19 19"
                                             xmlns="http://www.w3.org/2000/svg">
@@ -92,7 +100,7 @@
                                         </svg>
                                     </div>
                                 </button>
-                                <div class="dropdown dropdown-hover dropdown-bottom">
+                                <div v-if="showReportMenu" class="dropdown dropdown-hover dropdown-bottom">
                                     <label tabindex="0" class="btn btn-ghost btn-circle">
                                         <div class="indicator">
                                             <svg class="h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -105,19 +113,18 @@
                                     <ul tabindex="0" 
                                         class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52"
                                         style="margin-top: 0.5rem">
-                                        <li>
+                                        <li v-if="menuPermissions.manhourReport">
                                             <router-link :to="{ name: 'ManhourReport' }" class="text-sm">
                                                 <Clock class="w-4 h-4" />
                                                 Manhour Report
                                             </router-link>
                                         </li>
-                                        <li>
+                                        <li v-if="menuPermissions.expenseReport">
                                             <router-link :to="{ name: 'ExpenseReport' }" class="text-sm">
                                                 <Receipt class="w-4 h-4" />
                                                 Expense Report
                                             </router-link>
                                         </li>
-                                      
                                     </ul>
                                 </div>
                             </div>
@@ -217,8 +224,7 @@
         <div class="drawer-side z-[999] lg:hidden">
             <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
             <ul class="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
-                <!-- Sidebar content -->
-                <li>
+                <li v-if="menuPermissions.serviceReport">
                     <a @click="router.push({ name: 'ServiceReportList' })" class="flex items-center gap-3">
                         <svg class="h-6" fill="#000000" viewBox="0 0 512 512" data-name="Layer 1" id="Layer_1"
                             xmlns="http://www.w3.org/2000/svg">
@@ -234,7 +240,7 @@
                         Service Report
                     </a>
                 </li>
-                <li>
+                <li v-if="menuPermissions.expenseEntry">
                     <a @click="router.push({ name: 'ExpenseEntryList' })" class="flex items-center gap-3">
                         <svg class="h-6" viewBox="0 0 76 76" xmlns="http://www.w3.org/2000/svg"
                             xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full"
@@ -250,7 +256,7 @@
                         Expense Entry
                     </a>
                 </li>
-                <li>
+                <li v-if="menuPermissions.expenseRequest">
                     <a @click="router.push({ name: 'ExpenseRequestList' })" class="flex items-center gap-3">
                         <svg class="h-6" fill="#000000" viewBox="0 0 16 16" id="request-refund-16px"
                             xmlns="http://www.w3.org/2000/svg">
@@ -265,7 +271,7 @@
                         Expense Request
                     </a>
                 </li>
-                <li>
+                <li v-if="menuPermissions.advanceRequest">
                     <a @click="router.push({ name: 'AdvanceRequestList' })" class="flex items-center gap-3">
                         <svg class="h-6" fill="#000000" viewBox="-2.5 0 19 19" xmlns="http://www.w3.org/2000/svg">
                             <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
@@ -279,30 +285,20 @@
                         Advance Request
                     </a>
                 </li>
-                <!-- <li>
-                    <a @click="openReport('Accounting Report')" 
-                       class="flex items-center gap-3">
-                        <svg class="h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M21 11.5H3M21 11.5C21.8284 11.5 22.5 12.1716 22.5 13V19C22.5 19.8284 21.8284 20.5 21 20.5H3C2.17157 20.5 1.5 19.8284 1.5 19V13C1.5 12.1716 2.17157 11.5 3 11.5M21 11.5V9C21 8.17157 20.3284 7.5 19.5 7.5H4.5C3.67157 7.5 3 8.17157 3 9V11.5M12 15.5V17.5M8 15.5V17.5M16 15.5V17.5" 
-                                stroke="currentColor" 
-                                stroke-width="1.5" 
-                                stroke-linecap="round"/>
-                        </svg>
-                        Accounting Report
-                    </a>
-                </li> -->
-                <li>
-                                            <router-link :to="{ name: 'ManhourReport' }" class="text-sm">
-                                                <Clock class="w-4 h-4" />
-                                                Manhour Report
-                                            </router-link>
-                                        </li>
-                                        <li>
-                                            <router-link :to="{ name: 'ExpenseReport' }" class="text-sm">
-                                                <Receipt class="w-4 h-4" />
-                                                Expense Report
-                                            </router-link>
-                                        </li>
+                <template v-if="showReportMenu">
+                    <li v-if="menuPermissions.manhourReport">
+                        <router-link :to="{ name: 'ManhourReport' }" class="text-sm">
+                            <Clock class="w-4 h-4" />
+                            Manhour Report
+                        </router-link>
+                    </li>
+                    <li v-if="menuPermissions.expenseReport">
+                        <router-link :to="{ name: 'ExpenseReport' }" class="text-sm">
+                            <Receipt class="w-4 h-4" />
+                            Expense Report
+                        </router-link>
+                    </li>
+                </template>
             </ul>
         </div>
     </div>
@@ -337,6 +333,16 @@ const appFavicon = ref('')
 const navbarSettingsResource = createResource({
     url: 'smartoffice.api.sitesetting.get_site_info',
     auto: true,
+})
+
+// เพิ่มตัวแปรสำหรับควบคุมการแสดงเมนูทั้งหมด
+const menuPermissions = ref({
+  serviceReport: true,    // เมนู Service Report
+  expenseEntry: true,     // เมนู Expense Entry
+  expenseRequest: true,   // เมนู Expense Request
+  advanceRequest: true,   // เมนู Advance Request
+  manhourReport: false,    // รายงาน Manhour Report
+  expenseReport: false     // รายงาน Expense Report
 })
 
 onMounted(() => {
@@ -410,6 +416,12 @@ const getInitials = (name: string) => {
 function openReport(reportName: string) {
     window.open(`/app/query-report/${reportName}?year=2024&month=November`, '_blank')
 }
+
+// เพิ่ม computed property สำหรับตรวจสอบการแสดงเมนูรายงาน
+const showReportMenu = computed(() => {
+  return menuPermissions.value.manhourReport || menuPermissions.value.expenseReport
+})
+
 </script>
 
 <style scoped>
