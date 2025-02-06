@@ -91,11 +91,14 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
 import { session } from '../data/session'
+import { usePermissions } from '../composables/usePermissions'
 
 const errorMessage = ref('')
 const ldapLoading = ref(false)
 const isLDAPMode = ref(true)
 const username = ref('')
+
+const { fetchPermissions } = usePermissions()
 
 // ฟังก์ชันสำหรับสร้าง email จาก username
 const getEmail = computed(() => {
@@ -137,6 +140,7 @@ async function loginWithLDAP({ username, password }) {
       username,
       password
     })
+    
   } catch (error: any) {
     errorMessage.value = handleLoginError(error)
   } finally {
@@ -161,6 +165,7 @@ async function submit(e: Event) {
         password: formData.get('password') as string,
       })
     }
+    await fetchPermissions()  
   } catch (error: any) {
     errorMessage.value = handleLoginError(error)
   }

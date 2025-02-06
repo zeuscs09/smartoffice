@@ -312,6 +312,7 @@ import { session } from '../data/session'
 import { createResource } from 'frappe-ui'
 import { ref, onMounted, computed, watch } from 'vue'
 import { Clock, Receipt, Calculator } from 'lucide-vue-next'
+import { usePermissions } from '../composables/usePermissions'
 
 const router = useRouter()
 const fullName = ref('')
@@ -335,15 +336,7 @@ const navbarSettingsResource = createResource({
     auto: true,
 })
 
-// เพิ่มตัวแปรสำหรับควบคุมการแสดงเมนูทั้งหมด
-const menuPermissions = ref({
-  serviceReport: true,    // เมนู Service Report
-  expenseEntry: true,     // เมนู Expense Entry
-  expenseRequest: true,   // เมนู Expense Request
-  advanceRequest: true,   // เมนู Advance Request
-  manhourReport: false,    // รายงาน Manhour Report
-  expenseReport: false     // รายงาน Expense Report
-})
+const { menuPermissions } = usePermissions()
 
 onMounted(() => {
     taskResource.fetch({
