@@ -31,7 +31,7 @@ frappe.ui.form.on("SMO Expense Request", {
     ];
 
     if (frm.is_new()) {
-      // ฟอร์��นี้เป็นฟอร์มใหม่และยังไม่เคยบันทึก
+      // ฟอร์มนี้เป็นฟอร์มใหม่และยังไม่เคยบันทึก
       // ดึงเดือนปัจจุบัน
       const currentMonth = new Date().getMonth(); // ดึง index ของเดือน (เริ่มจาก 0)
       const fullMonthName = monthNames[currentMonth]; // ชื่อเดือนเต็ม
@@ -42,22 +42,26 @@ frappe.ui.form.on("SMO Expense Request", {
     }
   },
   refresh(frm) {
-    if (
-      frm.doc.workflow_state !== "Rejected" ||
-      frm.doc.owner !== frappe.session.user
-    ) {
-      frm.page.btn_secondary.hide();
-    } else {
-      frm.page.btn_secondary.show();
-    }
-    if (window.opener && typeof window.opener.refresh_table === "function") {
-      window.opener.refresh_table();
-    }
-    frm.add_custom_button(__("Close"), function () {
-      // เช็คว่ามี window.opener หรือไม่
+    if (frm.doc.from_page || frappe.utils.get_query_params().from_page) {
+      // ตรวจสอบว่าผู้ใช้มีสิทธิ์ System Manager หรือไม่
+      if (!frappe.user.has_role("System Manager")) {
+        $(".navbar").css("visibility", "hidden");
+        $(".menu-btn-group").hide();
+        $(".page-icon-group").hide();
+        if (frm.doc.workflow_state !== "Rejected") {
+          frm.page.btn_secondary.hide();
+        } else {
+          frm.page.btn_secondary.show();
+        }
+      }
 
-      window.close();
-    });
+      if (window.opener && typeof window.opener.refresh_table === "function") {
+        window.opener.refresh_table();
+      }
+      frm.add_custom_button(__("Close"), function () {
+        window.close();
+      });
+    }
 
     if (frm.doc.amended_from) {
       // ถ้ามีค่าใน amended_from (เป็นเอกสารที่แก้ไขจากเอกสารเดิม)
@@ -87,12 +91,6 @@ frappe.ui.form.on("SMO Expense Request", {
       "read_only",
       frm.doc.workflow_state !== "Pending Approval"
     );
-    if (frm.doc.from_page || frappe.utils.get_query_params().from_page) {
-      $(".navbar").css("visibility", "hidden");
-      $(".menu-btn-group").hide();
-      $(".page-icon-group").hide();
-      
-    }
     // ตรวจสอบว่า amended_from มีค่า หรือไม่
    
   

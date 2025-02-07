@@ -48,8 +48,19 @@ class SMOExpenseRequest(Document):
             self.create_notification(self.owner, f"คำขอเบิกค่าใช้จ่ายของคุณได้รับการอนุมัติแล้ว: {self.name}")
 
     def on_cancel(self):
-        if self.workflow_state != "Rejected":
+        # ตรวจสอบว่าเป็น System Manager หรือไม่
+        is_system_manager = "System Manager" in frappe.get_roles()
+        
+        if not is_system_manager and self.workflow_state != "Rejected":
             frappe.throw("สามารถยกเลิกเอกสารได้เฉพาะกรณีที่ถูกปฏิเสธ (Rejected) เท่านั้น")
+        
+        # ถ้าเป็น System Manager และ workflow state ไม่ใช่ Rejected
+        if is_system_manager and self.workflow_state != "Rejected":
+            # ปรับ workflow state เป็น Rejected
+            self.workflow_state = "Rejected"
+            self.db_set('workflow_state', 'Rejected')
+        
+        # อัพเดทสถานะของรายการค่าใช้จ่าย
         for item in self.expense_request_item:
             frappe.db.set_value("SMO Expense Entry", item.expense, "is_request", 0)
 
@@ -115,7 +126,7 @@ class SMOExpenseRequest(Document):
                 current_employee = frappe.db.get_value("Employee", current_employee.reports_to, 
                     ["name", "user_id", "designation", "grade", "reports_to"], as_dict=True)
                 
-                # ตรวจสอบว่าผู้อนุมัตินี้ยังไม่ได้ถูกเพิ���มไปแล้ว
+                # ตรวจสอบว่าผู้อนุมัตินี้ยังไม่ได้ถูกเพิ่มไปแล้ว
                 if not any(approver['approver'] == current_employee.name for approver in approvers):
                     approvers.append({
                         "approver": current_employee.name,
