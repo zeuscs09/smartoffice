@@ -5,30 +5,86 @@ def get_user_permissions():
     user = frappe.session.user
     roles = frappe.get_roles(user)
     
-    # ตรวจสอบสิทธิ์จากเมนูปกติ
-    permissions = {
-        "serviceReport": True,
-        "expenseEntry": True,
-        "expenseRequest": True,
-        "advanceRequest": True,
-    }
-    
-    # ตรวจสอบสิทธิ์จาก DocType
     try:
-        # ตรวจสอบสิทธิ์ Manhour Report จาก SMO Task
-        smo_task = frappe.get_doc("DocType", "SMO Task")
-        permissions["manhourReport"] = smo_task.has_permission("report")
+        # ตรวจสอบสิทธิ์จาก DocType โดยใช้ frappe.db
+        permissions = {
+            # ตรวจสอบสิทธิ์ Service Report
+            "serviceReport": bool(frappe.db.get_value(
+                'DocPerm',
+                {
+                    'parent': 'SMO Service Report',
+                    'role': ['in', roles],
+                    'read': 1
+                },
+                'read'
+            )),
+            
+            # ตรวจสอบสิทธิ์ Expense Entry
+            "expenseEntry": bool(frappe.db.get_value(
+                'DocPerm',
+                {
+                    'parent': 'SMO Expense Entry',
+                    'role': ['in', roles],
+                    'read': 1
+                },
+                'read'
+            )),
+            
+            # ตรวจสอบสิทธิ์ Expense Request
+            "expenseRequest": bool(frappe.db.get_value(
+                'DocPerm',
+                {
+                    'parent': 'SMO Expense Request',
+                    'role': ['in', roles],
+                    'read': 1
+                },
+                'read'
+            )),
+            
+            # ตรวจสอบสิทธิ์ Advance Entry
+            "advanceRequest": bool(frappe.db.get_value(
+                'DocPerm',
+                {
+                    'parent': 'SMO Advance Entry',
+                    'role': ['in', roles],
+                    'read': 1
+                },
+                'read'
+            )),
+            
+            # ตรวจสอบสิทธิ์ Manhour Report (จาก SMO Task)
+            "manhourReport": bool(frappe.db.get_value(
+                'DocPerm',
+                {
+                    'parent': 'SMO Task',
+                    'role': ['in', roles],
+                    'report': 1
+                },
+                'report'
+            )),
+            
+            # ตรวจสอบสิทธิ์ Expense Report (จาก SMO Expense Entry)
+            "expenseReport": bool(frappe.db.get_value(
+                'DocPerm',
+                {
+                    'parent': 'SMO Expense Entry',
+                    'role': ['in', roles],
+                    'report': 1
+                },
+                'report'
+            ))
+        }
         
-        # ตรวจสอบสิทธิ์ Expense Report จาก SMO Expense Entry
-        smo_expense = frappe.get_doc("DocType", "SMO Expense Entry")
-        permissions["expenseReport"] = smo_expense.has_permission("report")
-    except frappe.DoesNotExistError:
-        # ถ้าไม่พบ DocType ให้กำหนดเป็น False
-        permissions["manhourReport"] = False
-        permissions["expenseReport"] = False
     except Exception as e:
-        frappe.log_error(f"Error checking report permissions: {str(e)}")
-        permissions["manhourReport"] = False
-        permissions["expenseReport"] = False
+        frappe.log_error(f"Error checking permissions: {str(e)}")
+        # กรณีเกิดข้อผิดพลาด ให้กำหนดทุกสิทธิ์เป็น False
+        permissions = {
+            "serviceReport": False,
+            "expenseEntry": False,
+            "expenseRequest": False,
+            "advanceRequest": False,
+            "manhourReport": False,
+            "expenseReport": False
+        }
     
     return permissions 
