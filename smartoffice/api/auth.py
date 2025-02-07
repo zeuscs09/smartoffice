@@ -6,73 +6,42 @@ def get_user_permissions():
     roles = frappe.get_roles(user)
     
     try:
-        # ตรวจสอบสิทธิ์จาก DocType โดยใช้ frappe.db
+        def check_permission(doctype, perm_type='read'):
+            # ตรวจสอบจาก Custom DocPerm ก่อน
+            custom_permission = frappe.db.get_value(
+                'Custom DocPerm',
+                {
+                    'parent': doctype,
+                    'role': ['in', roles],
+                    perm_type: 1
+                },
+                perm_type
+            )
+            
+            if custom_permission:
+                return True
+                
+            # ถ้าไม่พบใน Custom DocPerm ให้ตรวจสอบใน DocPerm
+            standard_permission = frappe.db.get_value(
+                'DocPerm',
+                {
+                    'parent': doctype,
+                    'role': ['in', roles],
+                    perm_type: 1
+                },
+                perm_type
+            )
+            
+            return bool(standard_permission)
+
+        # ตรวจสอบสิทธิ์จาก DocType
         permissions = {
-            # ตรวจสอบสิทธิ์ Service Report
-            "serviceReport": bool(frappe.db.get_value(
-                'DocPerm',
-                {
-                    'parent': 'SMO Service Report',
-                    'role': ['in', roles],
-                    'read': 1
-                },
-                'read'
-            )),
-            
-            # ตรวจสอบสิทธิ์ Expense Entry
-            "expenseEntry": bool(frappe.db.get_value(
-                'DocPerm',
-                {
-                    'parent': 'SMO Expense Entry',
-                    'role': ['in', roles],
-                    'read': 1
-                },
-                'read'
-            )),
-            
-            # ตรวจสอบสิทธิ์ Expense Request
-            "expenseRequest": bool(frappe.db.get_value(
-                'DocPerm',
-                {
-                    'parent': 'SMO Expense Request',
-                    'role': ['in', roles],
-                    'read': 1
-                },
-                'read'
-            )),
-            
-            # ตรวจสอบสิทธิ์ Advance Entry
-            "advanceRequest": bool(frappe.db.get_value(
-                'DocPerm',
-                {
-                    'parent': 'SMO Advance Entry',
-                    'role': ['in', roles],
-                    'read': 1
-                },
-                'read'
-            )),
-            
-            # ตรวจสอบสิทธิ์ Manhour Report (จาก SMO Task)
-            "manhourReport": bool(frappe.db.get_value(
-                'DocPerm',
-                {
-                    'parent': 'SMO Task',
-                    'role': ['in', roles],
-                    'report': 1
-                },
-                'report'
-            )),
-            
-            # ตรวจสอบสิทธิ์ Expense Report (จาก SMO Expense Entry)
-            "expenseReport": bool(frappe.db.get_value(
-                'DocPerm',
-                {
-                    'parent': 'SMO Expense Entry',
-                    'role': ['in', roles],
-                    'report': 1
-                },
-                'report'
-            ))
+            "serviceReport": check_permission('SMO Service Report', 'read'),
+            "expenseEntry": check_permission('SMO Expense Entry', 'read'),
+            "expenseRequest": check_permission('SMO Expense Request', 'read'),
+            "advanceRequest": check_permission('SMO Advance Entry', 'read'),
+            "manhourReport": check_permission('SMO Task', 'report'),
+            "expenseReport": check_permission('SMO Expense Entry', 'report')
         }
         
     except Exception as e:
