@@ -68,9 +68,18 @@ const fetchReport = async () => {
   }
 }
 
-// Format duration helper
+// ปรับฟังก์ชัน formatHourMinute ใหม่
 const formatHourMinute = (minutes: number) => {
-  return formatDuration(minutes * 60)
+  const hours = Math.floor(minutes / 60)
+  const mins = minutes % 60
+  
+  const hourText = hours > 0 ? `${hours} hour${hours > 1 ? 's' : ''}` : ''
+  const minText = mins > 0 ? `${mins} min${mins > 1 ? 's' : ''}` : ''
+  
+  if (hours > 0 && mins > 0) {
+    return `${hourText} ${minText}`
+  }
+  return hourText || minText || '0 mins'
 }
 
 // เพิ่ม computed properties สำหรับคำนวณ totals
@@ -87,7 +96,6 @@ const totals = computed(() => {
 
 const exportToExcel = () => {
   try {
-    // สร้างข้อมูลสำหรับ Excel
     const excelData = reportData.value.map(item => ({
       'Project Code': item.project_code,
       'Customer': item.customer_name,
@@ -95,6 +103,7 @@ const exportToExcel = () => {
       'Task Type': item.task_type,
       'Engineer': item.engineer,
       'Tasks': item.task_count,
+      'Total Min': item.minutes,
       'Hours': formatHourMinute(item.minutes),
       '% Hour': `${item.percent_hour.toFixed(2)}%`,
       '% Tasks': `${item.percent_task.toFixed(2)}%`
@@ -109,6 +118,7 @@ const exportToExcel = () => {
         'Task Type': '',
         'Engineer': 'รวมทั้งหมด',
         'Tasks': totals.value.taskCount,
+        'Total Min': totals.value.minutes,
         'Hours': formatHourMinute(totals.value.minutes),
         '% Hour': `${totals.value.percentHour.toFixed(2)}%`,
         '% Tasks': `${totals.value.percentTask.toFixed(2)}%`
@@ -128,6 +138,7 @@ const exportToExcel = () => {
       { wch: 15 }, // Task Type
       { wch: 25 }, // Engineer
       { wch: 10 }, // Tasks
+      { wch: 10 }, // Total Min
       { wch: 10 }, // Hours
       { wch: 10 }, // % Hour
       { wch: 10 }  // % Tasks
@@ -220,6 +231,7 @@ onMounted(() => {
             <th>Task Type</th>
             <th>Engineer</th>
             <th class="text-right">Tasks</th>
+            <th class="text-right">Total Min</th>
             <th class="text-right">Hours</th>
             <th class="text-right">% Hour</th>
             <th class="text-right">% Tasks</th>
@@ -233,6 +245,7 @@ onMounted(() => {
             <td>{{ item.task_type }}</td>
             <td>{{ item.engineer }}</td>
             <td class="text-right">{{ item.task_count }}</td>
+            <td class="text-right">{{ item.minutes }}</td>
             <td class="text-right">{{ formatHourMinute(item.minutes) }}</td>
             <td class="text-right">{{ (item.percent_hour).toFixed(2) }}%</td>
             <td class="text-right">{{ (item.percent_task).toFixed(2) }}%</td>
@@ -242,6 +255,7 @@ onMounted(() => {
           <tr v-if="totals" class="font-bold bg-base-200">
             <td colspan="5" class="text-right">Total</td>
             <td class="text-right">{{ totals.taskCount }}</td>
+            <td class="text-right">{{ totals.minutes }}</td>
             <td class="text-right">{{ formatHourMinute(totals.minutes) }}</td>
             <td class="text-right">{{ totals.percentHour.toFixed(2) }}%</td>
             <td class="text-right">{{ totals.percentTask.toFixed(2) }}%</td>
