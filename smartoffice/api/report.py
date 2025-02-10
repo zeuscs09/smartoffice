@@ -6,11 +6,16 @@ from datetime import datetime
 # smartoffice/api/report.py
 
 @frappe.whitelist()
-def get_manhour_report(month=None, ungroup_task_type=0, ungroup_engineer=0):
+def get_manhour_report(month=None, ungroup_task_type=0, ungroup_engineer=0, job_types=None, departments=None, grades=None):
     if not month:
         return {"error": "กรุณาระบุเดือนที่ต้องการดูรายงาน"}
     
     try:
+        # แปลง parameters
+        job_types = frappe.parse_json(job_types) if job_types else []
+        departments = frappe.parse_json(departments) if departments else []
+        grades = frappe.parse_json(grades) if grades else []
+
         # Base query with conditional GROUP BY
         query = """
             SELECT 
@@ -26,14 +31,36 @@ def get_manhour_report(month=None, ungroup_task_type=0, ungroup_engineer=0):
                 `tabSMO Service Report` sr
             INNER JOIN 
                 `tabSMO Working Team` wt ON wt.parent = sr.name
+            INNER JOIN
+                `tabEmployee` emp ON emp.name = wt.employee
             WHERE 
                 sr.workflow_state = 'Customer Approved'
                 AND DATE_FORMAT(sr.start_date_input, '%%Y-%%m') = %s
+                {job_types_filter}
+                {departments_filter}
+                {grades_filter}
             GROUP BY 
                 {group_by}
             ORDER BY 
                 total_seconds DESC
         """
+
+        # สร้าง filters
+        filters = [month]
+        job_types_filter = ""
+        if job_types:
+            job_types_filter = "AND sr.job_type IN %s"
+            filters.append(tuple(job_types))
+
+        departments_filter = ""
+        if departments:
+            departments_filter = "AND emp.department IN %s"
+            filters.append(tuple(departments))
+
+        grades_filter = ""
+        if grades:
+            grades_filter = "AND emp.grade IN %s"
+            filters.append(tuple(grades))
 
         # ปรับ query ตามการ group
         if int(ungroup_task_type) and int(ungroup_engineer):
@@ -57,11 +84,14 @@ def get_manhour_report(month=None, ungroup_task_type=0, ungroup_engineer=0):
         formatted_query = query.format(
             task_type_select=task_type_select,
             engineer_select=engineer_select,
-            group_by=group_by
+            group_by=group_by,
+            job_types_filter=job_types_filter,
+            departments_filter=departments_filter,
+            grades_filter=grades_filter
         )
 
-        # Execute query with just the month parameter
-        result = frappe.db.sql(formatted_query, (month,), as_dict=1)
+        # Execute query
+        result = frappe.db.sql(formatted_query, tuple(filters), as_dict=1)
 
         # คำนวณ total สำหรับ percentage
         total_seconds = sum(r.total_seconds for r in result)
@@ -90,7 +120,7 @@ def get_manhour_report(month=None, ungroup_task_type=0, ungroup_engineer=0):
         }
 
     except Exception as e:
-        frappe.log_error("Manhour Report Error", str(e)[:100])
+        frappe.log_error("Manhour Report Error", str(e))
         return {
             "status": "error",
             "message": f"เกิดข้อผิดพลาด: {str(e)[:100]}"

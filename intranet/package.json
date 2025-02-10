@@ -9,6 +9,7 @@
     "copy-html-entry": "cp ../smartoffice/public/intranet/index.html ../smartoffice/www/intranet.html"
   },
   "dependencies": {
+    "@vueform/multiselect": "^2.6.11",
     "chart.js": "^4.4.7",
     "daisyui": "^4.12.13",
     "feather-icons": "^4.28.0",
