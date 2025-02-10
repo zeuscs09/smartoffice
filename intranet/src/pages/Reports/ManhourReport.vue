@@ -452,17 +452,27 @@ watch([selectedJobTypeValues, selectedDepartmentValues, selectedGradeValues],
   { deep: true }
 )
 
-// เพิ่มฟังก์ชันสำหรับลบรายการที่เลือก (ไม่มี fetchReport)
+// เพิ่ม computed property สำหรับตรวจสอบการเลือก
+const hasAnySelection = computed(() => {
+  return selectedJobTypeValues.value.length > 0 ||
+         selectedDepartmentValues.value.length > 0 ||
+         selectedGradeValues.value.length > 0
+})
+
+// เพิ่มฟังก์ชันสำหรับลบรายการที่เลือก
 const removeJobType = (item: SelectOption) => {
   selectedJobTypeValues.value = selectedJobTypeValues.value.filter(i => i !== item)
+  fetchReport()
 }
 
 const removeDepartment = (item: SelectOption) => {
   selectedDepartmentValues.value = selectedDepartmentValues.value.filter(i => i !== item)
+  fetchReport()
 }
 
 const removeGrade = (item: SelectOption) => {
   selectedGradeValues.value = selectedGradeValues.value.filter(i => i !== item)
+  fetchReport()
 }
 
 // เพิ่ม watch สำหรับ ungroup options
@@ -550,6 +560,53 @@ onMounted(async () => {
                 <i class="fas fa-file-excel text-sm"></i>
                 Export Excel
               </button>
+            </div>
+          </div>
+
+          <!-- Selected Criteria Badges -->
+          <div class="flex flex-wrap gap-2 mt-4">
+            <!-- Job Type Badges -->
+            <div v-for="item in selectedJobTypeValues" :key="item" 
+              class="badge badge-primary gap-1 py-3 px-3"
+            >
+              <span>{{ item }}</span>
+              <button 
+                class="btn btn-ghost btn-xs px-1 min-h-0 h-auto hover:bg-transparent"
+                @click="removeJobType(item)"
+              >
+                ×
+              </button>
+            </div>
+
+            <!-- Department Badges -->
+            <div v-for="item in selectedDepartmentValues" :key="item"
+              class="badge badge-primary gap-1 py-3 px-3"
+            >
+              <span>{{ item }}</span>
+              <button 
+                class="btn btn-ghost btn-xs px-1 min-h-0 h-auto hover:bg-transparent"
+                @click="removeDepartment(item)"
+              >
+                ×
+              </button>
+            </div>
+
+            <!-- Grade Badges -->
+            <div v-for="item in selectedGradeValues" :key="item"
+              class="badge badge-primary gap-1 py-3 px-3"
+            >
+              <span>{{ item }}</span>
+              <button 
+                class="btn btn-ghost btn-xs px-1 min-h-0 h-auto hover:bg-transparent"
+                @click="removeGrade(item)"
+              >
+                ×
+              </button>
+            </div>
+
+            <!-- Show placeholder if no selections -->
+            <div v-if="!hasAnySelection" class="text-gray-500 text-sm">
+              No filters selected
             </div>
           </div>
 
@@ -711,5 +768,23 @@ onMounted(async () => {
 
 .table tr.bg-base-200 {
   background-color: hsl(var(--b2) / 0.3);
+}
+
+.badge {
+  @apply font-normal text-sm flex items-center;
+}
+
+.badge button {
+  @apply ml-1 text-current opacity-60 hover:opacity-100 flex items-center justify-center text-lg font-medium leading-none;
+}
+
+/* ปรับแต่ง badge เมื่อ hover */
+.badge:hover {
+  @apply shadow-sm;
+}
+
+/* ปรับแต่ง close button เมื่อ hover */
+.badge button:hover {
+  @apply bg-transparent;
 }
 </style>
