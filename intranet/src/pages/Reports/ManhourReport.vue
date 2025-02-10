@@ -247,18 +247,18 @@ const loadCriteria = () => {
 const fetchReport = async () => {
   try {
     isLoading.value = true
-    saveCriteria() // บันทึก criteria ก่อนดึงข้อมูล
+    saveCriteria()
     
     const response = await fetch('/api/method/smartoffice.api.report.get_manhour_report', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         month: selectedMonth.value,
-        job_types: selectedJobTypeNames.value,
-        departments: selectedDepartmentNames.value,
-        grades: selectedGradeNames.value,
-        ungroup_task_type: ungroupTaskType.value,
-        ungroup_engineer: ungroupEngineer.value
+        job_types: selectedJobTypeValues.value,
+        departments: selectedDepartmentValues.value,
+        grades: selectedGradeValues.value,
+        ungroup_task_type: ungroupTaskType.value ? 1 : 0,
+        ungroup_engineer: ungroupEngineer.value ? 1 : 0
       })
     })
     const result = await response.json()
@@ -453,6 +453,11 @@ const removeDepartment = (item: SelectOption) => {
 const removeGrade = (item: SelectOption) => {
   selectedGradeValues.value = selectedGradeValues.value.filter(i => i !== item)
 }
+
+// เพิ่ม watch สำหรับ ungroup options
+watch([ungroupTaskType, ungroupEngineer], () => {
+  fetchReport() // ดึงข้อมูลใหม่เมื่อมีการเปลี่ยนแปลง ungroup options
+})
 
 onMounted(async () => {
   await fetchFilterOptions()
