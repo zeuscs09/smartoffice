@@ -54,6 +54,9 @@ const jobTypes = ref<JobType[]>([])
 const departments = ref<Department[]>([])
 const grades = ref<Grade[]>([])
 
+// เพิ่ม ref สำหรับเก็บค่าประเภทรายงาน
+const reportType = ref<'task' | 'service_report'>('task')
+
 // แป้ไขการ format วันที่
 const formattedMonth = computed(() => {
   if (!selectedMonth.value) return ''
@@ -199,7 +202,7 @@ const selectedJobTypeNames = computed(() => selectedJobTypeValues.value.map(opt 
 const selectedDepartmentNames = computed(() => selectedDepartmentValues.value.map(opt => opt))
 const selectedGradeNames = computed(() => selectedGradeValues.value.map(opt => opt))
 
-// เพิ่ม interface สำหรับ criteria
+// แก้ไข interface สำหรับ criteria
 interface ReportCriteria {
   month: string
   jobTypes: SelectOption[]
@@ -207,6 +210,7 @@ interface ReportCriteria {
   grades: SelectOption[]
   ungroupTaskType: boolean
   ungroupEngineer: boolean
+  reportType: 'task' | 'service_report'
 }
 
 // เพิ่ม key สำหรับ localStorage
@@ -220,7 +224,8 @@ const saveCriteria = () => {
     departments: selectedDepartmentValues.value,
     grades: selectedGradeValues.value,
     ungroupTaskType: ungroupTaskType.value,
-    ungroupEngineer: ungroupEngineer.value
+    ungroupEngineer: ungroupEngineer.value,
+    reportType: reportType.value
   }
   localStorage.setItem(STORAGE_KEY, JSON.stringify(criteria))
 }
@@ -236,6 +241,7 @@ const loadCriteria = () => {
       selectedGradeValues.value = criteria.grades
       ungroupTaskType.value = criteria.ungroupTaskType
       ungroupEngineer.value = criteria.ungroupEngineer
+      reportType.value = criteria.reportType || 'task'
     }
   } catch (err) {
     console.error('Error loading criteria:', err)
@@ -249,7 +255,12 @@ const fetchReport = async () => {
     isLoading.value = true
     saveCriteria()
     
-    const response = await fetch('/api/method/smartoffice.api.report.get_manhour_report', {
+    // เลือก endpoint ตามประเภทรายงาน
+    const endpoint = reportType.value === 'task' 
+      ? '/api/method/smartoffice.api.report.get_manhour_report_by_task'
+      : '/api/method/smartoffice.api.report.get_manhour_report'
+    
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -459,6 +470,11 @@ watch([ungroupTaskType, ungroupEngineer], () => {
   fetchReport() // ดึงข้อมูลใหม่เมื่อมีการเปลี่ยนแปลง ungroup options
 })
 
+// เพิ่ม watch สำหรับ reportType
+watch(reportType, () => {
+  fetchReport()
+})
+
 onMounted(async () => {
   await fetchFilterOptions()
   loadCriteria() // โหลด criteria จาก localStorage
@@ -468,327 +484,232 @@ onMounted(async () => {
 
 <template>
   <UserLayout>
-  <div class="p-6">
-    <div class="flex justify-between items-center mb-6">
-      <div>
-        <h1 class="text-2xl font-bold">Manhour Report</h1>
-        <p class="text-gray-600">{{ formattedMonth }}</p>
-      </div>
-      
-      <div class="flex gap-4 items-center">
-        <!-- เลือกเดือน/ปี -->
-        <input 
-          type="month"
-          v-model="selectedMonth"
-          class="input input-bordered input-sm"
-        />
-
-        <!-- Ungroup Options -->
-        <div class="flex gap-2">
-          <label class="label cursor-pointer gap-2">
-            <input 
-              type="checkbox" 
-              v-model="ungroupTaskType"
-              class="checkbox checkbox-sm"
-            />
-            <span class="label-text text-sm">Ungroup Task Type</span>
-          </label>
-
-          <label class="label cursor-pointer gap-2">
-            <input 
-              type="checkbox" 
-              v-model="ungroupEngineer"
-              class="checkbox checkbox-sm"
-            />
-            <span class="label-text text-sm">Ungroup Engineer</span>
-          </label>
+    <div class="p-6">
+      <!-- Header Section -->
+      <div class="flex flex-col gap-6">
+        <!-- Title -->
+        <div>
+          <h1 class="text-2xl font-bold">Manhour Report</h1>
+          <p class="text-gray-600">{{ formattedMonth }}</p>
         </div>
 
-        <!-- ปุ่ม Refresh และ Export -->
-        <div class="flex gap-2">
-          <button 
-            class="btn btn-primary btn-sm"
-            @click="fetchReport"
-            :disabled="isLoading"
-          >
-            Refresh
-          </button>
-          <button 
-            class="btn btn-ghost btn-sm"
-            @click="exportToExcel"
-            :disabled="isLoading || !reportData.length"
-          >
-            Export Excel
-          </button>
+        <!-- Main Controls -->
+        <div class="flex flex-col gap-4 p-4 bg-base-100 rounded-lg border border-base-200">
+          <!-- Report Type and Date -->
+          <div class="flex items-center gap-8">
+            <!-- Report Type Selection -->
+            <div class="flex items-center gap-6 min-w-[400px]">
+              <label class="label-radio">
+                <input 
+                  type="radio" 
+                  name="report-type"
+                  value="task"
+                  v-model="reportType"
+                  class="radio radio-sm radio-primary"
+                />
+                <span class="label-text font-medium">Report from Task</span>
+              </label>
+
+              <label class="label-radio">
+                <input 
+                  type="radio" 
+                  name="report-type"
+                  value="service_report"
+                  v-model="reportType"
+                  class="radio radio-sm radio-primary"
+                />
+                <span class="label-text font-medium">Report from Service Report</span>
+              </label>
+            </div>
+
+            <!-- Month Selection -->
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-medium">Period:</span>
+              <input 
+                type="month"
+                v-model="selectedMonth"
+                class="input input-bordered input-sm w-40"
+              />
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-2 ml-auto">
+              <button 
+                class="btn btn-primary btn-sm gap-2"
+                @click="fetchReport"
+                :disabled="isLoading"
+              >
+                <i class="fas fa-sync-alt text-sm"></i>
+                Refresh
+              </button>
+              <button 
+                class="btn btn-outline btn-sm gap-2"
+                @click="exportToExcel"
+                :disabled="isLoading || !reportData.length"
+              >
+                <i class="fas fa-file-excel text-sm"></i>
+                Export Excel
+              </button>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="grid grid-cols-3 gap-6">
+            <!-- Job Types Filter -->
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text font-medium">Job Types</span>
+              </label>
+              <Multiselect
+                v-model="selectedJobTypeValues"
+                :options="jobTypeOptions"
+                mode="multiple"
+                :groups="true"
+                placeholder="Select job types..."
+                class="multiselect-primary"
+                label="label"
+                track-by="value"
+                group-label="label"
+                group-values="options"
+              />
+            </div>
+
+            <!-- Departments Filter -->
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text font-medium">Departments</span>
+              </label>
+              <Multiselect
+                v-model="selectedDepartmentValues"
+                :options="departmentOptions"
+                mode="multiple"
+                placeholder="Select departments..."
+                class="multiselect-primary"
+                label="label"
+                track-by="value"
+              />
+            </div>
+
+            <!-- Grades Filter -->
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text font-medium">Grades</span>
+              </label>
+              <Multiselect
+                v-model="selectedGradeValues"
+                :options="gradeOptions"
+                mode="multiple"
+                placeholder="Select grades..."
+                class="multiselect-primary"
+                label="label"
+                track-by="value"
+              />
+            </div>
+          </div>
+
+          <!-- Additional Options -->
+          <div class="flex items-center gap-6 pt-2 border-t border-base-200">
+            <label class="label-checkbox">
+              <input 
+                type="checkbox" 
+                v-model="ungroupTaskType"
+                class="checkbox checkbox-sm checkbox-primary"
+              />
+              <span class="label-text text-sm">Ungroup Task Type</span>
+            </label>
+
+            <label class="label-checkbox">
+              <input 
+                type="checkbox" 
+                v-model="ungroupEngineer"
+                class="checkbox checkbox-sm checkbox-primary"
+              />
+              <span class="label-text text-sm">Ungroup Engineer</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table Section -->
+      <div class="mt-6">
+        <div v-if="isLoading" class="flex justify-center py-8">
+          <span class="loading loading-spinner loading-lg"></span>
+        </div>
+
+        <div v-else class="overflow-x-auto bg-white rounded-lg shadow">
+          <table class="table table-zebra w-full table-sm">
+            <thead>
+              <tr class="bg-base-200">
+                <th>Project Code</th>
+                <th>Customer</th>
+                <th>Project Name</th>
+                <th>Task Type</th>
+                <th>Engineer</th>
+                <th class="text-right">Tasks</th>
+                <th class="text-right">Total Min</th>
+                <th class="text-right">Hours</th>
+                <th class="text-right">% Hour</th>
+                <th class="text-right">% Tasks</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in reportData" :key="item.project_code">
+                <td>{{ item.project_code }}</td>
+                <td>{{ item.customer_name }}</td>
+                <td>{{ item.project_name }}</td>
+                <td>{{ item.task_type }}</td>
+                <td>{{ item.engineer }}</td>
+                <td class="text-right">{{ item.task_count }}</td>
+                <td class="text-right">{{ item.minutes }}</td>
+                <td class="text-right">{{ formatHourMinute(item.minutes) }}</td>
+                <td class="text-right">{{ (item.percent_hour).toFixed(2) }}%</td>
+                <td class="text-right">{{ (item.percent_task).toFixed(2) }}%</td>
+              </tr>
+              
+              <tr v-if="totals" class="font-bold bg-base-200">
+                <td colspan="5" class="text-right">Total</td>
+                <td class="text-right">{{ totals.taskCount }}</td>
+                <td class="text-right">{{ totals.minutes }}</td>
+                <td class="text-right">{{ formatHourMinute(totals.minutes) }}</td>
+                <td class="text-right">{{ totals.percentHour.toFixed(2) }}%</td>
+                <td class="text-right">{{ totals.percentTask.toFixed(2) }}%</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
-
-    <!-- แก้ไข Filters Section -->
-    <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-      <!-- Job Types Filter -->
-      <div class="form-control w-full">
-        <label class="label">
-          <span class="label-text">Job Types</span>
-        </label>
-        <Multiselect
-          v-model="selectedJobTypeValues"
-          :options="jobTypeOptions"
-          mode="multiple"
-          :groups="true"
-          placeholder="Select job types..."
-          label="label"
-          track-by="value"
-          group-label="label"
-          group-values="options"
-          :searchable="true"
-          :clear-on-select="false"
-          :close-on-select="false"
-        />
-        <div class="mt-2 flex flex-wrap gap-2">
-          <div v-for="item in selectedJobTypeValues" :key="item" 
-            class="badge badge-lg badge-primary gap-2 px-3">
-            <span class="text-sm">{{ item }}</span>
-            <button class="hover:bg-base-200 rounded-full p-1" 
-              @click="removeJobType(item)">
-              ×
-            </button>
-          </div>
-          <div v-if="!selectedJobTypeValues.length" class="text-sm text-gray-500">
-            No job types selected
-          </div>
-        </div>
-      </div>
-
-      <!-- Departments Filter -->
-      <div class="form-control w-full">
-        <label class="label">
-          <span class="label-text">Departments</span>
-        </label>
-        <Multiselect
-          v-model="selectedDepartmentValues"
-          :options="departmentOptions"
-          mode="multiple"
-          placeholder="Select departments..."
-          label="label"
-          track-by="value"
-          :searchable="true"
-          :clear-on-select="false"
-          :close-on-select="false"
-        />
-        <div class="mt-2 flex flex-wrap gap-2">
-          <div v-for="item in selectedDepartmentValues" :key="item" 
-            class="badge badge-lg badge-primary gap-2 px-3">
-            <span class="text-sm">{{ item }}</span>
-            <button class="hover:bg-base-200 rounded-full p-1" 
-              @click="removeDepartment(item)">
-              ×
-            </button>
-          </div>
-          <div v-if="!selectedDepartmentValues.length" class="text-sm text-gray-500">
-            No departments selected
-          </div>
-        </div>
-      </div>
-
-      <!-- Grades Filter -->
-      <div class="form-control w-full">
-        <label class="label">
-          <span class="label-text">Grades</span>
-        </label>
-        <Multiselect
-          v-model="selectedGradeValues"
-          :options="gradeOptions"
-          mode="multiple"
-          placeholder="Select grades..."
-          label="label"
-          track-by="value"
-          :searchable="true"
-          :clear-on-select="false"
-          :close-on-select="false"
-        />
-        <div class="mt-2 flex flex-wrap gap-2">
-          <div v-for="item in selectedGradeValues" :key="item" 
-            class="badge badge-lg badge-primary gap-2 px-3">
-            <span class="text-sm">{{ item }}</span>
-            <button class="hover:bg-base-200 rounded-full p-1" 
-              @click="removeGrade(item)">
-              ×
-            </button>
-          </div>
-          <div v-if="!selectedGradeValues.length" class="text-sm text-gray-500">
-            No grades selected
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Loading State -->
-    <div v-if="isLoading" class="flex justify-center py-8">
-      <span class="loading loading-spinner loading-lg"></span>
-    </div>
-
-    <!-- Table -->
-    <div v-else class="overflow-x-auto">
-      <table class="table table-zebra w-full table-xs">
-        <thead>
-          <tr>
-            <th>Project Code</th>
-            <th>Customer</th>
-            <th>Project Name</th>
-            <th>Task Type</th>
-            <th>Engineer</th>
-            <th class="text-right">Tasks</th>
-            <th class="text-right">Total Min</th>
-            <th class="text-right">Hours</th>
-            <th class="text-right">% Hour</th>
-            <th class="text-right">% Tasks</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in reportData" :key="item.project_code">
-            <td>{{ item.project_code }}</td>
-            <td>{{ item.customer_name }}</td>
-            <td>{{ item.project_name }}</td>
-            <td>{{ item.task_type }}</td>
-            <td>{{ item.engineer }}</td>
-            <td class="text-right">{{ item.task_count }}</td>
-            <td class="text-right">{{ item.minutes }}</td>
-            <td class="text-right">{{ formatHourMinute(item.minutes) }}</td>
-            <td class="text-right">{{ (item.percent_hour).toFixed(2) }}%</td>
-            <td class="text-right">{{ (item.percent_task).toFixed(2) }}%</td>
-          </tr>
-          
-          <!-- Row Total -->
-          <tr v-if="totals" class="font-bold bg-base-200">
-            <td colspan="5" class="text-right">Total</td>
-            <td class="text-right">{{ totals.taskCount }}</td>
-            <td class="text-right">{{ totals.minutes }}</td>
-            <td class="text-right">{{ formatHourMinute(totals.minutes) }}</td>
-            <td class="text-right">{{ totals.percentHour.toFixed(2) }}%</td>
-            <td class="text-right">{{ totals.percentTask.toFixed(2) }}%</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
   </UserLayout>
 </template>
 
 <style scoped>
-/* เพิ่ม style สำหรับ row total ถ้าต้องการ */
-.bg-base-200 {
-  background-color: rgba(var(--b2) / var(--tw-bg-opacity));
-  --tw-bg-opacity: 0.3;
+.label-radio,
+.label-checkbox {
+  @apply flex items-center cursor-pointer hover:bg-base-200/50 px-3 py-1.5 rounded-md transition-colors;
 }
 
-/* ปรับ label ให้กระชับขึ้น */
-.label {
-  padding: 0.25rem;
-  min-height: auto;
+.label-radio .label-text,
+.label-checkbox .label-text {
+  @apply ml-2;
 }
 
-/* ปรับแต่ง style สำหรับ multiple select ของ DaisyUI */
-.select[multiple] {
-  height: auto;
-  min-height: 8rem;
-  padding: 0.5rem;
-}
-
-.select[multiple] option {
-  padding: 0.25rem 0.5rem;
-  margin: 0.25rem 0;
-  border-radius: 0.25rem;
-}
-
-.select[multiple] option:checked {
-  background-color: hsl(var(--p) / 0.1);
-  color: hsl(var(--p));
-}
-
-.select[multiple] optgroup {
-  font-weight: bold;
-  margin-top: 0.5rem;
-  padding: 0.25rem 0;
-  color: hsl(var(--bc) / 0.6);
-}
-
-.select[multiple] optgroup option {
-  padding-left: 1rem;
-}
-
-/* เพิ่ม smooth scrolling */
-.overflow-y-auto {
-  scrollbar-width: thin;
-  scrollbar-color: hsl(var(--bc) / 0.2) transparent;
-}
-
-.overflow-y-auto::-webkit-scrollbar {
-  width: 6px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb {
-  background-color: hsl(var(--bc) / 0.2);
-  border-radius: 3px;
-}
-
-/* เพิ่ม style สำหรับ dropdown */
-.dropdown-content {
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-/* ปรับแต่ง style ของ multiselect ให้เข้ากับ theme */
-.multiselect {
-  --ms-font-size: 0.875rem;
-  --ms-border-color: hsl(var(--bc) / 0.2);
-  --ms-border-width: 1px;
-  --ms-border-radius: 0.5rem;
-  --ms-bg: hsl(var(--b1));
-  --ms-option-bg-selected: hsl(var(--p) / 0.1);
-  --ms-option-color-selected: hsl(var(--p));
+.multiselect-primary {
   --ms-tag-bg: hsl(var(--p));
   --ms-tag-color: hsl(var(--pc));
-  --ms-ring-width: 0;
+  --ms-ring-color: hsl(var(--p) / 0.2);
+  --ms-option-bg-selected: hsl(var(--p) / 0.1);
+  --ms-option-color-selected: hsl(var(--p));
 }
 
-.multiselect-option.is-selected {
-  background: var(--ms-option-bg-selected);
-  color: var(--ms-option-color-selected);
+.table th {
+  @apply text-base-content/70 font-medium;
 }
 
-.multiselect-option.is-pointed {
-  background: hsl(var(--bc) / 0.1);
-  color: hsl(var(--bc));
+.table td {
+  @apply text-sm;
 }
 
-.multiselect-tag {
-  background: var(--ms-tag-bg);
-  color: var(--ms-tag-color);
-  padding: 4px 8px;
-  border-radius: 4px;
-  margin: 2px;
-}
-
-.multiselect-tag i {
-  margin-left: 4px;
-}
-
-/* ปรับแต่ง style ของ badges */
-.badge {
-  @apply py-2;
-  min-height: 2rem;
-}
-
-.badge button {
-  @apply opacity-70 hover:opacity-100 transition-opacity;
-}
-
-.badge button:hover {
-  @apply bg-base-200/20;
+.table tr.bg-base-200 {
+  background-color: hsl(var(--b2) / 0.3);
 }
 </style>
