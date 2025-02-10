@@ -71,7 +71,11 @@ def _build_approval_chain_by_grade(employee, required_grade):
             })
             approver_level += 1
             
-            if current_employee.grade == required_grade:
+            # เปรียบเทียบเฉพาะ 3 หลักแรกของ grade
+            current_grade = str(current_employee.grade)[:3]
+            required_grade_3_digit = str(required_grade)[:3]
+            
+            if current_grade >= required_grade_3_digit:
                 found_required_grade = True
                 break
 

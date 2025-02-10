@@ -139,8 +139,11 @@ class SMOExpenseRequest(Document):
                     
                     approver_level += 1
                     
-                    # ถ้าเจอ grade ที่ต้องการ ให้หยุดการวนลูป
-                    if current_employee.grade == required_grade:
+                    # เปรียบเทียบเฉพาะ 3 หลักแรกของ grade
+                    current_grade = str(current_employee.grade)[:3]
+                    required_grade_3_digit = str(required_grade)[:3]
+                    
+                    if current_grade >= required_grade_3_digit:
                         found_required_grade = True
                         break
 
