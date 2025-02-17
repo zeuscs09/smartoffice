@@ -22,7 +22,9 @@
   "column_break_ydln",
   "sync_customer",
   "sync_project",
-  "sync_opportunity"
+  "sync_opportunity",
+  "system_config_tab",
+  "open_date"
  ],
  "fields": [
   {
@@ -127,12 +129,22 @@
    "fieldname": "sync_opportunity",
    "fieldtype": "Button",
    "label": "Sync Opportunity"
+  },
+  {
+   "fieldname": "system_config_tab",
+   "fieldtype": "Tab Break",
+   "label": "System Config"
+  },
+  {
+   "fieldname": "open_date",
+   "fieldtype": "Date",
+   "label": "Open Date"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-01-22 15:31:45.947737",
+ "modified": "2025-02-17 15:16:29.886340",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "Smart Office Setting",

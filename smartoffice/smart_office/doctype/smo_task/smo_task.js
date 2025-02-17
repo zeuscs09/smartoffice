@@ -32,13 +32,56 @@ frappe.ui.form.on("SMO Task", {
     ) {
       frm.disable_form();
     }
+
+    // เพิ่มการเรียก API เพื่อดึง open_date
+    frappe.db.get_single_value('Smart Office Setting', 'open_date')
+      .then(open_date => {
+        console.log(open_date);
+        if (open_date) {
+          frm.set_df_property('start_date', 'min_date', open_date);
+          frm.set_df_property('finish_date', 'min_date', open_date);
+          
+          // ตรวจสอบค่าปัจจุบันและแจ้งเตือนถ้าน้อยกว่า open_date
+          if (frm.doc.start_date && frm.doc.start_date < open_date) {
+            frm.set_value('start_date', '');
+            frappe.msgprint({
+              title: 'ข้อผิดพลาด',
+              indicator: 'red',
+              message: `วันที่เริ่มต้นต้องไม่น้อยกว่า ${open_date}`
+            });
+          }
+          
+          if (frm.doc.finish_date && frm.doc.finish_date < open_date) {
+            frm.set_value('finish_date', '');
+            frappe.msgprint({
+              title: 'ข้อผิดพลาด',
+              indicator: 'red',
+              message: `วันที่สิ้นสุดต้องไม่น้อยกว่า ${open_date}`
+            });
+          }
+        }
+      });
   },
   
   start_date: function(frm) {
-    if(frm.doc.start_date) {
-      frm.set_value("finish_date", frm.doc.start_date);
-      recalculateEndTime(frm);
-    }
+    // ตรวจสอบ open_date เมื่อมีการเปลี่ยนแปลง start_date
+    frappe.db.get_single_value('Smart Office Setting', 'open_date')
+      .then(open_date => {
+        if (open_date && frm.doc.start_date && frm.doc.start_date < open_date) {
+          frm.set_value('start_date', '');
+          frappe.msgprint({
+            title: 'ข้อผิดพลาด',
+            indicator: 'red',
+            message: `วันที่เริ่มต้นต้องไม่น้อยกว่า ${open_date}`
+          });
+          return;
+        }
+        
+        if(frm.doc.start_date) {
+          frm.set_value("finish_date", frm.doc.start_date);
+          recalculateEndTime(frm);
+        }
+      });
   },
   customer_opportunity(frm) {
     frm.set_value("customer", frm.doc.customer_opportunity);
@@ -56,7 +99,21 @@ frappe.ui.form.on("SMO Task", {
   },
   
   finish_date: function(frm) {
-    calculateDurationFromEndTime(frm);
+    // ตรวจสอบ open_date เมื่อมีการเปลี่ยนแปลง finish_date
+    frappe.db.get_single_value('Smart Office Setting', 'open_date')
+      .then(open_date => {
+        if (open_date && frm.doc.finish_date && frm.doc.finish_date < open_date) {
+          frm.set_value('finish_date', '');
+          frappe.msgprint({
+            title: 'ข้อผิดพลาด',
+            indicator: 'red',
+            message: `วันที่สิ้นสุดต้องไม่น้อยกว่า ${open_date}`
+          });
+          return;
+        }
+        
+        calculateDurationFromEndTime(frm);
+      });
   },
   
   finish_hour_input: function(frm) {

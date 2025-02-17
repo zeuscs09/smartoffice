@@ -40,39 +40,101 @@ frappe.ui.form.on("SMO Service Report", {
         }
       });
     }
+
+    // เพิ่มการเรียก API เพื่อดึง open_date
+    frappe.db.get_single_value('Smart Office Setting', 'open_date')
+      .then(open_date => {
+        if (open_date) {
+          frm.set_df_property('start_date_input', 'min_date', open_date);
+          frm.set_df_property('finish_date_input', 'min_date', open_date);
+          
+          // ตรวจสอบค่าปัจจุบันและแจ้งเตือนถ้าน้อยกว่า open_date
+          if (frm.doc.start_date_input && frm.doc.start_date_input < open_date) {
+            frm.set_value('start_date_input', '');
+            frappe.msgprint({
+              title: 'ข้อผิดพลาด',
+              indicator: 'red',
+              message: `วันที่เริ่มต้นต้องไม่น้อยกว่า ${open_date}`
+            });
+          }
+          
+          if (frm.doc.finish_date_input && frm.doc.finish_date_input < open_date) {
+            frm.set_value('finish_date_input', '');
+            frappe.msgprint({
+              title: 'ข้อผิดพลาด',
+              indicator: 'red',
+              message: `วันที่สิ้นสุดต้องไม่น้อยกว่า ${open_date}`
+            });
+          }
+        }
+      });
   },
   before_save: function (frm) {
-    console.log("before_save triggered");
+    // เพิ่มการตรวจสอบ open_date ก่อนบันทึก
+    return new Promise((resolve, reject) => {
+      frappe.db.get_single_value('Smart Office Setting', 'open_date')
+        .then(open_date => {
+          if (open_date) {
+            if (frm.doc.start_date_input && frm.doc.start_date_input < open_date) {
+              frappe.throw({
+                title: 'ข้อผิดพลาด',
+                message: `วันที่เริ่มต้นต้องไม่น้อยกว่า ${open_date}`
+              });
+              reject();
+              return;
+            }
+            
+            if (frm.doc.finish_date_input && frm.doc.finish_date_input < open_date) {
+              frappe.throw({
+                title: 'ข้อผิดพลาด',
+                message: `วันที่สิ้นสุดต้องไม่น้อยกว่า ${open_date}`
+              });
+              reject();
+              return;
+            }
+          }
 
-    var hour = frm.doc.start_hour_input;
-    var minute = frm.doc.start_minute_input;
+          // ดำเนินการ before_save logic เดิม
+          console.log("before_save triggered");
 
-    if (hour && minute) {
-      var time_value = frm.doc.start_date_input + " " + hour + ":" + minute;
-      frm.set_value("job_start_on", time_value);
-    }
+          var hour = frm.doc.start_hour_input;
+          var minute = frm.doc.start_minute_input;
 
-    hour = frm.doc.finish_hour_input;
-    minute = frm.doc.finish_minute_input;
+          if (hour && minute) {
+            var time_value = frm.doc.start_date_input + " " + hour + ":" + minute;
+            frm.set_value("job_start_on", time_value);
+          }
 
-    if (hour && minute) {
-      var time_value = frm.doc.finish_date_input + " " + hour + ":" + minute;
-      frm.set_value("job_finish", time_value);
-    }
+          hour = frm.doc.finish_hour_input;
+          minute = frm.doc.finish_minute_input;
 
-    // validate วันที่เริ่มงานต้องน้อยกว่าวันที่สิ้นสุดงาน
-    if (frm.doc.job_start_on > frm.doc.job_finish) {
-      frappe.throw(__("Start date cannot be greater than Finish date"));
-    }
+          if (hour && minute) {
+            var time_value = frm.doc.finish_date_input + " " + hour + ":" + minute;
+            frm.set_value("job_finish", time_value);
+          }
 
-    if (frm.doc.start_date_input > frm.doc.finish_date_input) {
-      frm.set_value("over_night", 1);
-    }
+          // validate วันที่เริ่มงานต้องน้อยกว่าวันที่สิ้นสุดงาน
+          if (frm.doc.job_start_on > frm.doc.job_finish) {
+            frappe.throw(__("Start date cannot be greater than Finish date"));
+            reject();
+            return;
+          }
 
-    // เพิ่มการ refresh field ที่สำคัญ
-    frm.refresh_field("job_start_on");
-    frm.refresh_field("job_finish");
-    frm.refresh_field("over_night");
+          if (frm.doc.start_date_input > frm.doc.finish_date_input) {
+            frm.set_value("over_night", 1);
+          }
+
+          // เพิ่มการ refresh field ที่สำคัญ
+          frm.refresh_field("job_start_on");
+          frm.refresh_field("job_finish");
+          frm.refresh_field("over_night");
+
+          resolve();
+        })
+        .catch(err => {
+          reject(err);
+        });
+    });
   },
   after_save: function (frm) {
     console.log("after_save triggered");
@@ -142,10 +204,23 @@ frappe.ui.form.on("SMO Service Report", {
     }
   },
   start_date_input: function (frm) {
-    if (frm.doc.start_date_input) {
-      frm.set_value("finish_date_input", frm.doc.start_date_input);
-      recalculateEndTime(frm);
-    }
+    frappe.db.get_single_value('Smart Office Setting', 'open_date')
+      .then(open_date => {
+        if (open_date && frm.doc.start_date_input && frm.doc.start_date_input < open_date) {
+          frm.set_value('start_date_input', '');
+          frappe.msgprint({
+            title: 'ข้อผิดพลาด',
+            indicator: 'red',
+            message: `วันที่เริ่มต้นต้องไม่น้อยกว่า ${open_date}`
+          });
+          return;
+        }
+
+        if (frm.doc.start_date_input) {
+          frm.set_value("finish_date_input", frm.doc.start_date_input);
+          recalculateEndTime(frm);
+        }
+      });
   },
   start_hour_input: function (frm) {
     recalculateEndTime(frm);
@@ -157,7 +232,20 @@ frappe.ui.form.on("SMO Service Report", {
     recalculateEndTime(frm);
   },
   finish_date_input: function (frm) {
-    calculateDurationFromEndTime(frm);
+    frappe.db.get_single_value('Smart Office Setting', 'open_date')
+      .then(open_date => {
+        if (open_date && frm.doc.finish_date_input && frm.doc.finish_date_input < open_date) {
+          frm.set_value('finish_date_input', '');
+          frappe.msgprint({
+            title: 'ข้อผิดพลาด',
+            indicator: 'red',
+            message: `วันที่สิ้นสุดต้องไม่น้อยกว่า ${open_date}`
+          });
+          return;
+        }
+
+        calculateDurationFromEndTime(frm);
+      });
   },
   finish_hour_input: function (frm) {
     calculateDurationFromEndTime(frm);

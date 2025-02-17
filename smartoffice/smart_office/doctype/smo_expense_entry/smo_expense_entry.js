@@ -96,6 +96,31 @@ frappe.ui.form.on("SMO Expense Entry", {
           },
         };
       };
+
+    // เพิ่มการเรียก API เพื่อดึง open_date
+    frappe.db.get_single_value('Smart Office Setting', 'open_date')
+      .then(open_date => {
+        if (open_date) {
+          // ตรวจสอบค่าปัจจุบันและแจ้งเตือนถ้าน้อยกว่า open_date
+          if (frm.doc.service_date && frappe.datetime.str_to_obj(frm.doc.service_date) < frappe.datetime.str_to_obj(open_date)) {
+            frm.set_value('service_date', '');
+            frappe.msgprint({
+              title: 'ข้อผิดพลาด',
+              indicator: 'red',
+              message: `วันที่ให้บริการต้องไม่น้อยกว่า ${open_date}`
+            });
+          }
+          
+          if (frm.doc.finish_date && frappe.datetime.str_to_obj(frm.doc.finish_date) < frappe.datetime.str_to_obj(open_date)) {
+            frm.set_value('finish_date', '');
+            frappe.msgprint({
+              title: 'ข้อผิดพลาด',
+              indicator: 'red',
+              message: `วันที่สิ้นสุดต้องไม่น้อยกว่า ${open_date}`
+            });
+          }
+        }
+      });
   },
   cal_total(frm) {
     console.log("cal_total");
@@ -208,6 +233,38 @@ frappe.ui.form.on("SMO Expense Entry", {
     // รีเฟรชฟิลด์ expense_item เพื่อแสดงรายการที่เพิ่ม
     frm.refresh_field("expense_item");
     frm.trigger("cal_total");
+  },
+  before_save: function(frm) {
+    return new Promise((resolve, reject) => {
+      frappe.db.get_single_value('Smart Office Setting', 'open_date')
+        .then(open_date => {
+          if (open_date) {
+            if (frm.doc.service_date && frappe.datetime.str_to_obj(frm.doc.service_date) < frappe.datetime.str_to_obj(open_date)) {
+              frappe.throw({
+                title: 'ข้อผิดพลาด',
+                message: `วันที่ให้บริการต้องไม่น้อยกว่า ${open_date}`
+              });
+              reject();
+              return;
+            }
+            
+            if (frm.doc.finish_date && frappe.datetime.str_to_obj(frm.doc.finish_date) < frappe.datetime.str_to_obj(open_date)) {
+              frappe.throw({
+                title: 'ข้อผิดพลาด',
+                message: `วันที่สิ้นสุดต้องไม่น้อยกว่า ${open_date}`
+              });
+              reject();
+              return;
+            }
+          }
+
+          // ... existing before_save logic ...
+          resolve();
+        })
+        .catch(err => {
+          reject(err);
+        });
+    });
   },
 });
 
