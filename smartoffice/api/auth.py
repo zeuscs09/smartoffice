@@ -41,7 +41,10 @@ def get_user_permissions():
             "expenseRequest": check_permission('SMO Expense Request', 'read'),
             "advanceRequest": check_permission('SMO Advance Entry', 'read'),
             "manhourReport": check_permission('SMO Task', 'report'),
-            "expenseReport": check_permission('SMO Expense Entry', 'report')
+            "expenseReport": check_permission('SMO Expense Entry', 'report'),
+            # เพิ่มสิทธิ์สำหรับ Employee
+            "employeeList": check_permission('Employee', 'read'),
+            "employeeDetail": check_permission('Employee', 'read')
         }
         
     except Exception as e:
@@ -53,7 +56,10 @@ def get_user_permissions():
             "expenseRequest": False,
             "advanceRequest": False,
             "manhourReport": False,
-            "expenseReport": False
+            "expenseReport": False,
+            # เพิ่มสิทธิ์สำหรับ Employee
+            "employeeList": False,
+            "employeeDetail": False
         }
     
     return permissions 

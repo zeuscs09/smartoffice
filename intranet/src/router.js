@@ -117,6 +117,31 @@ const routes = [
     ]
   },
   {
+    path: '/employees',
+    name: 'Employees',
+    redirect: '/employees/list',
+    children: [
+      {
+        name: 'EmployeeList',
+        path: 'list',
+        component: () => import('@/pages/Employee/EmployeeList.vue'),
+        meta: {
+          requiresAuth: true,
+          permission: 'employeeList'
+        }
+      },
+      {
+        name: 'EmployeeDetail',
+        path: ':id',
+        component: () => import('@/pages/Employee/EmployeeDetail.vue'),
+        meta: {
+          requiresAuth: true,
+          permission: 'employeeDetail'
+        }
+      }
+    ]
+  },
+  {
     path: '/access-denied',
     name: 'AccessDenied',
     component: () => import('@/pages/AccessDenied.vue')

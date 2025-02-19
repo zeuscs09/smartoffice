@@ -1,0 +1,74 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "creation": "2025-02-19 14:17:57.571361",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "province",
+  "amphoe",
+  "tambol",
+  "zipcode",
+  "full_address"
+ ],
+ "fields": [
+  {
+   "fieldname": "province",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Province"
+  },
+  {
+   "fieldname": "amphoe",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Amphoe"
+  },
+  {
+   "fieldname": "tambol",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Tambol"
+  },
+  {
+   "fieldname": "zipcode",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Zipcode"
+  },
+  {
+   "fieldname": "full_address",
+   "fieldtype": "Data",
+   "label": "Full Address",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-02-19 14:27:25.857661",
+ "modified_by": "Administrator",
+ "module": "Smart Office",
+ "name": "Thai Address",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "full_address",
+ "show_title_field_in_link": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "tambol"
+}

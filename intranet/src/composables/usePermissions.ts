@@ -8,6 +8,8 @@ export interface MenuPermissions {
   advanceRequest: boolean
   manhourReport: boolean
   expenseReport: boolean
+  employeeList: boolean
+  employeeDetail: boolean
 }
 
 const defaultPermissions: MenuPermissions = {
@@ -16,7 +18,9 @@ const defaultPermissions: MenuPermissions = {
   expenseRequest: false,
   advanceRequest: false,
   manhourReport: false,
-  expenseReport: false
+  expenseReport: false,
+  employeeList: false,
+  employeeDetail: false
 }
 
 export function usePermissions() {
