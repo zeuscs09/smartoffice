@@ -140,7 +140,9 @@ frappe.ui.form.on("SMO Task", {
     frm.set_value("finish_hour_input", times.toHour);
     frm.set_value("finish_minute_input", times.toMinute);
   },
-  
+  project_code_opp: function(frm) {
+    frm.set_value("project_code", frm.doc.project_code_opp);
+  },
   customer(frm) {
     frm.set_query("site", () => {
       return {

@@ -291,6 +291,7 @@ def sync_vtiger_opportunity():
                         "opportunity_amount": opportunity["opportunity_amount"],
                         "sales_stage": opportunity["sales_stage"],
                         "custom_opportunity_name": opportunity["custom_opportunity_name"],
+                        "custom_project_code": opportunity["project_code"],
                         "modified": now()
                     }
 

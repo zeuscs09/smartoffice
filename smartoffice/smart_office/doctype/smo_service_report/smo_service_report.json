@@ -205,7 +205,7 @@
   {
    "fetch_from": "task.detail",
    "fieldname": "solutions",
-   "fieldtype": "Long Text"
+   "fieldtype": "Small Text"
   },
   {
    "depends_on": "eval:doc.task==\"\"",
@@ -218,6 +218,7 @@
    "width": "2000"
   },
   {
+   "fetch_from": "task.expected_time_use",
    "fieldname": "duration",
    "fieldtype": "Duration",
    "label": "Duration"
@@ -245,6 +246,7 @@
   },
   {
    "default": "08",
+   "fetch_from": "task.start_hour_input",
    "fieldname": "start_hour_input",
    "fieldtype": "Select",
    "label": "Hour",
@@ -253,6 +255,7 @@
   },
   {
    "default": "30",
+   "fetch_from": "task.start_minute_input",
    "fieldname": "start_minute_input",
    "fieldtype": "Select",
    "label": "Minute",
@@ -260,6 +263,7 @@
    "reqd": 1
   },
   {
+   "fetch_from": "task.finish_date",
    "fieldname": "finish_date_input",
    "fieldtype": "Date",
    "label": "Finish Date",
@@ -267,6 +271,7 @@
   },
   {
    "default": "17",
+   "fetch_from": "task.finish_hour_input",
    "fieldname": "finish_hour_input",
    "fieldtype": "Select",
    "label": "Hour",
@@ -275,6 +280,7 @@
   },
   {
    "default": "30",
+   "fetch_from": "task.finish_minute_input",
    "fieldname": "finish_minute_input",
    "fieldtype": "Select",
    "label": "Minute",
@@ -443,7 +449,7 @@
    "link_fieldname": "service_report"
   }
  ],
- "modified": "2025-01-29 15:27:18.724496",
+ "modified": "2025-02-19 21:44:08.340797",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Service Report",

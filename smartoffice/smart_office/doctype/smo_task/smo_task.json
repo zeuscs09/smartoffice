@@ -23,6 +23,7 @@
   "opportunity",
   "customer_opportunity",
   "opportunity_name",
+  "project_code_opp",
   "customer",
   "customer_name",
   "contact_person",
@@ -272,7 +273,6 @@
    "print_hide": 1
   },
   {
-   "depends_on": "eval:doc.job_group!=\"JT-01\"",
    "fetch_from": "project.custom_project_code",
    "fieldname": "project_code",
    "fieldtype": "Data",
@@ -375,6 +375,14 @@
    "hidden": 1,
    "label": "Customer Opportunity",
    "options": "Customer"
+  },
+  {
+   "fetch_from": "opportunity.custom_project_code",
+   "fieldname": "project_code_opp",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Project Code Opp",
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
@@ -386,7 +394,7 @@
    "link_fieldname": "task"
   }
  ],
- "modified": "2025-01-22 16:04:21.962810",
+ "modified": "2025-02-19 21:24:30.180139",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Task",
