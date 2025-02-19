@@ -43,8 +43,8 @@ def get_user_permissions():
             "manhourReport": check_permission('SMO Task', 'report'),
             "expenseReport": check_permission('SMO Expense Entry', 'report'),
             # เพิ่มสิทธิ์สำหรับ Employee
-            "employeeList": check_permission('Employee', 'read'),
-            "employeeDetail": check_permission('Employee', 'read')
+            "employeeList": check_permission('Employee', 'report'),
+            "employeeDetail": check_permission('Employee', 'report')
         }
         
     except Exception as e:
