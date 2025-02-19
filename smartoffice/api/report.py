@@ -266,7 +266,7 @@ def get_expense_report(year=None, month=None):
                     'Exp-Engineer บันทึกคชจ. พร้อมตั้งเบิกเงิน  ',
                     IFNULL(er.period_display, '')
                 ) AS REMARKH1,
-                '' AS REMARKH2,
+                DATE_FORMAT(er.modified, '%%Y-%%m-%%d') AS REMARKH2,
                 '' AS REMARKH3,
                 '' AS REMARKH4,
                 '' AS REMARKH5,
