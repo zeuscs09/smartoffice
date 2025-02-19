@@ -95,7 +95,7 @@ onMounted(async () => {
               <div class="grid grid-cols-1 gap-4">
                 <div>
                   <p class="text-sm text-gray-500">คำนำหน้า</p>
-                  <p class="font-medium">{{ employee.custom_salutation_local || '-' }}</p>
+                  <p class="font-medium">{{ employee.custom_salution_local || '-' }}</p>
                 </div>
                 <div>
                   <p class="text-sm text-gray-500">ชื่อ</p>
