@@ -219,6 +219,7 @@
   },
   {
    "fetch_from": "task.expected_time_use",
+   "fetch_if_empty": 1,
    "fieldname": "duration",
    "fieldtype": "Duration",
    "label": "Duration"
@@ -239,6 +240,7 @@
   },
   {
    "fetch_from": "task.start_date",
+   "fetch_if_empty": 1,
    "fieldname": "start_date_input",
    "fieldtype": "Date",
    "label": "Job Start On",
@@ -247,6 +249,7 @@
   {
    "default": "08",
    "fetch_from": "task.start_hour_input",
+   "fetch_if_empty": 1,
    "fieldname": "start_hour_input",
    "fieldtype": "Select",
    "label": "Hour",
@@ -256,6 +259,7 @@
   {
    "default": "30",
    "fetch_from": "task.start_minute_input",
+   "fetch_if_empty": 1,
    "fieldname": "start_minute_input",
    "fieldtype": "Select",
    "label": "Minute",
@@ -264,6 +268,7 @@
   },
   {
    "fetch_from": "task.finish_date",
+   "fetch_if_empty": 1,
    "fieldname": "finish_date_input",
    "fieldtype": "Date",
    "label": "Finish Date",
@@ -272,6 +277,7 @@
   {
    "default": "17",
    "fetch_from": "task.finish_hour_input",
+   "fetch_if_empty": 1,
    "fieldname": "finish_hour_input",
    "fieldtype": "Select",
    "label": "Hour",
@@ -281,6 +287,7 @@
   {
    "default": "30",
    "fetch_from": "task.finish_minute_input",
+   "fetch_if_empty": 1,
    "fieldname": "finish_minute_input",
    "fieldtype": "Select",
    "label": "Minute",
@@ -449,7 +456,7 @@
    "link_fieldname": "service_report"
   }
  ],
- "modified": "2025-02-19 21:44:08.340797",
+ "modified": "2025-02-21 14:23:37.213380",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Service Report",
