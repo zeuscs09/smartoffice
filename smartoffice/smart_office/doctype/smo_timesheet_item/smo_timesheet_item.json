@@ -1,0 +1,113 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-02-28 03:36:45.670804",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "from_time",
+  "to_time",
+  "column_break_iabx",
+  "working_hours",
+  "section_break_cbga",
+  "link_from_doc",
+  "column_break_jrav",
+  "doc_number",
+  "section_break_jphu",
+  "project_code",
+  "column_break_lbdv",
+  "customer",
+  "customer_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "from_time",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "From Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_iabx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "to_time",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "To Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_cbga",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "link_from_doc",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "From Doc",
+   "link_filters": "[[\"DocType\",\"name\",\"in\",[\"SMO Task\",\"SMO Service Report\"]]]",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "fieldname": "doc_number",
+   "fieldtype": "Dynamic Link",
+   "label": "Doc Number",
+   "options": "link_from_doc",
+   "reqd": 1
+  },
+  {
+   "fieldname": "working_hours",
+   "fieldtype": "Duration",
+   "in_list_view": 1,
+   "label": "Working Hour(s)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_jrav",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_jphu",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "project_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Project Code"
+  },
+  {
+   "fieldname": "column_break_lbdv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "fetch_from": "customer.custom_customer_name_local",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Customer Name"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-02-28 04:20:26.923716",
+ "modified_by": "Administrator",
+ "module": "Smart Office",
+ "name": "SMO Timesheet Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
