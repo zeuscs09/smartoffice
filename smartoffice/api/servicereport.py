@@ -85,7 +85,7 @@ def validate_service_report_access(name, customer_email, hash, timestamp):
     
     # ตรวจสอบการหมดอายุของลิงก์
     link_timestamp = get_datetime(timestamp)
-    if (now_datetime() - link_timestamp).total_seconds() > 86400:  # 24 ชั่วโมง
+    if (now_datetime() - link_timestamp).total_seconds() > 604800:  # 24 ชั่วโมง
         return False
     
     # ตรวจสอบอีเมลของลูกค้า
