@@ -60,7 +60,7 @@ frappe.ui.form.on("SMO Service Report", {
             });
           }
         );
-      }, __("Actions"));
+      });
     }
 
     if (frm.doc.from_todo && !frm.doc.start_date_input) {
