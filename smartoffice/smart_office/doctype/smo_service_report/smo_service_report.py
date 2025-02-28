@@ -217,4 +217,28 @@ class SMOServiceReport(Document):
 		self.save(ignore_permissions=True)  # บันทึกโดยไม่ตรวจสอบสิทธิ์
 
 		
+@frappe.whitelist()
+def resend_approval_email(name):
+	"""Resend approval email to customer for the specified service report"""
+	if not name:
+		frappe.throw(_("Service Report name is required"))
+		
+	# Check if the document exists and is submitted
+	doc = frappe.get_doc("SMO Service Report", name)
+	if doc.docstatus != 1:
+		frappe.throw(_("Only submitted Service Reports can have emails resent"))
+		
+	# Check if contact email exists
+	if not doc.contact_email:
+		frappe.throw(_("No customer email found for this Service Report"))
+		
+	# Check if approval hash exists, if not generate it
+	if not doc.approval_hash or not doc.approval_timestamp:
+		doc._set_approval_data()
+		doc.save(ignore_permissions=True)
+		
+	# Send the notification email
+	doc.notify_customer()
+	
+	return {"success": True}
 

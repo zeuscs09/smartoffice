@@ -37,7 +37,7 @@ def approve_service_report(name, customer_email, hash, timestamp):
     except frappe.DoesNotExistError:
         return {"success": False, "message": _("ไม่พบรายงานบริการ")}
     except Exception as e:
-        frappe.log_error(f"Error approving service report: {str(e)}")
+        frappe.log_error(title="Error approving service report", message=f"Error approving service report: {str(e)}")
         return {"success": False, "message": _("เกิดข้อผิดพลาดขณะอนุมัติรายงานบริการ โปรดลองอีกครั้งในภายหลัง")}
 
 @frappe.whitelist(allow_guest=True)

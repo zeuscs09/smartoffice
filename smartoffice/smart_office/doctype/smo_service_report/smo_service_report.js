@@ -33,6 +33,34 @@ frappe.ui.form.on("SMO Service Report", {
       frm.disable_form();
     }
 
+    // Add Resend Email button for submitted documents in Customer Review state
+    if (frm.doc.docstatus === 1 && frm.doc.workflow_state === "Customer Review" && frm.doc.contact_email) {
+      frm.add_custom_button(__("Resend Email"), function() {
+        frappe.confirm(
+          __("Are you sure you want to resend the approval email to {0}?", [frm.doc.contact_email]),
+          function() {
+            frappe.call({
+              method: "smartoffice.smart_office.doctype.smo_service_report.smo_service_report.resend_approval_email",
+              args: {
+                name: frm.doc.name
+              },
+              freeze: true,
+              freeze_message: __("Sending email..."),
+              callback: function(r) {
+                if (!r.exc) {
+                  frappe.msgprint({
+                    title: __("Success"),
+                    indicator: "green",
+                    message: __("Email has been resent to {0}", [frm.doc.contact_email])
+                  });
+                }
+              }
+            });
+          }
+        );
+      }, __("Actions"));
+    }
+
     if (frm.doc.from_todo && !frm.doc.start_date_input) {
       frappe.db.get_value("ToDo", frm.doc.from_todo, "date").then((r) => {
         if (r.message && r.message.date) {
