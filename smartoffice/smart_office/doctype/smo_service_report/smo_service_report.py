@@ -233,9 +233,9 @@ def resend_approval_email(name):
 		frappe.throw(_("No customer email found for this Service Report"))
 		
 	# Check if approval hash exists, if not generate it
-	if not doc.approval_hash or not doc.approval_timestamp:
-		doc._set_approval_data()
-		doc.save(ignore_permissions=True)
+	#if not doc.approval_hash or not doc.approval_timestamp:
+	doc._set_approval_data()
+	doc.save(ignore_permissions=True)
 		
 	# Send the notification email
 	doc.notify_customer()
