@@ -188,8 +188,8 @@ class SMOServiceReport(Document):
 			frappe.log_error(f"Failed to send email for Service Report {self.name}")
 			frappe.msgprint(_("Failed to send email. Please check error logs."))
 
-	def _set_approval_data(self):
-		if self.workflow_state == "Draft" and not self.approval_hash:
+	def _set_approval_data(self, force_regenerate=False):
+		if (self.workflow_state == "Draft" and not self.approval_hash) or force_regenerate:
 			# สร้าง salt
 			salt = os.urandom(16).hex()
 			
@@ -232,10 +232,10 @@ def resend_approval_email(name):
 	if not doc.contact_email:
 		frappe.throw(_("No customer email found for this Service Report"))
 		
-	# Check if approval hash exists, if not generate it
-	#if not doc.approval_hash or not doc.approval_timestamp:
-	doc._set_approval_data()
-	doc.save(ignore_permissions=True)
+	# Force regenerate approval data (timestamp, hash, salt)
+	doc._set_approval_data(force_regenerate=True)
+	doc.db_update()
+	frappe.db.commit()
 		
 	# Send the notification email
 	doc.notify_customer()

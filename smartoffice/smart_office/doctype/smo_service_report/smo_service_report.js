@@ -51,8 +51,10 @@ frappe.ui.form.on("SMO Service Report", {
                   frappe.msgprint({
                     title: __("Success"),
                     indicator: "green",
-                    message: __("Email has been resent to {0}", [frm.doc.contact_email])
+                    message: __("Email has been resent to {0} with new approval links", [frm.doc.contact_email])
                   });
+                  // Refresh the form to show updated approval data
+                  frm.reload_doc();
                 }
               }
             });
