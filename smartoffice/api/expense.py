@@ -38,7 +38,7 @@ def get_expense_entries(month, year,request_by,period):
             ei.attachment,
          
             ee.service_date,
-            ep.custom_project_code project
+            ee.project_code project
         FROM
             `tabSMO Expense Entry` ee
         INNER JOIN
@@ -47,7 +47,7 @@ def get_expense_entries(month, year,request_by,period):
             AND ei.parentfield = 'expense_item'
         INNER JOIN
             `tabCustomer` ec ON ee.customer = ec.name
-        INNER JOIN
+        left JOIN
             `tabProject` ep ON ee.project = ep.name
         LEFT JOIN
             `tabSMO Expense Type` et ON ei.expense_type = et.name
