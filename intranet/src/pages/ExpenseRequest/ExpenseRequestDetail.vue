@@ -418,7 +418,7 @@ const printExpenseDetails = () => {
             </div>
             <div class="header-item">
               <span class="header-label">Request by:</span>
-              <span class="header-value">${expenseResource.doc?.request_by}</span>
+              <span class="header-value">${expenseResource.doc?.full_name}</span>
             </div>
             <div class="header-item">
               <span class="header-label">Created on:</span>
@@ -670,7 +670,7 @@ const exportToExcel = () => {
     ['Year', expenseResource.doc?.year],
     ['Month', expenseResource.doc?.month],
     ['Period', expenseResource.doc?.period],
-    ['Request by', expenseResource.doc?.request_by],
+    ['Request by', expenseResource.doc?.full_name],
     ['Created on', expenseResource.doc?.creation?.split('.')[0]?.replace('T', ' ')],
     ['Status', expenseResource.doc?.workflow_state],
     ['Total Amount', formatCurrency(expenseResource.doc?.total || 0)],
@@ -881,7 +881,7 @@ const exportToExcel = () => {
                   />
                   <div class="flex flex-col">
                     <p class="text-xs sm:text-sm text-gray-600">
-                      Request by: {{ expenseResource.doc.request_by }}
+                      Request by: {{ expenseResource.doc.full_name }}
                     </p>
                     <p class="text-xs sm:text-sm text-gray-600">
                       Created on: {{ expenseResource.doc.creation?.split('.')[0]?.replace('T', ' ') }}

@@ -8,6 +8,7 @@
  "field_order": [
   "naming_series",
   "request_by",
+  "full_name",
   "year",
   "month",
   "period",
@@ -211,13 +212,20 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "month_value"
+  },
+  {
+   "fetch_from": "request_by.full_name",
+   "fieldname": "full_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Full Name"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-01-05 05:12:39.093662",
+ "modified": "2025-03-05 12:23:24.150566",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Request",
