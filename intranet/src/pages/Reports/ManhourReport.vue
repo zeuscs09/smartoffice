@@ -401,7 +401,7 @@ const fetchFilterOptions = async () => {
       body: JSON.stringify({
         doctype: 'Department',
         fields: ['name', 'department_name'],
-        filters: [['is_group', '=', 0]],
+        filters: [['disabled', '=', 0]],
         order_by: 'name asc'
       })
     })
