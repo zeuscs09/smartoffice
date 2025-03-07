@@ -401,13 +401,15 @@ const fetchFilterOptions = async () => {
       body: JSON.stringify({
         doctype: 'Department',
         fields: ['name', 'department_name'],
-        filters: [['disabled', '=', 0]],
-        order_by: 'name asc'
+        filters: [
+          ['disabled', '=', 0],
+          ['department_name', '!=', 'All Departments']
+        ],
+        order_by: 'department_name asc'
       })
     })
     const deptsResult = await deptsResponse.json() as ApiResponse
-    console.log('Departments:', deptsResult)
-    
+   
     // แก้ไขการ map ข้อมูล departments
     departments.value = deptsResult.message.values.map(([name]) => ({
       name,
