@@ -100,6 +100,17 @@
                                         </svg>
                                     </div>
                                 </button>
+                                <button v-if="menuPermissions.timesheet" 
+                                        class="btn btn-ghost btn-circle tooltip tooltip-bottom"
+                                        @click="router.push({ name: 'TimesheetList' })" 
+                                        data-tip="Timesheet">
+                                    <div class="indicator">
+                                        <svg class="h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12 8V12L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+                                        </svg>
+                                    </div>
+                                </button>
                                 <div v-if="showReportMenu" class="dropdown dropdown-hover dropdown-bottom">
                                     <label tabindex="0" class="btn btn-ghost btn-circle">
                                         <div class="indicator">
@@ -295,6 +306,15 @@
                             </g>
                         </svg>
                         Advance Request
+                    </a>
+                </li>
+                <li v-if="menuPermissions.timesheet">
+                    <a @click="router.push({ name: 'TimesheetList' })" class="flex items-center gap-3">
+                        <svg class="h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 8V12L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        Timesheet
                     </a>
                 </li>
                 <template v-if="showReportMenu">

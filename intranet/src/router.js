@@ -70,6 +70,24 @@ const routes = [
     component:()=>import('@/pages/Team/WorkLoad.vue')
   },
   {
+    name: 'TimesheetList',
+    path: '/timesheet',
+    component: () => import('@/pages/Timesheet/TimesheetList.vue'),
+    meta: {
+      requiresAuth: true,
+      permission: 'timesheet'
+    }
+  },
+  {
+    name: 'TimesheetDetail',
+    path: '/timesheet/:id',
+    component: () => import('@/pages/Timesheet/TimesheetDetail.vue'),
+    meta: {
+      requiresAuth: true,
+      permission: 'timesheet'
+    }
+  },
+  {
     path: '/customer',
     redirect: '/customer/login',
     children: [

@@ -44,7 +44,8 @@ def get_user_permissions():
             "expenseReport": check_permission('SMO Expense Entry', 'report'),
             # เพิ่มสิทธิ์สำหรับ Employee
             "employeeList": check_permission('Employee', 'report'),
-            "employeeDetail": check_permission('Employee', 'report')
+            "employeeDetail": check_permission('Employee', 'report'),
+            "timesheet": check_permission('SMO Timesheet', 'read')
         }
         
     except Exception as e:
@@ -59,7 +60,8 @@ def get_user_permissions():
             "expenseReport": False,
             # เพิ่มสิทธิ์สำหรับ Employee
             "employeeList": False,
-            "employeeDetail": False
+            "employeeDetail": False,
+            "timesheet": False
         }
     
     return permissions 

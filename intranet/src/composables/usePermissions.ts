@@ -10,6 +10,7 @@ export interface MenuPermissions {
   expenseReport: boolean
   employeeList: boolean
   employeeDetail: boolean
+  timesheet: boolean
 }
 
 const defaultPermissions: MenuPermissions = {
@@ -20,7 +21,8 @@ const defaultPermissions: MenuPermissions = {
   manhourReport: false,
   expenseReport: false,
   employeeList: false,
-  employeeDetail: false
+  employeeDetail: false,
+  timesheet: false
 }
 
 export function usePermissions() {
