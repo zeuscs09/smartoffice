@@ -37,34 +37,36 @@
                 <select class="select select-bordered w-full max-w-xs" v-model="statusFilter" @change="handleFilter">
                     <option value="">All</option>
                     <option value="Draft">Draft</option>
-                    <option value="Admin Review">Admin Review</option>
-                    <option value="Approval Review">Approval Review</option>
-                    <option value="Approved">Approve</option>
-                    <option value="Rejected">Reject</option>
+                    <option value="Pending Approval">Pending Approval</option>
+                    
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
                 </select>
                 <input type="date" class="input input-bordered " v-model="startDate" @change="handleFilter" />
                 <input type="date" class="input input-bordered " v-model="endDate" @change="handleFilter" />
-            </div <!-- ตารางแสดงข้อมูล -->
+            </div>
+            <!-- ตารางแสดงข้อมูล -->
             <ExpenseEntryTable 
-                :data="serviceReportStore.data" 
-                :loading="serviceReportStore.documentsResource.loading"
-                :error="serviceReportStore.documentsResource.error" 
-                :sortField="serviceReportStore.sortField"
-                :sortOrder="serviceReportStore.sortOrder" 
+                :data="expenseEntryStore.data" 
+                :loading="expenseEntryStore.documentsResource.loading"
+                :error="expenseEntryStore.documentsResource.error" 
+                :sortField="expenseEntryStore.sortField"
+                :sortOrder="expenseEntryStore.sortOrder" 
                 @sort="sortBy" 
+                @view="viewDocument"
             />
 
             <!-- Pagination -->
             <Pagination 
-                v-if="serviceReportStore.data.length > 0" 
-                :current-page="serviceReportStore.currentPage"
-                :is-first-page="serviceReportStore.isFirstPage" 
-                :is-last-page="serviceReportStore.isLastPage"
+                v-if="expenseEntryStore.data.length > 0" 
+                :current-page="expenseEntryStore.currentPage"
+                :is-first-page="expenseEntryStore.isFirstPage" 
+                :is-last-page="expenseEntryStore.isLastPage"
                 :page-size="pageSize" 
                 :displayed-items-count="displayedItemsCount" 
                 :total-items="totalItems"
-                @previous="serviceReportStore.previousPage()" 
-                @next="serviceReportStore.nextPage()"
+                @previous="expenseEntryStore.previousPage()" 
+                @next="expenseEntryStore.nextPage()"
                 @update:page-size="handlePageSizeChange" 
             />
 
@@ -100,17 +102,16 @@ import { useRouter } from 'vue-router'
 import UserLayout from '@/layouts/userLayout.vue'
 import { useExpenseEntryStore } from '@/stores/expenseEntryStore'
 import Pagination from '@/components/Pagination.vue'
-
 import Timeline from '@/components/TimeLine.vue'
 import ExpenseEntryTable from '@/components/ExpenseEntryTable.vue'
-const router = useRouter()
-const serviceReportStore = useExpenseEntryStore()
-serviceReportStore.pageSize = 10
-
-
 import { createDocumentResource } from 'frappe-ui'
 
+const router = useRouter()
+const expenseEntryStore = useExpenseEntryStore()
+expenseEntryStore.pageSize = 10
 
+// กำหนดคีย์สำหรับเก็บข้อมูลใน localStorage
+const STORAGE_KEY = 'expense-entry-criteria'
 
 const searchQuery = ref('')
 const statusFilter = ref('')
@@ -118,121 +119,181 @@ const startDate = ref('')
 const endDate = ref('')
 const pageSize = ref(10)
 const showFilter = ref(false)
+const timelineModal = ref<HTMLDialogElement | null>(null)
+const timelineEvents = ref([])
 
-const displayedItemsCount = computed(() => serviceReportStore.data.length)
-const totalItems = computed(() => serviceReportStore.documentsResource.data?.total || 0)
+const displayedItemsCount = computed(() => expenseEntryStore.data.length)
+const totalItems = computed(() => expenseEntryStore.documentsResource.data?.total || 0)
+
+// เพิ่มฟังก์ชันสำหรับบันทึกและโหลด criteria
+const saveCriteria = () => {
+  const criteria = {
+    searchQuery: searchQuery.value,
+    statusFilter: statusFilter.value,
+    startDate: startDate.value,
+    endDate: endDate.value,
+    pageSize: pageSize.value,
+    showFilter: showFilter.value,
+    currentPage: expenseEntryStore.currentPage,
+    sortField: expenseEntryStore.sortField,
+    sortOrder: expenseEntryStore.sortOrder
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(criteria))
+}
+
+const loadCriteria = () => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      const criteria = JSON.parse(saved)
+      
+      // กำหนดค่าให้กับตัวแปรต่างๆ
+      searchQuery.value = criteria.searchQuery || ''
+      statusFilter.value = criteria.statusFilter || ''
+      startDate.value = criteria.startDate || ''
+      endDate.value = criteria.endDate || ''
+      pageSize.value = criteria.pageSize || 10
+      showFilter.value = criteria.showFilter || false
+      
+      // กำหนดค่าให้ store
+      expenseEntryStore.searchQuery = searchQuery.value
+      expenseEntryStore.statusFilter = statusFilter.value
+      expenseEntryStore.startDate = startDate.value
+      expenseEntryStore.endDate = endDate.value
+      expenseEntryStore.pageSize = pageSize.value
+      expenseEntryStore.sortField = criteria.sortField || 'creation'
+      expenseEntryStore.sortOrder = criteria.sortOrder || 'desc'
+      
+      // ดึงข้อมูลโดยใช้หน้าที่บันทึกไว้
+      expenseEntryStore.fetchAll(criteria.currentPage || 1)
+    } else {
+      // กรณีไม่มีข้อมูลที่บันทึกไว้ ใช้ค่าเริ่มต้น
+      expenseEntryStore.pageSize = pageSize.value
+      expenseEntryStore.fetchAll(1)
+    }
+  } catch (err) {
+    console.error('Error loading criteria:', err)
+    // หากโหลดไม่สำเร็จให้ใช้ค่าเริ่มต้น
+    expenseEntryStore.pageSize = pageSize.value
+    expenseEntryStore.fetchAll(1)
+  }
+}
 
 onMounted(() => {
-    serviceReportStore.fetchAll(1)
+  // เรียกใช้ loadCriteria แทนการเรียก fetchAll โดยตรง
+  loadCriteria()
 })
 
 const toggleFilter = () => {
-    showFilter.value = !showFilter.value
+  showFilter.value = !showFilter.value
+  saveCriteria() // บันทึกการแสดง/ซ่อนตัวกรอง
 }
 
 const handleSearch = () => {
-    serviceReportStore.searchQuery = searchQuery.value
-    serviceReportStore.fetchAll(1)
+  expenseEntryStore.searchQuery = searchQuery.value
+  expenseEntryStore.fetchAll(1)
+  saveCriteria() // บันทึกเกณฑ์การค้นหา
 }
 
 const handleFilter = () => {
-    serviceReportStore.statusFilter = statusFilter.value
-    serviceReportStore.startDate = startDate.value
-    serviceReportStore.endDate = endDate.value
-    serviceReportStore.fetchAll(1)
+  expenseEntryStore.statusFilter = statusFilter.value
+  expenseEntryStore.startDate = startDate.value
+  expenseEntryStore.endDate = endDate.value
+  expenseEntryStore.fetchAll(1)
+  saveCriteria() // บันทึกเกณฑ์การกรอง
 }
 
 const sortBy = (field: string) => {
-    if (serviceReportStore.sortField === field) {
-        serviceReportStore.sortOrder = serviceReportStore.sortOrder === 'asc' ? 'desc' : 'asc'
-    } else {
-        serviceReportStore.sortField = field
-        serviceReportStore.sortOrder = 'asc'
-    }
-    serviceReportStore.fetchAll(1)
+  if (expenseEntryStore.sortField === field) {
+    expenseEntryStore.sortOrder = expenseEntryStore.sortOrder === 'asc' ? 'desc' : 'asc'
+  } else {
+    expenseEntryStore.sortField = field
+    expenseEntryStore.sortOrder = 'asc'
+  }
+  expenseEntryStore.fetchAll(1)
+  saveCriteria() // บันทึกลำดับการเรียง
 }
 
 const handlePageSizeChange = (newSize: number) => {
-    pageSize.value = newSize
-    serviceReportStore.pageSize = newSize
-    serviceReportStore.fetchAll(1)
+  pageSize.value = newSize
+  expenseEntryStore.pageSize = newSize
+  expenseEntryStore.fetchAll(1)
+  saveCriteria() // บันทึกขนาดหน้า
 }
 
 const refreshData = () => {
-    serviceReportStore.fetchAll(serviceReportStore.currentPage)
+  expenseEntryStore.fetchAll(expenseEntryStore.currentPage)
+}
+
+// แก้ไขให้ window.refresh_table บันทึก criteria ด้วย
+window.refresh_table = () => {
+  expenseEntryStore.fetchAll(expenseEntryStore.currentPage)
+  saveCriteria()
 }
 
 const applyFiltersAndRefresh = () => {
-    // รวมตรรกะการค้นหาและกรอง
-    handleSearch()
-    handleFilter()
-    // รีเฟรชข้อมูล
-    serviceReportStore.fetchAll(serviceReportStore.currentPage)
+  // รวมตรรกะการค้นหาและกรอง
+  handleSearch()
+  handleFilter()
+  // รีเฟรชข้อมูล
+  expenseEntryStore.fetchAll(expenseEntryStore.currentPage)
+  saveCriteria() // บันทึกทุกเกณฑ์
 }
 
 const viewDocument = (docName: string) => {
-
-    location.href = `/app/smo-expense-entry/${docName}?from=frontend`
+  // บันทึก criteria ก่อนไปหน้ารายละเอียด
+  saveCriteria()
+  location.href = `/app/smo-expense-entry/${docName}?from=frontend`
 }
 
 const showTimeline = async (docName: string) => {
-    console.log(docName)
-    const expenseRequest = createDocumentResource({
-        doctype: 'SMO Expense Entry',
-        name: docName,
-        auto: false,
-    })
-    timelineEvents.value = []
-    // ในที่นี้เราจะใช้ข้อมูลจำลอง แต่ในการใช้งานจริงคุณอาจต้องโหลดข้อมูลจาก API
+  console.log(docName)
+  const expenseRequest = createDocumentResource({
+    doctype: 'SMO Expense Entry',
+    name: docName,
+    auto: false,
+  })
+  timelineEvents.value = []
 
-    await expenseRequest.reload();
-    console.log(expenseRequest.doc);
+  await expenseRequest.reload();
+  console.log(expenseRequest.doc);
 
+  // เพิ่มเหตุการณ์ "สร้างคำขอ" ที่ด้านบนสุดของ timeline
+  timelineEvents.value.push({
+    date: expenseRequest.doc.creation,
+    action: 'Submit Request',
+    status: 'Approved',
+    approve_role: 'Requestor',
+    by: expenseRequest.doc.owner
+  });
 
-    // เพิ่มเหตุการณ์ "สร้างคำขอ" ที่ด้านบนสุดของ timeline
-    timelineEvents.value.push({
-        date: expenseRequest.doc.creation,
-        action: 'Submit Request',
-        status: 'Approved',
-        approve_role: 'Requestor',
-        by: expenseRequest.doc.owner
-    });
+  timelineEvents.value.push({
+    date: expenseRequest.doc.creation,
+    action: expenseRequest.doc.workflow_state,
+    status: expenseRequest.doc.workflow_state,
+    approve_role: 'Vice President',
+    by: expenseRequest.doc.approver
+  });
 
-    timelineEvents.value.push({
-        date: expenseRequest.doc.creation,
-        action: expenseRequest.doc.workflow_state,
-        status: expenseRequest.doc.workflow_state,
-        approve_role: 'Vice President',
-        by: expenseRequest.doc.approver
-    });
-
-
-    timelineModal.value?.showModal();
-
-
+  timelineModal.value?.showModal();
 }
-
-window.refresh_table = () => {
-    serviceReportStore.fetchAll(serviceReportStore.currentPage)
-}
-
 
 const newExpenseEntry = () => {
-    window.open('/app/smo-expense-entry/new?from_page=/intranet', '_blank')
-
+  // บันทึก criteria ก่อนไปหน้าสร้างใหม่
+  saveCriteria()
+  window.open('/app/smo-expense-entry/new?from_page=/intranet', '_blank')
 }
 
-const timelineModal = ref<HTMLDialogElement | null>(null)
-
-const timelineEvents = ref([
-
-])
-
-// เพิ่ม watch เพื่อติดตามการเปลี่ยนแปลงของ pageSize
-watch(pageSize, (newSize) => {
-    console.log('Page size changed to:', newSize)
+// ให้บันทึก criteria เมื่อ store ได้รับข้อมูลใหม่
+watch(() => expenseEntryStore.currentPage, () => {
+  saveCriteria()
 })
 
+// บันทึก criteria เมื่อ pageSize เปลี่ยน
+watch(pageSize, (newSize) => {
+  console.log('Page size changed to:', newSize)
+  saveCriteria()
+})
 </script>
 
 <style scoped>

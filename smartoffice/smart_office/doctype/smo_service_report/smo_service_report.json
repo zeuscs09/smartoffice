@@ -204,6 +204,7 @@
   },
   {
    "fetch_from": "task.detail",
+   "fetch_if_empty": 1,
    "fieldname": "solutions",
    "fieldtype": "Small Text"
   },
@@ -456,7 +457,7 @@
    "link_fieldname": "service_report"
   }
  ],
- "modified": "2025-02-21 14:23:37.213380",
+ "modified": "2025-03-26 20:20:16.026525",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Service Report",

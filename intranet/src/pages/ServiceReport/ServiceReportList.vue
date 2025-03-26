@@ -45,6 +45,7 @@
                     :sortOrder="serviceReportStore.sortOrder" 
                     :sortable="true" 
                     @sort="sortBy" 
+                    @view="viewDocument"
                 />
             </div>
 
@@ -78,8 +79,10 @@ import Pagination from '@/components/Pagination.vue' // นำเข้า Pagin
 
 const router = useRouter()
 const serviceReportStore = useServiceReportStore()
-serviceReportStore.pageSize = 10
 const formatDate = inject('formatDate') as (date: string) => string
+
+// กำหนดคีย์สำหรับเก็บข้อมูลใน localStorage
+const STORAGE_KEY = 'service-report-criteria'
 
 const searchQuery = ref('')
 const statusFilter = ref('')
@@ -91,64 +94,136 @@ const showFilter = ref(false)
 const displayedItemsCount = computed(() => serviceReportStore.data.length)
 const totalItems = computed(() => serviceReportStore.documentsResource.data?.total || 0)
 
-onMounted(() => {
+// เพิ่มฟังก์ชันสำหรับบันทึกและโหลด criteria
+const saveCriteria = () => {
+  const criteria = {
+    searchQuery: searchQuery.value,
+    statusFilter: statusFilter.value,
+    startDate: startDate.value,
+    endDate: endDate.value,
+    pageSize: pageSize.value,
+    showFilter: showFilter.value,
+    currentPage: serviceReportStore.currentPage,
+    sortField: serviceReportStore.sortField,
+    sortOrder: serviceReportStore.sortOrder
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(criteria))
+}
+
+const loadCriteria = () => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      const criteria = JSON.parse(saved)
+      
+      // กำหนดค่าให้กับตัวแปรต่างๆ
+      searchQuery.value = criteria.searchQuery || ''
+      statusFilter.value = criteria.statusFilter || ''
+      startDate.value = criteria.startDate || ''
+      endDate.value = criteria.endDate || ''
+      pageSize.value = criteria.pageSize || 10
+      showFilter.value = criteria.showFilter || false
+      
+      // กำหนดค่าให้ store
+      serviceReportStore.searchQuery = searchQuery.value
+      serviceReportStore.statusFilter = statusFilter.value
+      serviceReportStore.startDate = startDate.value
+      serviceReportStore.endDate = endDate.value
+      serviceReportStore.pageSize = pageSize.value
+      serviceReportStore.sortField = criteria.sortField || 'creation'
+      serviceReportStore.sortOrder = criteria.sortOrder || 'desc'
+      
+      // ดึงข้อมูลโดยใช้หน้าที่บันทึกไว้
+      serviceReportStore.fetchAll(criteria.currentPage || 1)
+    } else {
+      // กรณีไม่มีข้อมูลที่บันทึกไว้ ใช้ค่าเริ่มต้น
+      serviceReportStore.pageSize = pageSize.value
+      serviceReportStore.fetchAll(1)
+    }
+  } catch (err) {
+    console.error('Error loading criteria:', err)
+    // หากโหลดไม่สำเร็จให้ใช้ค่าเริ่มต้น
+    serviceReportStore.pageSize = pageSize.value
     serviceReportStore.fetchAll(1)
+  }
+}
+
+onMounted(() => {
+  // เรียกใช้ loadCriteria แทนการเรียก fetchAll โดยตรง
+  loadCriteria()
 })
 
 const toggleFilter = () => {
-    showFilter.value = !showFilter.value
+  showFilter.value = !showFilter.value
+  saveCriteria() // บันทึกการแสดง/ซ่อนตัวกรอง
 }
 
 const handleSearch = () => {
-    serviceReportStore.searchQuery = searchQuery.value
-    serviceReportStore.fetchAll(1)
+  serviceReportStore.searchQuery = searchQuery.value
+  serviceReportStore.fetchAll(1)
+  saveCriteria() // บันทึกเกณฑ์การค้นหา
 }
 
 const handleFilter = () => {
-    serviceReportStore.statusFilter = statusFilter.value
-    serviceReportStore.startDate = startDate.value
-    serviceReportStore.endDate = endDate.value
-    serviceReportStore.fetchAll(1)
+  serviceReportStore.statusFilter = statusFilter.value
+  serviceReportStore.startDate = startDate.value
+  serviceReportStore.endDate = endDate.value
+  serviceReportStore.fetchAll(1)
+  saveCriteria() // บันทึกเกณฑ์การกรอง
 }
 
 const sortBy = (field: string) => {
-    if (serviceReportStore.sortField === field) {
-        serviceReportStore.sortOrder = serviceReportStore.sortOrder === 'asc' ? 'desc' : 'asc'
-    } else {
-        serviceReportStore.sortField = field
-        serviceReportStore.sortOrder = 'asc'
-    }
-    serviceReportStore.fetchAll(1)
+  if (serviceReportStore.sortField === field) {
+    serviceReportStore.sortOrder = serviceReportStore.sortOrder === 'asc' ? 'desc' : 'asc'
+  } else {
+    serviceReportStore.sortField = field
+    serviceReportStore.sortOrder = 'asc'
+  }
+  serviceReportStore.fetchAll(1)
+  saveCriteria() // บันทึกลำดับการเรียง
 }
 
 const handlePageSizeChange = (newSize: number) => {
-    pageSize.value = newSize
-    serviceReportStore.pageSize = newSize
-    serviceReportStore.fetchAll(1)
+  pageSize.value = newSize
+  serviceReportStore.pageSize = newSize
+  serviceReportStore.fetchAll(1)
+  saveCriteria() // บันทึกขนาดหน้า
 }
 
 const refreshData = () => {
-    serviceReportStore.fetchAll(serviceReportStore.currentPage)
+  serviceReportStore.fetchAll(serviceReportStore.currentPage)
 }
+
+// แก้ไขให้ window.refresh_table บันทึก criteria ด้วย
 window.refresh_table = () => {
-    serviceReportStore.fetchAll(serviceReportStore.currentPage)
+  serviceReportStore.fetchAll(serviceReportStore.currentPage)
+  saveCriteria()
 }
 
 const applyFiltersAndRefresh = () => {
-    // รวมตรรกะการค้นหาและกรอง
-    handleSearch()
-    handleFilter()
-    // รีเฟรชข้อมูล
-    serviceReportStore.fetchAll(serviceReportStore.currentPage)
+  // รวมตรรกะการค้นหาและกรอง
+  handleSearch()
+  handleFilter()
+  // รีเฟรชข้อมูล
+  serviceReportStore.fetchAll(serviceReportStore.currentPage)
+  saveCriteria() // บันทึกทุกเกณฑ์
 }
 
 const viewDocument = (docName: string) => {
-    location.href = `/app/smo-service-report/${docName}?from_page=service_report`
+  // บันทึก criteria ก่อนไปหน้ารายละเอียด
+  saveCriteria()
+  location.href = `/app/smo-service-report/${docName}?from_page=service_report`
 }
 
-// เพิ่ม watch เพื่อติดตามการเปลี่ยนแปลงของ pageSize
+// ให้บันทึก criteria เมื่อ store ได้รับข้อมูลใหม่
+watch(() => serviceReportStore.currentPage, () => {
+  saveCriteria()
+})
+
+// บันทึก criteria เมื่อ pageSize เปลี่ยน
 watch(pageSize, (newSize) => {
-    console.log('Page size changed to:', newSize)
+  console.log('Page size changed to:', newSize)
+  saveCriteria()
 })
 </script>
 

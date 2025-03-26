@@ -75,30 +75,37 @@ class SMOExpenseRequest(Document):
         self.max_level = 0
         self.next_action = ""
         self.workflow_description = ""
-        finance_designation = frappe.get_doc("Smart Office Setting").finance_user
-        if not finance_designation:
-            frappe.throw("Not found finance designation")
+        
+        # เปลี่ยนจากการดึง designation เป็นการดึง role จาก settings
+        checking_role = frappe.get_doc("Smart Office Setting").accounting
+        if not checking_role:
+            frappe.throw("Not found accounting")
       
-        finance_employees = frappe.get_all(
-			"Employee",
-			filters={
-				"status": "Active",
-				"designation": finance_designation
-			},
-			fields=["user_id"]
-		)
+        # ดึง users ที่มี role ที่กำหนด
+        finance_users = frappe.get_all(
+            "Has Role",
+            filters={
+                "role": checking_role,
+                "parenttype": "User"
+            },
+            fields=["parent"]
+        )
 
-        if not finance_employees:
-            frappe.throw(f"No employees found with designation: {finance_designation}")
-
-		# กรองเฉพาะ employees ที่มี user_id
-        finance_users = [emp.user_id for emp in finance_employees if emp.user_id]
-		
         if not finance_users:
-            frappe.throw(f"No user accounts found for employees with designation: {finance_designation}")
+            frappe.throw(f"No users found with role: {checking_role}")
 
-		# แปลง list ของ users เป็น string คั่นด้วย comma
-        finance_user_list = ", ".join(finance_users)
+        # กรองเฉพาะ active users
+        active_finance_users = []
+        for user in finance_users:
+            user_status = frappe.db.get_value("User", user.parent, "enabled")
+            if user_status:
+                active_finance_users.append(user.parent)
+        
+        if not active_finance_users:
+            frappe.throw(f"No active users found with role: {checking_role}")
+
+        # แปลง list ของ users เป็น string คั่นด้วย comma
+        finance_user_list = ", ".join(active_finance_users)
      
         employee = frappe.db.get_value("Employee", {"user_id": self.request_by}, ["name", "reports_to", "grade"], as_dict=True)
         total_amount = self.total
@@ -185,7 +192,7 @@ class SMOExpenseRequest(Document):
             "approver": finance_user_list,
             "user_id": finance_user_list,
             "approver_level": approver_level,
-            "approver_role": "Finance",
+            "approver_role": checking_role,
             "status": "Pending"
         })
 
@@ -271,13 +278,15 @@ class SMOExpenseRequest(Document):
         frappe.errprint(f"Creating notification for user: {user_id}")
         
         # แยก user_id ที่มี comma คั่น
-        user_list = [u.strip() for u in user_id.split(',')]
+        user_list = [u.strip() for u in user_id.split(',') if u.strip()]
         
         for user in user_list:
             if not user:
                 continue
             
             frappe.errprint(f"Creating notification for individual user: {user}")
+            
+            # สร้าง notification log
             notification = frappe.get_doc({
                 "doctype": "Notification Log", 
                 "subject": message or f"คำขอเบิกค่าใช้จ่ายใหม่รอการอนุมัติ: {self.name}",
@@ -288,6 +297,44 @@ class SMOExpenseRequest(Document):
                 "read": 0,
             })
             notification.insert(ignore_permissions=True)
+            
+            # ส่ง realtime notification
+            frappe.publish_realtime(
+                event='notification',
+                message={
+                    'type': 'Alert',
+                    'message': message or f"คำขอเบิกค่าใช้จ่ายใหม่รอการอนุมัติ: {self.name}",
+                    'user': user
+                },
+                user=user
+            )
+            
+            # ส่งอีเมลแจ้งเตือน
+            try:
+                # ดึงข้อมูลอีเมลของผู้ใช้
+                user_email = frappe.db.get_value("User", user, "email")
+                if user_email:
+                    # ตั้งค่าหัวข้อและเนื้อหาอีเมล
+                    subject = message or f"คำขอเบิกค่าใช้จ่ายใหม่รอการอนุมัติ: {self.name}"
+                    content = f"""
+                    <p>เรียน {frappe.db.get_value("User", user, "full_name") or user}</p>
+                    <p>{subject}</p>
+                    <p>คุณสามารถเข้าดูรายละเอียดเพิ่มเติมได้ที่ลิงก์ด้านล่าง:</p>
+                    <p><a href="{frappe.utils.get_url()}/intranet/expense-request/{self.name}">คลิกที่นี่เพื่อดูรายละเอียด</a></p>
+                    <p>ขอแสดงความนับถือ</p>
+                    <p>ระบบแจ้งเตือนอัตโนมัติ</p>
+                    """
+                    
+                    # ส่งอีเมล
+                    frappe.sendmail(
+                        recipients=[user_email],
+                        subject=subject,
+                        message=content,
+                        reference_doctype=self.doctype,
+                        reference_name=self.name
+                    )
+            except Exception as e:
+                frappe.errprint(f"Failed to send email: {str(e)}")
         
         frappe.errprint(f"=== End create_notification ===")
 

@@ -305,11 +305,15 @@ const formatHourMinute = (minutes: number) => {
 const totals = computed(() => {
   if (!reportData.value.length) return null
   
+  // เพิ่มการนับจำนวน engineers แบบ distinct
+  const uniqueEngineers = new Set(reportData.value.map(item => item.engineer))
+  
   return {
     taskCount: reportData.value.reduce((sum, item) => sum + item.task_count, 0),
     minutes: reportData.value.reduce((sum, item) => sum + item.minutes, 0),
     percentHour: 100, // รวมต้องได้ 100%
-    percentTask: 100  // รวมต้องได้ 100%
+    percentTask: 100,  // รวมต้องได้ 100%
+    engineerCount: uniqueEngineers.size // เพิ่มการนับจำนวน engineers ที่ไม่ซ้ำกัน
   }
 })
 
@@ -334,8 +338,8 @@ const exportToExcel = () => {
         'Project Code': '',
         'Customer': '',
         'Project Name': '',
-        'Task Type': '',
-        'Engineer': 'รวมทั้งหมด',
+        'Task Type': 'รวมทั้งหมด',
+        'Engineer': totals.value.engineerCount.toString(),
         'Tasks': totals.value.taskCount,
         'Total Min': totals.value.minutes,
         'Hours': formatHourMinute(totals.value.minutes),
@@ -729,7 +733,8 @@ onMounted(async () => {
               </tr>
               
               <tr v-if="totals" class="font-bold bg-base-200">
-                <td colspan="5" class="text-right">Total</td>
+                <td colspan="4" class="text-right">รวมทั้งหมด</td>
+                <td class="text-right">{{ totals.engineerCount }} </td>
                 <td class="text-right">{{ totals.taskCount }}</td>
                 <td class="text-right">{{ totals.minutes }}</td>
                 <td class="text-right">{{ formatHourMinute(totals.minutes) }}</td>
