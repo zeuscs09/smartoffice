@@ -33,7 +33,13 @@ export function formatCurrency(amount: number): string {
 }
 
 // ฟังก์ชันสำหรับจัดรูปแบบระยะเวลา รวมถึงวัน เดือน ปี
-export function formatDuration(duration: number): string {
+export function formatDuration(duration: number, options?: { hourOnly?: boolean }): string {
+  // ถ้าต้องการแสดงผลเป็นชั่วโมงเท่านั้น
+  if (options?.hourOnly) {
+    const hours = duration / 3600;
+    return `${hours.toFixed(2)} hrs`;
+  }
+
   const seconds = Math.floor(duration % 60)
   const minutes = Math.floor((duration / 60) % 60)
   const hours = Math.floor((duration / 3600) % 24)

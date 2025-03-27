@@ -1,23 +1,31 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, inject } from 'vue'
 import { createResource } from 'frappe-ui'
 import { useRouter, useRoute } from 'vue-router'
 import { useToast } from '@/composables/useToast'
 import { Calendar, Clock, Save, ArrowLeft, Plus, Trash2, Check, X } from 'lucide-vue-next'
 import UserLayout from '@/layouts/userLayout.vue'
+import { session } from '@/data/session'
 
+const formatDuration = inject('formatDuration') as (duration: number, options?: { hourOnly?: boolean }) => string
 const router = useRouter()
 const route = useRoute()
-const { showToast } = useToast()
+
+// เปลี่ยนวิธีการใช้งาน toast ตามตัวอย่างใน AdvanceEntryDetail.vue
+const toast = useToast()
 
 // Get timesheet ID from route params
 const timesheetId = computed(() => route.params.id as string)
 const isNewTimesheet = computed(() => timesheetId.value === 'new')
-
+const employee = ref({
+  name: '',
+  employee_name: ''
+})
 // Timesheet data
 const timesheet = ref({
   name: '',
   employee: '',
+  employee_name: '',
   year: new Date().getFullYear().toString(),
   month: '',
   month_value: '',
@@ -57,11 +65,8 @@ const timesheetResource = createResource({
     }
   },
   onError(error) {
-    showToast({
-      title: 'Error',
-      message: error.message || 'Failed to fetch timesheet',
-      type: 'error'
-    })
+    // เปลี่ยนจาก showToast() เป็นการใช้ toast.error()
+    toast.error(error.message || 'Failed to fetch timesheet')
   }
 })
 
@@ -69,11 +74,8 @@ const timesheetResource = createResource({
 const saveTimesheetResource = createResource({
   url: 'smartoffice.api.timesheet.save_timesheet',
   onSuccess(data) {
-    showToast({
-      title: 'Success',
-      message: 'Timesheet saved successfully',
-      type: 'success'
-    })
+    // เปลี่ยนจาก showToast() เป็นการใช้ toast.success()
+    toast.success('Timesheet saved successfully')
     if (isNewTimesheet.value) {
       router.replace({ name: 'TimesheetDetail', params: { id: data.name } })
     } else {
@@ -81,11 +83,8 @@ const saveTimesheetResource = createResource({
     }
   },
   onError(error) {
-    showToast({
-      title: 'Error',
-      message: error.message || 'Failed to save timesheet',
-      type: 'error'
-    })
+    // เปลี่ยนจาก showToast() เป็นการใช้ toast.error()
+    toast.error(error.message || 'Failed to save timesheet')
   }
 })
 
@@ -93,19 +92,11 @@ const saveTimesheetResource = createResource({
 const submitTimesheetResource = createResource({
   url: 'smartoffice.api.timesheet.submit_timesheet',
   onSuccess() {
-    showToast({
-      title: 'Success',
-      message: 'Timesheet submitted successfully',
-      type: 'success'
-    })
+    toast.success('Timesheet submitted successfully')
     fetchTimesheet()
   },
   onError(error) {
-    showToast({
-      title: 'Error',
-      message: error.message || 'Failed to submit timesheet',
-      type: 'error'
-    })
+    toast.error(error.message || 'Failed to submit timesheet')
   }
 })
 
@@ -113,36 +104,26 @@ const submitTimesheetResource = createResource({
 const cancelTimesheetResource = createResource({
   url: 'smartoffice.api.timesheet.cancel_timesheet',
   onSuccess() {
-    showToast({
-      title: 'Success',
-      message: 'Timesheet cancelled successfully',
-      type: 'success'
-    })
+    toast.success('Timesheet cancelled successfully')
     fetchTimesheet()
   },
   onError(error) {
-    showToast({
-      title: 'Error',
-      message: error.message || 'Failed to cancel timesheet',
-      type: 'error'
-    })
+    toast.error(error.message || 'Failed to cancel timesheet')
   }
 })
 
 // Resource for fetching timesheet data
 const fetchDataResource = createResource({
-  url: 'smartoffice.api.timesheet.get_timesheet_data',
+  url: 'smartoffice.smart_office.doctype.smo_timesheet.smo_timesheet.get_timesheets',
   onSuccess(data) {
-    if (data && data.time_sheets) {
-      timesheet.value.time_sheets = data.time_sheets
+    console.log(data)
+    if (data) {
+      timesheet.value.time_sheets = data
+      console.log(timesheet.value.time_sheets)
     }
   },
   onError(error) {
-    showToast({
-      title: 'Error',
-      message: error.message || 'Failed to fetch timesheet data',
-      type: 'error'
-    })
+    toast.error(error.message || 'Failed to fetch timesheet data')
   }
 })
 
@@ -156,29 +137,17 @@ const fetchTimesheet = () => {
 // Save timesheet
 const saveTimesheet = () => {
   if (!timesheet.value.employee) {
-    showToast({
-      title: 'Error',
-      message: 'Please select an employee',
-      type: 'error'
-    })
+    toast.error('Please select an employee')
     return
   }
 
   if (!timesheet.value.year) {
-    showToast({
-      title: 'Error',
-      message: 'Please select a year',
-      type: 'error'
-    })
+    toast.error('Please select a year')
     return
   }
 
   if (!timesheet.value.month) {
-    showToast({
-      title: 'Error',
-      message: 'Please select a month',
-      type: 'error'
-    })
+    toast.error('Please select a month')
     return
   }
 
@@ -196,11 +165,7 @@ const saveTimesheet = () => {
 // Submit timesheet
 const submitTimesheet = () => {
   if (!timesheet.value.name) {
-    showToast({
-      title: 'Error',
-      message: 'Please save the timesheet first',
-      type: 'error'
-    })
+    toast.error('Please save the timesheet first')
     return
   }
 
@@ -212,11 +177,7 @@ const submitTimesheet = () => {
 // Cancel timesheet
 const cancelTimesheet = () => {
   if (!timesheet.value.name) {
-    showToast({
-      title: 'Error',
-      message: 'Please save the timesheet first',
-      type: 'error'
-    })
+    toast.error('Please save the timesheet first')
     return
   }
 
@@ -228,11 +189,7 @@ const cancelTimesheet = () => {
 // Get timesheet data
 const getTimesheetData = () => {
   if (!timesheet.value.employee || !timesheet.value.year || !timesheet.value.month) {
-    showToast({
-      title: 'Error',
-      message: 'Please select employee, year and month',
-      type: 'error'
-    })
+    toast.error('Please select employee, year and month')
     return
   }
 
@@ -245,7 +202,7 @@ const getTimesheetData = () => {
   fetchDataResource.submit({
     employee: timesheet.value.employee,
     year: timesheet.value.year,
-    month: timesheet.value.month_value
+    month: selectedMonth.value
   })
 }
 
@@ -261,6 +218,30 @@ const formatDate = (dateString: string) => {
     minute: '2-digit'
   })
 }
+const getEmployee = async () => {
+    
+    try {
+      const response = await fetch('/api/method/frappe.client.get_list', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          doctype: 'Employee',
+          fields: ['name', 'employee_name'],
+          filters: [['user_id', '=', session.user]],
+          order_by: 'employee_name asc'
+        })
+      })
+
+      const data = await response.json()
+      
+      employee.value = data.message[0] || []
+      console.log(employee.value)
+    } catch (err) {
+      console.error('Error fetching expense types:', err)
+    }
+  }
 
 // Calculate total hours
 const totalHours = computed(() => {
@@ -292,14 +273,18 @@ const goBack = () => {
   router.push({ name: 'TimesheetList' })
 }
 
-onMounted(() => {
+onMounted(async () => {
   fetchTimesheet()
-  
+  await getEmployee()
   // Set current month as default for new timesheet
   if (isNewTimesheet.value) {
+    console.log(employee.value)
     const currentMonth = new Date().getMonth()
     timesheet.value.month = months[currentMonth].value
     timesheet.value.month_value = months[currentMonth].number
+    timesheet.value.employee = employee.value.name
+    timesheet.value.employee_name = employee.value.employee_name
+  
   }
 })
 </script>
@@ -367,9 +352,9 @@ onMounted(() => {
                 </label>
                 <input 
                   type="text" 
-                  v-model="timesheet.employee" 
+                  v-model="timesheet.employee_name"  
                   class="input input-bordered w-full" 
-                  :disabled="!isEditable || !isNewTimesheet"
+                  :disabled="!isEditable || isNewTimesheet"
                   placeholder="Employee ID"
                 />
               </div>
@@ -447,7 +432,7 @@ onMounted(() => {
                     <tr v-for="(item, index) in timesheet.time_sheets" :key="index" class="hover">
                       <td>{{ formatDate(item.from_time) }}</td>
                       <td>{{ formatDate(item.to_time) }}</td>
-                      <td>{{ item.working_hours }} hrs</td>
+                      <td>{{ formatDuration(item.working_hours, { hourOnly: true }) }} </td>
                       <td>{{ item.link_from_doc }}</td>
                       <td>{{ item.doc_number }}</td>
                       <td>{{ item.project_code }}</td>
@@ -493,7 +478,7 @@ onMounted(() => {
                 <div class="stat-title">Total Working Hours</div>
                 <div class="stat-value text-primary flex items-center text-2xl">
                   <Clock class="w-5 h-5 mr-2" />
-                  {{ totalHours }} hrs
+                  {{ formatDuration(totalHours, { hourOnly: true }) }} 
                 </div>
               </div>
               

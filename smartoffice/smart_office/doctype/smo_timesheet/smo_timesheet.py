@@ -33,6 +33,10 @@ class SMOTimesheet(Document):
 				self.approver = ""
 		if not self.approver:
 			frappe.throw( self.employee + " ไม่มีผู้อนุมัติ")
+		total_hours = 0
+		for time_sheet in self.time_sheets:
+			total_hours += time_sheet.working_hours
+		self.total_hours = total_hours
 @frappe.whitelist()
 def get_timesheets(employee=None, year=None, month=None):
 	if not employee or not year or not month:
