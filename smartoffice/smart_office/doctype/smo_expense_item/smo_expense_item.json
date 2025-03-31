@@ -7,6 +7,7 @@
  "field_order": [
   "expense_type",
   "input_expense_types",
+  "overnight_trip",
   "expense_type_name",
   "taxi_initial",
   "rate_per_km",
@@ -266,12 +267,19 @@
    "fieldname": "attachment_section",
    "fieldtype": "Section Break",
    "label": "Attachment"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.expense_type=='EP004'",
+   "fieldname": "overnight_trip",
+   "fieldtype": "Check",
+   "label": "Overnight Trip"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-12-18 20:18:31.150254",
+ "modified": "2025-03-26 20:38:54.929612",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Item",

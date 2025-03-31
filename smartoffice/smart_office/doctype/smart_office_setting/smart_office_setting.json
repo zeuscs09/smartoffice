@@ -14,6 +14,7 @@
   "flow_section",
   "admin_user",
   "finance_user",
+  "accounting",
   "vtiger_section",
   "db_host",
   "db_name",
@@ -84,7 +85,7 @@
    "fieldname": "finance_user",
    "fieldtype": "Link",
    "label": "Finance",
-   "options": "Designation"
+   "options": "Role"
   },
   {
    "fieldname": "vtiger_section",
@@ -139,12 +140,18 @@
    "fieldname": "open_date",
    "fieldtype": "Date",
    "label": "Open Date"
+  },
+  {
+   "fieldname": "accounting",
+   "fieldtype": "Link",
+   "label": "Accounting",
+   "options": "Role"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-02-17 15:16:29.886340",
+ "modified": "2025-03-26 19:50:35.697456",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "Smart Office Setting",

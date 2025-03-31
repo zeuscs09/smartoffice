@@ -44,26 +44,33 @@ class SMOAdvanceEntry(Document):
 		
 		# ตั้งค่า admin user ก่อน
 		# ตึง designation จาก setting
-		finance_designation = frappe.get_doc("Smart Office Setting").finance_user
-		if not finance_designation:
-			frappe.throw("Not found finance designation")
+		checking_role = frappe.get_doc("Smart Office Setting").accounting
+		if not checking_role:
+			frappe.throw(f"Not found {checking_role}")
 
-		# ดึง employees ทั้งหมดที่มี designation นี้ และมี user_id
-		finance_employees = frappe.get_all(
-			"Employee",
+		# เปลี่ยนจากการดึง employees ตาม designation เป็นการใช้ role 
+		# ดึง users ที่มี role ที่กำหนด
+		finance_users = frappe.get_all(
+			"Has Role",
 			filters={
-				"status": "Active",
-				"designation": finance_designation
+				"role": checking_role,
+				"parenttype": "User"
 			},
-			fields=["user_id"]
+			fields=["parent"]
 		)
 
-		if not finance_employees:
-			frappe.throw(f"No employees found with designation: {finance_designation}")
-  
-		finance_users = [emp.user_id for emp in finance_employees if emp.user_id]
 		if not finance_users:
-			frappe.throw(f"No user accounts found for employees with designation: {finance_designation}")
+			frappe.throw(f"No users found with role: {checking_role}")
+
+		# กรองเฉพาะ active users
+		active_finance_users = []
+		for user in finance_users:
+			user_status = frappe.db.get_value("User", user.parent, "enabled")
+			if user_status:
+				active_finance_users.append(user.parent)
+		
+		if not active_finance_users:
+			frappe.throw(f"No active users found with role: {checking_role}")
 
 		# เรียกใช้ approval_utils เพื่อสร้าง approval chain
 		approvers, max_level, next_user = get_approval_chain(
@@ -73,7 +80,7 @@ class SMOAdvanceEntry(Document):
 		)
 
 		
-		finance_user_list = ", ".join(finance_users)
+		finance_user_list = ", ".join(active_finance_users)
 		# ปรับ level ของ approvers ที่เหลือให้เริ่มจาก 2
 		for approver_data in approvers:
 			self.append("approvers", {
@@ -88,7 +95,7 @@ class SMOAdvanceEntry(Document):
 			"approver": finance_user_list,
 			"user_id": finance_user_list,
 			"approver_level": max_level + 1,
-			"approver_role": "Finance",
+			"approver_role": checking_role,
 			"status": ""
 		})
 		self.max_level = max_level + 1
@@ -198,3 +205,29 @@ class SMOAdvanceEntry(Document):
 				},
 				user=single_user
 			)
+			try:
+				# ดึงข้อมูลอีเมลของผู้ใช้
+				user_email = frappe.db.get_value("User", single_user, "email")
+				if user_email:
+					# ตั้งค่าหัวข้อและเนื้อหาอีเมล
+					subject = message or f"คำขอเบิกค่าใช้จ่ายใหม่รอการอนุมัติ: {self.name}"
+					content = f"""
+					<p>เรียน {frappe.db.get_value("User", single_user, "full_name") or single_user}</p>
+					<p>{subject}</p>
+					<p>คุณสามารถเข้าดูรายละเอียดเพิ่มเติมได้ที่ลิงก์ด้านล่าง:</p>
+					<p><a href="{frappe.utils.get_url()}/intranet/advance-entry/{self.name}">คลิกที่นี่เพื่อดูรายละเอียด</a></p>
+					<p>ขอแสดงความนับถือ</p>
+					<p>ระบบแจ้งเตือนอัตโนมัติ</p>
+					"""
+					
+					# ส่งอีเมล
+					frappe.sendmail(
+						recipients=[user_email],
+						subject=subject,
+						message=content,
+						reference_doctype=self.doctype,
+						reference_name=self.name
+					)
+			except Exception as e:
+					frappe.errprint(f"Failed to send email: {str(e)}")
+   

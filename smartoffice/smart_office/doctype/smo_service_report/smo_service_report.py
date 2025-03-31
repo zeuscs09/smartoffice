@@ -127,12 +127,19 @@ class SMOServiceReport(Document):
 			timesheet.submit()
 
 	def notify_customer(self):
-		frappe.errprint(f"Notify Customer: {self.contact_email} {self.approval_hash}")
+		
 		if not self.contact_email or not self.approval_hash:
 			return
 
 		args = self.as_dict()
+		teams=self.team 
+		team_names=[]
+		for team in teams:
+			team_names.append(team.full_name)
 		
+		team_names_str = ", ".join(team_names)
+		args['team_names'] = team_names_str
+		args['project_code'] = self.project_code
 		# จัดรูปแบบวันที่และเวลา
 		job_start = get_datetime(self.job_start_on)
 		args['formatted_date'] = format_date(job_start, "dd MMMM yyyy")

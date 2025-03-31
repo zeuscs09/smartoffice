@@ -37,33 +37,35 @@
                 <select class="select select-bordered w-full max-w-xs" v-model="statusFilter" @change="handleFilter">
                     <option value="">All</option>
                     <option value="Draft">Draft</option>
-                    <option value="Approval Review">Approval Review</option>
-                    <option value="Approved">Approve</option>
-                    <option value="Rejected">Reject</option>
+                    <option value="Pending Approval">Pending Approval</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
                 </select>
                 <input type="date" class="input input-bordered " v-model="startDate" @change="handleFilter" />
                 <input type="date" class="input input-bordered " v-model="endDate" @change="handleFilter" />
-            </div <!-- ตารางแสดงข้อมูล -->
+            </div>
+            <!-- ตารางแสดงข้อมูล -->
             <AdvanceEntryTable 
-                :data="serviceReportStore.data" 
-                :loading="serviceReportStore.documentsResource.loading"
-                :error="serviceReportStore.documentsResource.error" 
-                :sortField="serviceReportStore.sortField"
-                :sortOrder="serviceReportStore.sortOrder" 
+                :data="advanceEntryStore.data" 
+                :loading="advanceEntryStore.documentsResource.loading"
+                :error="advanceEntryStore.documentsResource.error" 
+                :sortField="advanceEntryStore.sortField"
+                :sortOrder="advanceEntryStore.sortOrder" 
                 @sort="sortBy" 
+                @view="viewDocument"
             />
 
             <!-- Pagination -->
             <Pagination 
-                v-if="serviceReportStore.data.length > 0" 
-                :current-page="serviceReportStore.currentPage"
-                :is-first-page="serviceReportStore.isFirstPage" 
-                :is-last-page="serviceReportStore.isLastPage"
+                v-if="advanceEntryStore.data.length > 0" 
+                :current-page="advanceEntryStore.currentPage"
+                :is-first-page="advanceEntryStore.isFirstPage" 
+                :is-last-page="advanceEntryStore.isLastPage"
                 :page-size="pageSize" 
                 :displayed-items-count="displayedItemsCount" 
                 :total-items="totalItems"
-                @previous="serviceReportStore.previousPage()" 
-                @next="serviceReportStore.nextPage()"
+                @previous="advanceEntryStore.previousPage()" 
+                @next="advanceEntryStore.nextPage()"
                 @update:page-size="handlePageSizeChange" 
             />
 
@@ -99,15 +101,15 @@ import { useRouter } from 'vue-router'
 import UserLayout from '@/layouts/userLayout.vue'
 import { useAdvanceEntryStore } from '@/stores/advanceEntryStore'
 import Pagination from '@/components/Pagination.vue'
-
 import Timeline from '@/components/TimeLine.vue'
 import AdvanceEntryTable from '@/components/AdvanceEntryTable.vue'
+
 const router = useRouter()
-const serviceReportStore = useAdvanceEntryStore()
-serviceReportStore.pageSize = 10
+const advanceEntryStore = useAdvanceEntryStore()
+advanceEntryStore.pageSize = 10
 
-
-
+// กำหนดคีย์สำหรับเก็บข้อมูลใน localStorage
+const STORAGE_KEY = 'advance-entry-criteria'
 
 const searchQuery = ref('')
 const statusFilter = ref('')
@@ -115,78 +117,137 @@ const startDate = ref('')
 const endDate = ref('')
 const pageSize = ref(10)
 const showFilter = ref(false)
+const timelineModal = ref<HTMLDialogElement | null>(null)
+const timelineEvents = ref([])
 
-const displayedItemsCount = computed(() => serviceReportStore.data.length)
-const totalItems = computed(() => serviceReportStore.documentsResource.data?.total || 0)
+const displayedItemsCount = computed(() => advanceEntryStore.data.length)
+const totalItems = computed(() => advanceEntryStore.documentsResource.data?.total || 0)
+
+// เพิ่มฟังก์ชันสำหรับบันทึกและโหลด criteria
+const saveCriteria = () => {
+  const criteria = {
+    searchQuery: searchQuery.value,
+    statusFilter: statusFilter.value,
+    startDate: startDate.value,
+    endDate: endDate.value,
+    pageSize: pageSize.value,
+    showFilter: showFilter.value,
+    currentPage: advanceEntryStore.currentPage,
+    sortField: advanceEntryStore.sortField,
+    sortOrder: advanceEntryStore.sortOrder
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(criteria))
+}
+
+const loadCriteria = () => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      const criteria = JSON.parse(saved)
+      
+      // กำหนดค่าให้กับตัวแปรต่างๆ
+      searchQuery.value = criteria.searchQuery || ''
+      statusFilter.value = criteria.statusFilter || ''
+      startDate.value = criteria.startDate || ''
+      endDate.value = criteria.endDate || ''
+      pageSize.value = criteria.pageSize || 10
+      showFilter.value = criteria.showFilter || false
+      
+      // กำหนดค่าให้ store
+      advanceEntryStore.searchQuery = searchQuery.value
+      advanceEntryStore.statusFilter = statusFilter.value
+      advanceEntryStore.startDate = startDate.value
+      advanceEntryStore.endDate = endDate.value
+      advanceEntryStore.pageSize = pageSize.value
+      advanceEntryStore.sortField = criteria.sortField || 'creation'
+      advanceEntryStore.sortOrder = criteria.sortOrder || 'desc'
+      
+      // ดึงข้อมูลโดยใช้หน้าที่บันทึกไว้
+      advanceEntryStore.fetchAll(criteria.currentPage || 1)
+    } else {
+      // กรณีไม่มีข้อมูลที่บันทึกไว้ ใช้ค่าเริ่มต้น
+      advanceEntryStore.pageSize = pageSize.value
+      advanceEntryStore.fetchAll(1)
+    }
+  } catch (err) {
+    console.error('Error loading criteria:', err)
+    // หากโหลดไม่สำเร็จให้ใช้ค่าเริ่มต้น
+    advanceEntryStore.pageSize = pageSize.value
+    advanceEntryStore.fetchAll(1)
+  }
+}
 
 onMounted(() => {
-    serviceReportStore.fetchAll(1)
+  // เรียกใช้ loadCriteria แทนการเรียก fetchAll โดยตรง
+  loadCriteria()
 })
 
 const toggleFilter = () => {
-    showFilter.value = !showFilter.value
+  showFilter.value = !showFilter.value
+  saveCriteria() // บันทึกการแสดง/ซ่อนตัวกรอง
 }
 
 const handleSearch = () => {
-    serviceReportStore.searchQuery = searchQuery.value
-    serviceReportStore.fetchAll(1)
+  advanceEntryStore.searchQuery = searchQuery.value
+  advanceEntryStore.fetchAll(1)
+  saveCriteria() // บันทึกเกณฑ์การค้นหา
 }
 
 const handleFilter = () => {
-    serviceReportStore.statusFilter = statusFilter.value
-    serviceReportStore.startDate = startDate.value
-    serviceReportStore.endDate = endDate.value
-    serviceReportStore.fetchAll(1)
+  advanceEntryStore.statusFilter = statusFilter.value
+  advanceEntryStore.startDate = startDate.value
+  advanceEntryStore.endDate = endDate.value
+  advanceEntryStore.fetchAll(1)
+  saveCriteria() // บันทึกเกณฑ์การกรอง
 }
 
 const sortBy = (field: string) => {
-    if (serviceReportStore.sortField === field) {
-        serviceReportStore.sortOrder = serviceReportStore.sortOrder === 'asc' ? 'desc' : 'asc'
-    } else {
-        serviceReportStore.sortField = field
-        serviceReportStore.sortOrder = 'asc'
-    }
-    serviceReportStore.fetchAll(1)
+  if (advanceEntryStore.sortField === field) {
+    advanceEntryStore.sortOrder = advanceEntryStore.sortOrder === 'asc' ? 'desc' : 'asc'
+  } else {
+    advanceEntryStore.sortField = field
+    advanceEntryStore.sortOrder = 'asc'
+  }
+  advanceEntryStore.fetchAll(1)
+  saveCriteria() // บันทึกลำดับการเรียง
 }
 
 const handlePageSizeChange = (newSize: number) => {
-    pageSize.value = newSize
-    serviceReportStore.pageSize = newSize
-    serviceReportStore.fetchAll(1)
+  pageSize.value = newSize
+  advanceEntryStore.pageSize = newSize
+  advanceEntryStore.fetchAll(1)
+  saveCriteria() // บันทึกขนาดหน้า
 }
 
-// const refreshData = () => {
-//     serviceReportStore.fetchAll(serviceReportStore.currentPage)
-// }
+// เพิ่มฟังก์ชัน viewDocument
+const viewDocument = (docName: string) => {
+  // บันทึก criteria ก่อนไปหน้ารายละเอียด
+  saveCriteria()
+  location.href = `/app/smo-advance-entry/${docName}?from=frontend`
+}
 
-// const applyFiltersAndRefresh = () => {
-//     // รวมตรรกะการค้นหาและกรอง
-//     handleSearch()
-//     handleFilter()
-//     // รีเฟรชข้อมูล
-//     serviceReportStore.fetchAll(serviceReportStore.currentPage)
-// }
-
-
+// แก้ไขให้ window.refresh_table บันทึก criteria ด้วย
+window.refresh_table = () => {
+  advanceEntryStore.fetchAll(advanceEntryStore.currentPage)
+  saveCriteria()
+}
 
 const newAdvanceEntry = () => {
-    window.open('/app/smo-advance-entry/new?from_page=/intranet', '_blank')
+  // บันทึก criteria ก่อนไปหน้าสร้างใหม่
+  saveCriteria()
+  window.open('/app/smo-advance-entry/new?from_page=/intranet', '_blank')
 }
-window.refresh_table = () => {
-    serviceReportStore.fetchAll(serviceReportStore.currentPage)
-}
 
-const timelineModal = ref<HTMLDialogElement | null>(null)
-
-const timelineEvents = ref([
-
-])
-
-// เพิ่ม watch เพื่อติดตามการเปลี่ยนแปลงของ pageSize
-watch(pageSize, (newSize) => {
-    console.log('Page size changed to:', newSize)
+// ให้บันทึก criteria เมื่อ store ได้รับข้อมูลใหม่
+watch(() => advanceEntryStore.currentPage, () => {
+  saveCriteria()
 })
 
+// บันทึก criteria เมื่อ pageSize เปลี่ยน
+watch(pageSize, (newSize) => {
+  console.log('Page size changed to:', newSize)
+  saveCriteria()
+})
 </script>
 
 <style scoped>

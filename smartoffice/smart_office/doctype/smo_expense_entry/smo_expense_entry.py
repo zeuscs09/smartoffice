@@ -233,7 +233,32 @@ class SMOExpenseEntry(Document):
 				},
 				user=user_id
 			)
-
+			try:
+					# ดึงข้อมูลอีเมลของผู้ใช้
+				user_email = frappe.db.get_value("User", user_id, "email")
+				if user_email:
+					# ตั้งค่าหัวข้อและเนื้อหาอีเมล
+					subject = message or f"คำขอเบิกค่าใช้จ่ายใหม่รอการอนุมัติ: {self.name}"
+					content = f"""
+					<p>เรียน {frappe.db.get_value("User", user_id, "full_name") or user_id}</p>
+					<p>{subject}</p>
+					<p>คุณสามารถเข้าดูรายละเอียดเพิ่มเติมได้ที่ลิงก์ด้านล่าง:</p>
+					<p><a href="{frappe.utils.get_url()}/intranet/expense-entry/{self.name}">คลิกที่นี่เพื่อดูรายละเอียด</a></p>
+					<p>ขอแสดงความนับถือ</p>
+					<p>ระบบแจ้งเตือนอัตโนมัติ</p>
+					"""
+					
+					# ส่งอีเมล
+					frappe.sendmail(
+						recipients=[user_email],
+						subject=subject,
+						message=content,
+						reference_doctype=self.doctype,
+						reference_name=self.name
+					)
+			except Exception as e:
+					frappe.errprint(f"Failed to send email: {str(e)}")
+   
 	def check_service_report_status(self):
 		if self.service_report:
 			service_report_status = frappe.db.get_value("SMO Service Report", self.service_report, "workflow_state")

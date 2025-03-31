@@ -49,27 +49,28 @@
             <!-- ตารางแสดงข้อมูล -->
             <div class="overflow-x-auto mt-4">
                 <ExpenseRequestTable
-                    :data="serviceReportStore.data"
-                    :loading="serviceReportStore.documentsResource.loading"
-                    :error="serviceReportStore.documentsResource.error"
-                    :sort-field="serviceReportStore.sortField"
-                    :sort-order="serviceReportStore.sortOrder"
+                    :data="expenseRequestStore.data"
+                    :loading="expenseRequestStore.documentsResource.loading"
+                    :error="expenseRequestStore.documentsResource.error"
+                    :sort-field="expenseRequestStore.sortField"
+                    :sort-order="expenseRequestStore.sortOrder"
                     :sortable="true"
                     @sort="handleSort"
+                    @view="viewDocument"
                 />
             </div>
 
             <!-- Pagination -->
             <Pagination 
-                v-if="serviceReportStore.data.length > 0" 
-                :current-page="serviceReportStore.currentPage"
-                :is-first-page="serviceReportStore.isFirstPage" 
-                :is-last-page="serviceReportStore.isLastPage"
+                v-if="expenseRequestStore.data.length > 0" 
+                :current-page="expenseRequestStore.currentPage"
+                :is-first-page="expenseRequestStore.isFirstPage" 
+                :is-last-page="expenseRequestStore.isLastPage"
                 :page-size="pageSize" 
                 :displayed-items-count="displayedItemsCount" 
                 :total-items="totalItems"
-                @previous="serviceReportStore.previousPage()" 
-                @next="serviceReportStore.nextPage()"
+                @previous="expenseRequestStore.previousPage()" 
+                @next="expenseRequestStore.nextPage()"
                 @update:page-size="handlePageSizeChange" 
             />
 
@@ -84,17 +85,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, inject } from 'vue'
+import { ref, computed, onMounted, inject, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import UserLayout from '@/layouts/userLayout.vue'
 import { useExpenseRequestStore } from '@/stores/expenseRequestStore'
 import ExpenseRequestTable from '@/components/ExpenseRequestTable.vue'
-import Pagination from '@/components/Pagination.vue' // นำเข้า Pagination component
+import Pagination from '@/components/Pagination.vue'
+
 const router = useRouter()
-const serviceReportStore = useExpenseRequestStore()
-serviceReportStore.pageSize = 10
+const expenseRequestStore = useExpenseRequestStore()
+expenseRequestStore.pageSize = 10
 
-
+// กำหนดคีย์สำหรับเก็บข้อมูลใน localStorage
+const STORAGE_KEY = 'expense-request-criteria'
 
 const searchQuery = ref('')
 const statusFilter = ref('')
@@ -102,65 +105,142 @@ const startDate = ref('')
 const endDate = ref('')
 const pageSize = ref(10)
 const showFilter = ref(false)
+const timelineModal = ref<HTMLDialogElement | null>(null)
+const timelineEvents = ref([])
 
-const displayedItemsCount = computed(() => serviceReportStore.data.length)
-const totalItems = computed(() => serviceReportStore.documentsResource.data?.total || 0)
+const displayedItemsCount = computed(() => expenseRequestStore.data.length)
+const totalItems = computed(() => expenseRequestStore.documentsResource.data?.total || 0)
+
+// เพิ่มฟังก์ชันสำหรับบันทึกและโหลด criteria
+const saveCriteria = () => {
+  const criteria = {
+    searchQuery: searchQuery.value,
+    statusFilter: statusFilter.value,
+    startDate: startDate.value,
+    endDate: endDate.value,
+    pageSize: pageSize.value,
+    showFilter: showFilter.value,
+    currentPage: expenseRequestStore.currentPage,
+    sortField: expenseRequestStore.sortField,
+    sortOrder: expenseRequestStore.sortOrder
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(criteria))
+}
+
+const loadCriteria = () => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      const criteria = JSON.parse(saved)
+      
+      // กำหนดค่าให้กับตัวแปรต่างๆ
+      searchQuery.value = criteria.searchQuery || ''
+      statusFilter.value = criteria.statusFilter || ''
+      startDate.value = criteria.startDate || ''
+      endDate.value = criteria.endDate || ''
+      pageSize.value = criteria.pageSize || 10
+      showFilter.value = criteria.showFilter || false
+      
+      // กำหนดค่าให้ store
+      expenseRequestStore.searchQuery = searchQuery.value
+      expenseRequestStore.statusFilter = statusFilter.value
+      expenseRequestStore.startDate = startDate.value
+      expenseRequestStore.endDate = endDate.value
+      expenseRequestStore.pageSize = pageSize.value
+      expenseRequestStore.sortField = criteria.sortField || 'creation'
+      expenseRequestStore.sortOrder = criteria.sortOrder || 'desc'
+      
+      // ดึงข้อมูลโดยใช้หน้าที่บันทึกไว้
+      expenseRequestStore.fetchAll(criteria.currentPage || 1)
+    } else {
+      // กรณีไม่มีข้อมูลที่บันทึกไว้ ใช้ค่าเริ่มต้น
+      expenseRequestStore.pageSize = pageSize.value
+      expenseRequestStore.fetchAll(1)
+    }
+  } catch (err) {
+    console.error('Error loading criteria:', err)
+    // หากโหลดไม่สำเร็จให้ใช้ค่าเริ่มต้น
+    expenseRequestStore.pageSize = pageSize.value
+    expenseRequestStore.fetchAll(1)
+  }
+}
 
 onMounted(() => {
-    serviceReportStore.fetchAll(1)
+  // เรียกใช้ loadCriteria แทนการเรียก fetchAll โดยตรง
+  loadCriteria()
 })
 
 const toggleFilter = () => {
-    showFilter.value = !showFilter.value
+  showFilter.value = !showFilter.value
+  saveCriteria() // บันทึกการแสดง/ซ่อนตัวกรอง
 }
 
 const handleSearch = () => {
-    serviceReportStore.searchQuery = searchQuery.value
-    serviceReportStore.fetchAll(1)
+  expenseRequestStore.searchQuery = searchQuery.value
+  expenseRequestStore.fetchAll(1)
+  saveCriteria() // บันทึกเกณฑ์การค้นหา
 }
 
 const handleFilter = () => {
-    serviceReportStore.statusFilter = statusFilter.value
-    serviceReportStore.startDate = startDate.value
-    serviceReportStore.endDate = endDate.value
-    serviceReportStore.fetchAll(1)
+  expenseRequestStore.statusFilter = statusFilter.value
+  expenseRequestStore.startDate = startDate.value
+  expenseRequestStore.endDate = endDate.value
+  expenseRequestStore.fetchAll(1)
+  saveCriteria() // บันทึกเกณฑ์การกรอง
 }
 
 const sortField = ref('')
 const sortOrder = ref('asc')
 
 const handleSort = (field: string) => {
-    if (sortField.value === field) {
-        sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
-    } else {
-        sortField.value = field
-        sortOrder.value = 'asc'
-    }
-    serviceReportStore.sortField = sortField.value
-    serviceReportStore.sortOrder = sortOrder.value
-    serviceReportStore.fetchAll(1)
+  if (sortField.value === field) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortField.value = field
+    sortOrder.value = 'asc'
+  }
+  expenseRequestStore.sortField = sortField.value
+  expenseRequestStore.sortOrder = sortOrder.value
+  expenseRequestStore.fetchAll(1)
+  saveCriteria() // บันทึกการจัดเรียง
 }
 
 const handlePageSizeChange = (newSize: number) => {
-    pageSize.value = newSize
-    serviceReportStore.pageSize = newSize
-    serviceReportStore.fetchAll(1)
+  pageSize.value = newSize
+  expenseRequestStore.pageSize = newSize
+  expenseRequestStore.fetchAll(1)
+  saveCriteria() // บันทึกขนาดหน้า
 }
+
+// เพิ่มฟังก์ชัน viewDocument
+const viewDocument = (docName: string) => {
+  // บันทึก criteria ก่อนไปหน้ารายละเอียด
+  saveCriteria()
+  location.href = `/app/smo-expense-request/${docName}?from=frontend`
+}
+
 const createExpenseRequest = () => {
-    window.open('/app/smo-expense-request/new?from_page=/intranet', '_blank')
+  // บันทึก criteria ก่อนไปหน้าสร้างใหม่
+  saveCriteria()
+  window.open('/app/smo-expense-request/new?from_page=/intranet', '_blank')
 }
 
-const timelineModal = ref<HTMLDialogElement | null>(null)
-
-const timelineEvents = ref([
-   
-])
-
-// เพิ่มฟังก์ชัน refresh_table ให้กับ window object
+// แก้ไขให้ window.refresh_table บันทึก criteria ด้วย
 window.refresh_table = () => {
-    serviceReportStore.fetchAll(serviceReportStore.currentPage)
+  expenseRequestStore.fetchAll(expenseRequestStore.currentPage)
+  saveCriteria()
 }
 
+// ให้บันทึก criteria เมื่อ store ได้รับข้อมูลใหม่
+watch(() => expenseRequestStore.currentPage, () => {
+  saveCriteria()
+})
+
+// บันทึก criteria เมื่อ pageSize เปลี่ยน
+watch(pageSize, (newSize) => {
+  console.log('Page size changed to:', newSize)
+  saveCriteria()
+})
 </script>
 
 <style scoped>

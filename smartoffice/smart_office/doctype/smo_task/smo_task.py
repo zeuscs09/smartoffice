@@ -79,7 +79,8 @@ class SMOTask(Document):
                     "date": current_date.strftime('%Y-%m-%d'),
                     "allocated_to": team_member.user,
                     "priority": "Medium" if self.priority == "Normal" else self.priority,
-                    "status": "Closed" if self.location == "Office" else "Open"
+                    # "status": "Closed" if self.location == "Office" else "Open",
+                    "status": "Open"
                 })
                 todo.insert(ignore_permissions=True)
                 current_date += timedelta(days=1)
