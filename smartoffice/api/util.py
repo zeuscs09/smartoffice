@@ -18,6 +18,6 @@ def get_comments(name,comment_type,reference_doctype):
         WHERE `reference_doctype` = %s 
         AND `reference_name` = %s 
         AND `comment_type` = %s
-        ORDER BY creation DESC
+        ORDER BY creation asc
     """, (reference_doctype, name, comment_type) ,as_dict=True)
     return comments
