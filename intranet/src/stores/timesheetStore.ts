@@ -9,12 +9,10 @@ export const useTimesheetStore = defineStore('timesheet', () => {
   const pageSize = ref(10)
   const searchQuery = ref('')
   const statusFilter = ref('')
-  const startDate = ref('')
-  const endDate = ref('')
-  const sortField = ref('')
-  const sortOrder = ref('asc')
   const yearFilter = ref(new Date().getFullYear().toString())
   const monthFilter = ref((new Date().getMonth() + 1).toString().padStart(2, '0'))
+  const sortField = ref('posting_date')
+  const sortOrder = ref('desc')
 
   // Resource for fetching timesheets
   const documentsResource = createResource({
@@ -78,12 +76,10 @@ export const useTimesheetStore = defineStore('timesheet', () => {
     pageSize,
     searchQuery,
     statusFilter,
-    startDate,
-    endDate,
-    sortField,
-    sortOrder,
     yearFilter,
     monthFilter,
+    sortField,
+    sortOrder,
     documentsResource,
 
     // Computed

@@ -28,14 +28,15 @@ def get_timesheets(page=1, page_size=10, filters=None):
                 values["month"] = filters.get("month")
                 
             if filters.get("status") != "":
-                conditions.append("docstatus = %(status)s")
-                values["status"] = int(filters.get("status"))
+                conditions.append("workflow_state = %(status)s")
+                values["status"] = filters.get("status")
         
         # Add condition to only show timesheets for the current user
         employee = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
-        if employee and not frappe.has_permission("SMO Timesheet", "read", user=frappe.session.user):
-            conditions.append("employee = %(employee)s")
-            values["employee"] = employee
+        # Add conditions for employee and approver with OR
+        conditions.append("(ts.employee = %(employee)s OR ts.approver = %(approver)s)")
+        values["employee"] = employee
+        values["approver"] = frappe.session.user
         
         where_clause = " AND ".join(conditions) if conditions else ""
         if where_clause:
@@ -44,22 +45,30 @@ def get_timesheets(page=1, page_size=10, filters=None):
         # Get total count
         count_query = f"""
             SELECT COUNT(*) as total
-            FROM `tabSMO Timesheet`
+            FROM `tabSMO Timesheet` ts
+            INNER JOIN `tabEmployee` e ON ts.employee = e.name
             {where_clause}
         """
         total = frappe.db.sql(count_query, values=values, as_dict=True)[0].get("total")
         
         # Get paginated data
         query = f"""
-            SELECT name, employee, year, month, month_value, creation, modified, docstatus,
-                   CASE 
-                       WHEN docstatus = 0 THEN 'Draft'
-                       WHEN docstatus = 1 THEN 'Submitted'
-                       WHEN docstatus = 2 THEN 'Cancelled'
-                   END as status
-            FROM `tabSMO Timesheet`
+            SELECT 
+                ts.name,
+                e.user_id,
+                ts.employee,
+                ts.approver,
+                ts.workflow_state,
+                ts.year,
+                ts.month,
+                ts.month_value,
+                ts.creation,
+                ts.modified,
+                ts.total_hours
+            FROM `tabSMO Timesheet` ts
+            INNER JOIN `tabEmployee` e ON ts.employee = e.name
             {where_clause}
-            ORDER BY creation DESC
+            ORDER BY ts.creation DESC
             LIMIT {start}, {page_size}
         """
         
