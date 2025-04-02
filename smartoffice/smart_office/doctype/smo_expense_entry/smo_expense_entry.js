@@ -345,12 +345,12 @@ frappe.ui.form.on("SMO Expense Item", {
         row.taxi_initial + row.taxi_return_distance * row.rate_per_km;
     }
     if (row.expense_type == "EP004") {
-      row.total_cost = cur_frm.doc.ot_rate;
+      row.total_cost = frm.doc.ot_rate;
     }
     if (row.expense_type == "EP009") {
-      row.total_cost = cur_frm.doc.over_night_rate;
-      row.from_date = cur_frm.doc.service_date;
-      row.to_date = cur_frm.doc.finish_date;
+      row.total_cost = frm.doc.over_night_rate;
+      row.from_date = frm.doc.service_date;
+      row.to_date = frm.doc.finish_date;
     }
     frm.trigger("cal_total");
     frm.refresh_field("expense_item");
@@ -372,4 +372,15 @@ frappe.ui.form.on("SMO Expense Item", {
   total_cost: function (frm, cdt, cdn) {
     frm.trigger("cal_total");
   },
+  overnight_trip: function (frm, cdt, cdn) {
+    let row = locals[cdt][cdn];
+    if (row.overnight_trip == 1) {
+      row.total_cost = frm.doc.over_night_rate;
+    } else {
+      row.total_cost = 0;
+    }
+    frm.trigger("cal_total");
+    frm.refresh_field("expense_item");
+  },
+  
 });
