@@ -139,8 +139,8 @@ const formatDate = (dateString) => {
               </div>
             </td>
             <td>
-              <div class="badge" :class="getStatusBadgeClass(timesheet.status)">
-                {{ timesheet.status }}
+              <div class="badge" :class="getStatusBadgeClass(timesheet.workflow_state)">
+                {{ timesheet.workflow_state }}
               </div>
             </td>
             <td>{{ formatDate(timesheet.creation) }}</td>

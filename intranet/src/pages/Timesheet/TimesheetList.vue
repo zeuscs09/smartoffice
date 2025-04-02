@@ -1,26 +1,115 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, reactive, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from '@/composables/useToast'
 import { Calendar, Clock, Plus, Search, Filter } from 'lucide-vue-next'
 import UserLayout from '@/layouts/userLayout.vue'
 import Pagination from '@/components/Pagination.vue'
 import TimesheetTable from '@/components/TimesheetTable.vue'
-import { useTimesheetStore } from '@/stores/timesheetStore'
+import { useTimesheetList } from '@/composables/useTimesheetList'
+import type { TimesheetFilters } from '@/types/timesheet'
 
 const router = useRouter()
 const { showToast } = useToast()
-const timesheetStore = useTimesheetStore()
 
 // UI state
 const showFilter = ref(false)
 
-// Filter state
-const filters = ref({
-  year: timesheetStore.yearFilter,
-  month: timesheetStore.monthFilter,
-  status: timesheetStore.statusFilter
+// ใช้ composable แทน store
+const {
+  timesheets,
+  isLoading,
+  error,
+  filters,
+  pagination,
+  fetchTimesheets,
+  updateFilters,
+  resetFilters,
+  nextPage,
+  prevPage,
+  goToPage
+} = useTimesheetList()
+
+// Sorting state
+const sortState = reactive({
+  field: 'posting_date',
+  order: 'desc'
 })
+
+// Filter state สำหรับ UI
+const filterForm = reactive({
+  year: new Date().getFullYear().toString(),
+  month: '',
+  status: '',
+  employee: ''
+})
+
+// ฟังก์ชันช่วยจัดรูปแบบต่างๆ - ย้ายจากบล็อก script ด้านล่าง
+function getStatusText(workflow_state: string) {
+  return workflow_state
+}
+
+function getStatusVariant(workflow_state: string) {
+  switch(workflow_state) {
+    case 'Draft': return 'warning'
+    case 'Approval Review': return 'warning'
+    case 'Rejected': return 'danger'
+    case 'Approved': return 'success'
+    default: return 'secondary'
+  }
+}
+
+function formatHours(hours: number) {
+  return `${hours} hrs`
+}
+
+// แปลงค่าจาก filter form เป็น TimesheetFilters
+const convertToTimesheetFilters = () => {
+  const newFilters: Partial<TimesheetFilters> = {}
+  
+  // ถ้ามีการเลือกทั้งปีและเดือน จะสร้าง from_date และ to_date
+  if (filterForm.year && filterForm.month) {
+    const year = parseInt(filterForm.year)
+    const month = parseInt(filterForm.month) - 1 // JavaScript months are 0-11
+    
+    // สร้างวันแรกของเดือน
+    const fromDate = new Date(year, month, 1)
+    newFilters.from_date = fromDate.toISOString().split('T')[0]
+    
+    // สร้างวันสุดท้ายของเดือน
+    const toDate = new Date(year, month + 1, 0)
+    newFilters.to_date = toDate.toISOString().split('T')[0]
+  } 
+  // ถ้ามีแค่ปี จะกำหนดเป็นทั้งปี
+  else if (filterForm.year) {
+    const year = parseInt(filterForm.year)
+    
+    // วันแรกของปี
+    newFilters.from_date = `${year}-01-01`
+    
+    // วันสุดท้ายของปี
+    newFilters.to_date = `${year}-12-31`
+  }
+  
+  // ถ้ามีการกรองตาม status
+  if (filterForm.status) {
+    // แปลงจากค่า docstatus (0, 1, 2) เป็น string enum ('Draft', 'Submitted', 'Cancelled')
+    if (filterForm.status === '0') {
+      newFilters.status = 'Draft'
+    } else if (filterForm.status === '1') {
+      newFilters.status = 'Submitted'
+    } else if (filterForm.status === '2') {
+      newFilters.status = 'Cancelled'
+    }
+  }
+  
+  // ถ้ามีการกรอง employee
+  if (filterForm.employee) {
+    newFilters.employee = filterForm.employee
+  }
+  
+  return newFilters
+}
 
 // Available years for filtering
 const years = computed(() => {
@@ -59,10 +148,17 @@ const toggleFilter = () => {
 
 // Apply filters
 const applyFilters = () => {
-  timesheetStore.yearFilter = filters.value.year
-  timesheetStore.monthFilter = filters.value.month
-  timesheetStore.statusFilter = filters.value.status
-  timesheetStore.fetchAll(1)
+  const convertedFilters = convertToTimesheetFilters()
+  updateFilters(convertedFilters)
+}
+
+// Reset filters
+const clearFilters = () => {
+  filterForm.year = new Date().getFullYear().toString()
+  filterForm.month = ''
+  filterForm.status = ''
+  filterForm.employee = ''
+  resetFilters()
 }
 
 // Navigate to timesheet detail page
@@ -77,38 +173,56 @@ const createTimesheet = () => {
 
 // Handle sorting
 const handleSort = (field: string) => {
-  if (timesheetStore.sortField === field) {
-    timesheetStore.sortOrder = timesheetStore.sortOrder === 'asc' ? 'desc' : 'asc'
+  if (sortState.field === field) {
+    sortState.order = sortState.order === 'asc' ? 'desc' : 'asc'
   } else {
-    timesheetStore.sortField = field
-    timesheetStore.sortOrder = 'asc'
+    sortState.field = field
+    sortState.order = 'asc'
   }
-  timesheetStore.fetchAll(1)
+  
+  // อัปเดตการเรียงลำดับและโหลดข้อมูลใหม่
+  updateFilters({
+    ...convertToTimesheetFilters(),
+    // สร้าง orderBy โดยใช้ค่าจาก sortState (ส่งเป็น option ไป)
+    orderBy: `${sortState.field} ${sortState.order}`
+  })
 }
 
 // Handle page size change
 const handlePageSizeChange = (newSize: number) => {
-  timesheetStore.pageSize = newSize
-  timesheetStore.fetchAll(1)
+  pagination.limit = newSize
+  goToPage(1)
 }
 
 // Computed properties for pagination
 const displayedItemsCount = computed(() => 
-  timesheetStore.data.length || 0
+  timesheets.value.length || 0
 )
 
 const totalItems = computed(() => 
-  timesheetStore.documentsResource.data?.total || 0
+  pagination.total || 0
 )
 
+// Load data when component is mounted
 onMounted(() => {
-  timesheetStore.fetchAll()
+  // ตั้งค่า filter เริ่มต้นเป็นปีปัจจุบัน
+  applyFilters()
 })
 
 // Add refresh function for external calls
 window.refresh_timesheet_table = () => {
-  timesheetStore.refresh()
+  fetchTimesheets()
 }
+
+// Watch for sorting changes
+watch([sortState.field, sortState.order], () => {
+  // อัปเดตการเรียงลำดับและโหลดข้อมูลใหม่
+  updateFilters({
+    ...convertToTimesheetFilters(),
+    // สร้าง orderBy โดยใช้ค่าจาก sortState (ส่งเป็น option ไป)
+    orderBy: `${sortState.field} ${sortState.order}`
+  })
+})
 </script>
 
 <template>
@@ -157,7 +271,7 @@ window.refresh_timesheet_table = () => {
               <span class="label-text">Year</span>
             </label>
             <select 
-              v-model="filters.year" 
+              v-model="filterForm.year" 
               class="select select-bordered w-full"
             >
               <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
@@ -168,7 +282,7 @@ window.refresh_timesheet_table = () => {
               <span class="label-text">Month</span>
             </label>
             <select 
-              v-model="filters.month" 
+              v-model="filterForm.month" 
               class="select select-bordered w-full"
             >
               <option value="">All Months</option>
@@ -182,7 +296,7 @@ window.refresh_timesheet_table = () => {
               <span class="label-text">Status</span>
             </label>
             <select 
-              v-model="filters.status" 
+              v-model="filterForm.status" 
               class="select select-bordered w-full"
             >
               <option v-for="option in statusOptions" :key="option.value" :value="option.value">
@@ -190,13 +304,29 @@ window.refresh_timesheet_table = () => {
               </option>
             </select>
           </div>
-          <div class="flex items-end">
+          <div>
+            <label class="label">
+              <span class="label-text">Employee</span>
+            </label>
+            <input 
+              v-model="filterForm.employee" 
+              class="input input-bordered w-full"
+              placeholder="Employee ID"
+            />
+          </div>
+          <div class="md:col-span-4 flex gap-2">
             <button 
-              class="btn btn-primary btn-sm w-full"
+              class="btn btn-primary btn-sm"
               @click="applyFilters"
             >
               <Search class="w-4 h-4 mr-1" />
               Search
+            </button>
+            <button 
+              class="btn btn-ghost btn-sm"
+              @click="clearFilters"
+            >
+              Clear Filters
             </button>
           </div>
         </div>
@@ -205,30 +335,60 @@ window.refresh_timesheet_table = () => {
       <!-- Timesheets Table -->
       <div class="overflow-x-auto bg-base-100 rounded-lg shadow mt-4">
         <TimesheetTable
-          :data="timesheetStore.data"
-          :loading="timesheetStore.documentsResource.loading"
-          :error="timesheetStore.documentsResource.error"
-          :sort-field="timesheetStore.sortField"
-          :sort-order="timesheetStore.sortOrder"
+          :data="timesheets"
+          :loading="isLoading"
+          :error="error"
+          :sort-field="sortState.field"
+          :sort-order="sortState.order"
           :sortable="true"
           @sort="handleSort"
           @view="viewTimesheet"
-        />
+        >
+       
+        </TimesheetTable>
       </div>
-
+{{ pagination }}
       <!-- Pagination -->
       <Pagination 
-        v-if="timesheetStore.data.length > 0" 
-        :current-page="timesheetStore.currentPage"
-        :is-first-page="timesheetStore.isFirstPage" 
-        :is-last-page="timesheetStore.isLastPage"
-        :page-size="timesheetStore.pageSize" 
+        v-if="timesheets.length > 0" 
+        :current-page="pagination.currentPage"
+        :is-first-page="pagination.start === 0" 
+        :is-last-page="pagination.start + pagination.limit >= pagination.total"
+        :page-size="pagination.limit" 
         :displayed-items-count="displayedItemsCount" 
         :total-items="totalItems"
-        @previous="timesheetStore.previousPage" 
-        @next="timesheetStore.nextPage"
+        @previous="prevPage" 
+        @next="nextPage"
         @update:page-size="handlePageSizeChange" 
       />
+
+      <!-- ข้อความแสดงเมื่อไม่มีข้อมูล -->
+      <div 
+        v-if="!isLoading && !error && timesheets.length === 0" 
+        class="text-center p-8 bg-base-100 rounded-lg shadow mt-4"
+      >
+        <div class="text-lg font-medium">No timesheets found</div>
+        <p class="text-base-content/70 mt-2">Try adjusting your filters or create a new timesheet</p>
+        <button 
+          class="btn btn-primary mt-4"
+          @click="createTimesheet"
+        >
+          <Plus class="w-4 h-4 mr-1" />
+          Create Timesheet
+        </button>
+      </div>
+
+      <!-- แสดงข้อผิดพลาด -->
+      <div 
+        v-if="error" 
+        class="alert alert-error mt-4"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>{{ error.message }}</span>
+      </div>
     </div>
   </UserLayout>
 </template>
