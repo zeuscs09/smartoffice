@@ -123,11 +123,10 @@ const isEditable = computed(() => {
   if (isInitialLoading.value) return true
   
   // ถ้าเป็นเอกสารใหม่ หรือ docstatus เป็น 0 (Draft) ให้แสดงปุ่ม Save
-  if (isNewTimesheet.value || timesheet.value.docstatus === 0) return true
+  if (isNewTimesheet.value ) return true
   
-  // ถ้า workflow_state เป็น Rejected และ docstatus < 2 ให้แสดงปุ่ม Save
-  if (timesheet.value.workflow_state === 'Rejected' && timesheet.value.docstatus < 2) return true
-  
+  if (timesheet.value.docstatus === 0 && timesheet.value.emp_user_id == session.user) return true
+ 
   return false
 })
 
@@ -273,6 +272,11 @@ const saveTimesheet = async (): Promise<void> => {
     return
   }
 
+  if (timesheet.value.time_sheets.length == 0) {
+    toast.error('No time sheets found')
+    return
+  }
+
   timesheet.value.month_value = selectedMonth.number
   isLoading.value.save = true
 
@@ -304,13 +308,14 @@ const saveTimesheet = async (): Promise<void> => {
           }
         })
       })
-
+      console.log(response)
       if (!response.ok) throw new Error('Failed to save timesheet')
       const data = await response.json()
       
       toast.success('Timesheet created successfully')
       // Use window.location.href instead of router.replace
-      router.push(`/timesheet/${data.message.name}`)
+      // router.push(`/timesheet/${data.message.name}`)
+      window.location.href = `/intranet/timesheet/${data.message.name}`
     } else {
       // For existing timesheet, use set_value
       const response = await fetch('/api/method/frappe.client.set_value', {
@@ -566,7 +571,7 @@ onMounted(async () => {
           </div>
           <div class="flex gap-2">
             <button 
-              v-show="isEditable  && timesheet.docstatus == 0 && timesheet.emp_user_id == session.user" 
+              v-show="isEditable" 
               class="btn btn-sm bg-green-500 hover:bg-green-600 text-white"
               @click="saveTimesheet"
               :disabled="isLoading.save"
