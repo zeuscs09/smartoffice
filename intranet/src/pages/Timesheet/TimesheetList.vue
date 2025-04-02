@@ -203,9 +203,10 @@ const months = [
 // Status options for filtering
 const statusOptions = [
   { value: '', label: 'All' },
-  { value: '0', label: 'Draft' },
-  { value: '1', label: 'Submitted' },
-  { value: '2', label: 'Cancelled' }
+  { value: 'Draft', label: 'Draft' },
+  { value: 'Approval Review', label: 'Approval Review' },
+  { value: 'Approved', label: 'Approved' },
+  { value: 'Rejected', label: 'Rejected' }
 ]
 </script>
 
@@ -257,7 +258,7 @@ const statusOptions = [
           @input="applyFilters"
         />
         <select 
-          class="select select-bordered w-32" 
+          class="select select-bordered w-64" 
           v-model="filterForm.status"
           @change="applyFilters"
         >
