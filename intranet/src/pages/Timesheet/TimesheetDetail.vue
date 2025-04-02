@@ -566,7 +566,7 @@ onMounted(async () => {
           </div>
           <div class="flex gap-2">
             <button 
-              v-show="isEditable  && timesheet.docstatus == 0" 
+              v-show="isEditable  && timesheet.docstatus == 0 && timesheet.emp_user_id == session.user" 
               class="btn btn-sm bg-green-500 hover:bg-green-600 text-white"
               @click="saveTimesheet"
               :disabled="isLoading.save"
