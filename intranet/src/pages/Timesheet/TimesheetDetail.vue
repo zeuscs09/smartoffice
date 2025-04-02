@@ -131,14 +131,6 @@ const isEditable = computed(() => {
   return false
 })
 
-const statusText = computed(() => {
-  switch (timesheet.value.docstatus) {
-    case 0: return 'Draft'
-    case 1: return 'Submitted'
-    case 2: return 'Cancelled'
-    default: return 'Unknown'
-  }
-})
 
 // Add loading states
 const isLoading = ref({
@@ -318,7 +310,7 @@ const saveTimesheet = async (): Promise<void> => {
       
       toast.success('Timesheet created successfully')
       // Use window.location.href instead of router.replace
-      window.location.href = `/timesheet/${data.message.name}`
+      router.push(`/timesheet/${data.message.name}`)
     } else {
       // For existing timesheet, use set_value
       const response = await fetch('/api/method/frappe.client.set_value', {
