@@ -37,6 +37,64 @@ class SMOTimesheet(Document):
 		for time_sheet in self.time_sheets:
 			total_hours += time_sheet.working_hours
 		self.total_hours = total_hours
+	def on_submit(self):
+		self.create_notification(self.approver, "Timesheet รอการอนุมัติ: " + self.name)
+	
+	def create_notification(self, user_ids, message):
+		# ถ้า user_ids เป็น string ที่มี comma ให้แยกเป็น list
+		if isinstance(user_ids, str) and ',' in user_ids:
+			user_list = [u.strip() for u in user_ids.split(',')]
+		else:
+			user_list = [user_ids]
+
+		# สร้าง notification สำหรับแต่ละ user
+		for user_id in user_list:
+			notification = frappe.get_doc({
+				"doctype": "Notification Log",
+				"subject": message,
+				"for_user": user_id,
+				"type": "Alert",
+				"document_type": self.doctype,
+				"document_name": self.name,
+				"read": 0,
+			})
+			notification.insert(ignore_permissions=True)
+
+			# ส่งการแจ้งเตือนแบบ realtime
+			frappe.publish_realtime(
+				event='notification',
+				message={
+					'type': 'Alert',
+					'message': message
+				},
+				user=user_id
+			)
+			try:
+					# ดึงข้อมูลอีเมลของผู้ใช้
+				user_email = frappe.db.get_value("User", user_id, "email")
+				if user_email:
+					# ตั้งค่าหัวข้อและเนื้อหาอีเมล
+					subject = message or f"Timesheet รอการอนุมัติ: {self.name}"
+					content = f"""
+					<p>เรียน {frappe.db.get_value("User", user_id, "full_name") or user_id}</p>
+					<p>{subject}</p>
+					<p>คุณสามารถเข้าดูรายละเอียดเพิ่มเติมได้ที่ลิงก์ด้านล่าง:</p>
+					<p><a href="{frappe.utils.get_url()}/intranet/timesheet/{self.name}">คลิกที่นี่เพื่อดูรายละเอียด</a></p>
+					<p>ขอแสดงความนับถือ</p>
+					<p>ระบบแจ้งเตือนอัตโนมัติ</p>
+					"""
+					
+					# ส่งอีเมล
+					frappe.sendmail(
+						recipients=[user_email],
+						subject=subject,
+						message=content,
+						reference_doctype=self.doctype,
+						reference_name=self.name
+					)
+			except Exception as e:
+					frappe.errprint(f"Failed to send email: {str(e)}")
+   
 @frappe.whitelist()
 def get_timesheets(employee=None, year=None, month=None):
 	if not employee or not year or not month:
@@ -58,8 +116,18 @@ def get_timesheets(employee=None, year=None, month=None):
 	
 	result = []
 	
+	# ดึงรายการ doc_number ที่ถูกใช้ใน timesheet ที่ยังไม่ได้ยกเลิก
+	used_docs = frappe.db.sql("""
+		SELECT DISTINCT tsi.doc_number
+		FROM `tabSMO Timesheet` ts
+		JOIN `tabSMO Timesheet Item` tsi ON ts.name = tsi.parent
+		WHERE ts.docstatus < 2  # 0 = Draft, 1 = Submitted
+		AND ts.employee = %s
+	""", (employee), as_dict=1)
+	
+	used_doc_numbers = [d.doc_number for d in used_docs]
+	
 	# ดึง Task ที่มีพนักงานอยู่ในทีม
-	# ใช้ SQL query เพื่อค้นหาใน child table
 	tasks_with_employee = frappe.db.sql("""
 		SELECT DISTINCT parent 
 		FROM `tabSMO Working Team` 
@@ -69,11 +137,12 @@ def get_timesheets(employee=None, year=None, month=None):
 	task_names = [d.parent for d in tasks_with_employee]
 	
 	if task_names:
-		# ดึง Task ที่ไม่มี Service Report
+		# ดึง Task ที่ไม่มี Service Report และยังไม่ถูกใช้ใน timesheet
 		tasks = frappe.get_all(
 			"SMO Task",
 			filters={
 				"name": ["in", task_names],
+				"name": ["not in", used_doc_numbers],  # เพิ่มเงื่อนไขนี้
 				"start_date": ["between", [start_date, end_date]],
 				"docstatus": 1
 			},
@@ -102,7 +171,6 @@ def get_timesheets(employee=None, year=None, month=None):
 				})
 
 	# ดึง Service Reports ที่มีพนักงานอยู่ในทีม
-	# ใช้ SQL query เพื่อค้นหาใน child table
 	sr_with_employee = frappe.db.sql("""
 		SELECT DISTINCT parent 
 		FROM `tabSMO Working Team` 
@@ -112,11 +180,12 @@ def get_timesheets(employee=None, year=None, month=None):
 	sr_names = [d.parent for d in sr_with_employee]
 	
 	if sr_names:
-		# ดึง Service Reports
+		# ดึง Service Reports ที่ยังไม่ถูกใช้ใน timesheet
 		service_reports = frappe.get_all(
 			"SMO Service Report",
 			filters={
 				"name": ["in", sr_names],
+				"name": ["not in", used_doc_numbers],  # เพิ่มเงื่อนไขนี้
 				"start_date_input": ["between", [start_date, end_date]],
 				"docstatus": 1
 			},
@@ -140,5 +209,7 @@ def get_timesheets(employee=None, year=None, month=None):
 				"customer": sr.customer,
 				"customer_name": sr.customer_name
 			})
-
+	
+	# sort by from_time
+	result.sort(key=lambda x: x['from_time'])
 	return result

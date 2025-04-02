@@ -155,7 +155,7 @@ const showTimeline = async (docName: string) => {
       status: status,
       approve_role: comment.content == "Approval Review" ? "Approver" : '',
       by: comment.action_by,
-      remark: ""
+      remark: comment.content == "Rejected" ? timesheet.reject_reason : ""
     })
    }
 
@@ -244,13 +244,13 @@ const formatDate = (dateString) => {
               <div class="flex items-center">
                 <span class="w-2 h-6 block mr-2" :class="{
                   'bg-green-500': timesheet.workflow_state === 'Approved',
-                  'bg-yellow-500': timesheet.workflow_state === 'Pending Approval',
+                  'bg-yellow-500': timesheet.workflow_state === 'Approval Review',
                   'bg-red-500': timesheet.workflow_state === 'Rejected',
                   'bg-gray-500': timesheet.workflow_state === 'Draft'
                 }"></span>
                 <span class="opacity-75" :class="{
                   'text-green-500': timesheet.workflow_state === 'Approved',
-                  'text-yellow-500': timesheet.workflow_state === 'Pending Approval',
+                  'text-yellow-500': timesheet.workflow_state === 'Approval Review',
                   'text-red-500': timesheet.workflow_state === 'Rejected',
                   'text-gray-500': timesheet.workflow_state === 'Draft'
                 }">{{ timesheet.workflow_state }}</span>

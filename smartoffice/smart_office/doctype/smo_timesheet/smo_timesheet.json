@@ -14,6 +14,7 @@
   "column_break_rgin",
   "get_data",
   "total_hours",
+  "reject_reason",
   "section_break_qiud",
   "time_sheets",
   "approver",
@@ -111,12 +112,19 @@
    "fieldname": "emp_user_id",
    "fieldtype": "Data",
    "label": "Emp User Id"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "reject_reason",
+   "fieldtype": "Small Text",
+   "label": "Reject Reason",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-04-02 12:42:11.170543",
+ "modified": "2025-04-02 15:44:48.898680",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Timesheet",

@@ -77,6 +77,8 @@ def get_mail_box(page=1, page_size=10, search=None, status=None, start_date=None
             row['link'] = f"/expense-entry/{row['document_name']}"
         elif row['document_type'] == 'SMO Service Report':
             row['link'] = f"/service-report/{row['document_name']}"
+        elif row['document_type'] == 'SMO Timesheet':
+            row['link'] = f"/timesheet/{row['document_name']}"
         else:
             row['link'] = frappe.utils.get_url_to_form(row['document_type'], row['document_name'])
         

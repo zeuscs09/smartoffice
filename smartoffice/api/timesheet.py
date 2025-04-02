@@ -127,7 +127,7 @@ def get_timesheet(name):
 @frappe.whitelist()
 def save_timesheet(timesheet):
     """
-    Save a timesheet
+    Save a timesheet with child table data
     """
     try:
         if isinstance(timesheet, str):
@@ -153,6 +153,23 @@ def save_timesheet(timesheet):
             doc.month = timesheet.get("month")
             doc.month_value = timesheet.get("month_value")
             
+            # Clear existing child table entries
+            doc.time_sheets = []
+            
+            # Add new child table entries
+            if timesheet.get("time_sheets"):
+                for item in timesheet.get("time_sheets"):
+                    doc.append("time_sheets", {
+                        "from_time": item.get("from_time"),
+                        "to_time": item.get("to_time"),
+                        "working_hours": item.get("working_hours"),
+                        "link_from_doc": item.get("link_from_doc"),
+                        "doc_number": item.get("doc_number"),
+                        "project_code": item.get("project_code"),
+                        "customer": item.get("customer"),
+                        "customer_name": item.get("customer_name")
+                    })
+            
             # Save the document
             doc.save()
             return doc.as_dict()
@@ -163,6 +180,20 @@ def save_timesheet(timesheet):
             doc.year = timesheet.get("year")
             doc.month = timesheet.get("month")
             doc.month_value = timesheet.get("month_value")
+            
+            # Add child table entries
+            if timesheet.get("time_sheets"):
+                for item in timesheet.get("time_sheets"):
+                    doc.append("time_sheets", {
+                        "from_time": item.get("from_time"),
+                        "to_time": item.get("to_time"),
+                        "working_hours": item.get("working_hours"),
+                        "link_from_doc": item.get("link_from_doc"),
+                        "doc_number": item.get("doc_number"),
+                        "project_code": item.get("project_code"),
+                        "customer": item.get("customer"),
+                        "customer_name": item.get("customer_name")
+                    })
             
             # Save the document
             doc.insert()
