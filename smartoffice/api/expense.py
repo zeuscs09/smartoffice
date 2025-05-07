@@ -54,13 +54,10 @@ def get_expense_entries(month, year,request_by,period):
         WHERE
             ee.is_request = 0 and
             ee.workflow_state = 'approved'
-            AND MONTH(ee.service_date) = %(month)s
-            AND YEAR(ee.service_date) = %(year)s
+            AND ee.service_date >= DATE_SUB(STR_TO_DATE(CONCAT(%(year)s, '-', %(month)s, '-01'), '%%Y-%%m-%%d'), INTERVAL 2 MONTH)
+            AND ee.service_date < DATE_ADD(STR_TO_DATE(CONCAT(%(year)s, '-', %(month)s, '-01'), '%%Y-%%m-%%d'), INTERVAL 1 MONTH)
             AND ee.owner = %(request_by)s
-            AND (
-                %(period)s != 'Mid month'
-                OR (%(period)s = 'Mid month' AND DAY(ee.creation) <= 15)
-            )
+            
     """, {
         "month": month,
         "year": year,
