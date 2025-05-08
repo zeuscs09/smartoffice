@@ -267,8 +267,8 @@ def get_expense_report(year=None, month=None):
                     IFNULL(er.period_display, '')
                 ) AS REMARKH1,
                 DATE_FORMAT(er.modified, '%%Y-%%m-%%d') AS REMARKH2,
-                CASE WHEN MONTH(er.modified) <> MONTH(ed.service_date) THEN concat( 'Service On ',DATE_FORMAT(ed.service_date, '%%Y-%%m-%%d')) ELSE '' END AS REMARKH3,
-                '' AS REMARKH4,
+                DATE_FORMAT(er.creation, '%%Y-%%m-%%d') AS REMARKH3,
+                CASE WHEN MONTH(er.modified) <> MONTH(ed.service_date) THEN concat( 'Service On ',DATE_FORMAT(ed.service_date, '%%Y-%%m-%%d')) ELSE '' END AS REMARKH4,
                 '' AS REMARKH5,
                 ed.account_code AS QCACCHART,
                 SUM(ed.AMT) AS AMT,
