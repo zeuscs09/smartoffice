@@ -192,31 +192,36 @@ frappe.ui.form.on("SMO Expense Entry", {
   },
   auto_expense(frm) {
     frm.clear_table("expense_item");
+    
+    // ตรวจสอบและกำหนดค่าเริ่มต้น
+    let distance_depart = frm.get_field("distance_depart").value || 0;
+    let distance_return = frm.get_field("distance_return").value || 0;
+    let config_taxi_rate = frm.doc.config_taxi_rate || 0;
+    let config_taxi_init = frm.doc.config_taxi_init || 0;
+    
     // เพิ่มรายการค่าใช้จ่าย EP001
     let ep001 = frm.add_child("expense_item", {
       input_expense_types: "EP001",
       expense_type: "EP001",
-      taxi_depart_distance: frm.get_field("distance_depart").value,
-      cal_taxi_depart_distance: frm.get_field("distance_depart").value,
-      rate_per_km: frm.doc.config_taxi_rate,
-      taxi_initial: frm.doc.config_taxi_init,
+      taxi_depart_distance: distance_depart,
+      cal_taxi_depart_distance: distance_depart,
+      rate_per_km: config_taxi_rate,
+      taxi_initial: config_taxi_init,
       receipt_date: frm.doc.service_date,
     });
-    ep001.total_cost =
-      ep001.taxi_initial + ep001.taxi_depart_distance * ep001.rate_per_km;
+    ep001.total_cost = config_taxi_init + (distance_depart * config_taxi_rate);
 
     // เพิ่มรายการค่าใช้จ่าย EP002
     let ep002 = frm.add_child("expense_item", {
       input_expense_types: "EP002",
       expense_type: "EP002",
-      taxi_return_distance: frm.get_field("distance_return").value,
-      cal_taxi_return_distance: frm.get_field("distance_return").value,
-      rate_per_km: frm.doc.config_taxi_rate,
-      taxi_initial: frm.doc.config_taxi_init,
+      taxi_return_distance: distance_return,
+      cal_taxi_return_distance: distance_return,
+      rate_per_km: config_taxi_rate,
+      taxi_initial: config_taxi_init,
       receipt_date: frm.doc.service_date,
     });
-    ep002.total_cost =
-      ep002.taxi_initial + ep002.taxi_return_distance * ep002.rate_per_km;
+    ep002.total_cost = config_taxi_init + (distance_return * config_taxi_rate);
 
     // เพิ่มรายการค่าใช้จ่าย EP004 ถ้า over_night เป็น true
     if (frm.doc.is_holiday) {
@@ -331,18 +336,23 @@ frappe.ui.form.on("SMO Expense Item", {
       row.rate_per_km = taxi_rate;
       row.taxi_initial = taxi_initial;
     }
+    
+    // ตรวจสอบและกำหนดค่าเริ่มต้นสำหรับการคำนวณ
+    let taxi_initial = row.taxi_initial || 0;
+    let rate_per_km = row.rate_per_km || 0;
+    
     if (row.expense_type == "EP001") {
       row.taxi_depart_distance = frm.get_field("distance_depart").value;
       row.cal_taxi_depart_distance = frm.get_field("distance_depart").value;
-      row.total_cost =
-        row.taxi_initial + row.taxi_depart_distance * row.rate_per_km;
+      let taxi_depart_distance = row.taxi_depart_distance || 0;
+      row.total_cost = taxi_initial + (taxi_depart_distance * rate_per_km);
     }
 
     if (row.expense_type == "EP002") {
       row.taxi_return_distance = frm.get_field("distance_return").value;
       row.cal_taxi_return_distance = frm.get_field("distance_return").value;
-      row.total_cost =
-        row.taxi_initial + row.taxi_return_distance * row.rate_per_km;
+      let taxi_return_distance = row.taxi_return_distance || 0;
+      row.total_cost = taxi_initial + (taxi_return_distance * rate_per_km);
     }
     if (row.expense_type == "EP004") {
       row.total_cost = frm.doc.ot_rate;
@@ -358,14 +368,24 @@ frappe.ui.form.on("SMO Expense Item", {
   taxi_depart_distance: function (frm, cdt, cdn) {
     let row = locals[cdt][cdn];
 
-    row.total_cost = row.taxi_depart_distance * row.rate_per_km;
+    // ตรวจสอบและกำหนดค่าเริ่มต้นถ้าเป็น null หรือ undefined
+    let taxi_initial = row.taxi_initial || 0;
+    let taxi_depart_distance = row.taxi_depart_distance || 0;
+    let rate_per_km = row.rate_per_km || 0;
+
+    row.total_cost = taxi_initial + (taxi_depart_distance * rate_per_km);
     frm.trigger("cal_total");
     frm.refresh_field("expense_item");
   },
   taxi_return_distance: function (frm, cdt, cdn) {
     let row = locals[cdt][cdn];
 
-    row.total_cost = row.taxi_return_distance * row.rate_per_km;
+    // ตรวจสอบและกำหนดค่าเริ่มต้นถ้าเป็น null หรือ undefined
+    let taxi_initial = row.taxi_initial || 0;
+    let taxi_return_distance = row.taxi_return_distance || 0;
+    let rate_per_km = row.rate_per_km || 0;
+
+    row.total_cost = taxi_initial + (taxi_return_distance * rate_per_km);
     frm.trigger("cal_total");
     frm.refresh_field("expense_item");
   },
