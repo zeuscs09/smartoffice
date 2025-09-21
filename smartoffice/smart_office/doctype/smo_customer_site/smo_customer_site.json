@@ -12,6 +12,7 @@
   "site_name",
   "depart_km",
   "return_km",
+  "is_upcountry",
   "column_break_oxhv",
   "location"
  ],
@@ -64,11 +65,17 @@
    "fieldname": "location",
    "fieldtype": "Geolocation",
    "label": "Location"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_upcountry",
+   "fieldtype": "Check",
+   "label": "Upcountry?"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-12-18 14:54:35.594567",
+ "modified": "2025-09-21 07:32:15.062055",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Customer Site",
