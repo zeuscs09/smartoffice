@@ -18,6 +18,7 @@
   "customer_site",
   "site_name",
   "project",
+  "is_upcountry",
   "column_break_xeie",
   "ot_rate",
   "over_night_rate",
@@ -302,13 +303,21 @@
   {
    "fieldname": "column_break_lfix",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fetch_from": "customer_site.is_upcountry",
+   "fetch_if_empty": 1,
+   "fieldname": "is_upcountry",
+   "fieldtype": "Check",
+   "label": "Upcountry"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-07-02 17:41:44.101101",
+ "modified": "2025-09-21 15:28:26.465465",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "SMO Expense Entry",

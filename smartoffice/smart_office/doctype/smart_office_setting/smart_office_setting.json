@@ -7,6 +7,7 @@
  "field_order": [
   "start_taxi",
   "taxi_rate",
+  "upcountry_taxi_rate",
   "over_night_rate",
   "service_report_approval_template",
   "customer_otp_template",
@@ -146,12 +147,18 @@
    "fieldtype": "Link",
    "label": "Accounting",
    "options": "Role"
+  },
+  {
+   "fieldname": "upcountry_taxi_rate",
+   "fieldtype": "Float",
+   "label": "Upcountry Taxi Rate",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-03-26 19:50:35.697456",
+ "modified": "2025-09-21 15:10:14.672549",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "Smart Office Setting",

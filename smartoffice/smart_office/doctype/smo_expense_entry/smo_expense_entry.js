@@ -136,10 +136,21 @@ frappe.ui.form.on("SMO Expense Entry", {
   },
   is_holiday(frm) {
     if (frm.doc.is_holiday && frm.doc.is_holiday == 1) {
-      if (frm.doc.working_hour > 4 * 3600) {
-        frm.set_value("ot_rate", 1000);
+      // ตรวจสอบว่าเป็นต่างจังหวัดหรือไม่
+      let is_upcountry = frm.doc.is_upcountry || 0;
+      
+      if (frm.doc.working_hour > 5 * 3600) { // เปลี่ยนจาก 4 เป็น 5 ชั่วโมง
+        if (is_upcountry == 1) {
+          frm.set_value("ot_rate", 1200); // ต่างจังหวัด เกิน 5 ชั่วโมง
+        } else {
+          frm.set_value("ot_rate", 1000); // กรุงเทพ ปริมณฑล เกิน 5 ชั่วโมง
+        }
       } else {
-        frm.set_value("ot_rate", 500);
+        if (is_upcountry == 1) {
+          frm.set_value("ot_rate", 600);  // ต่างจังหวัด 0-5 ชั่วโมง
+        } else {
+          frm.set_value("ot_rate", 500);  // กรุงเทพ ปริมณฑล 0-5 ชั่วโมง
+        }
       }
     } else {
       frm.set_value("ot_rate", 0);
@@ -223,12 +234,25 @@ frappe.ui.form.on("SMO Expense Entry", {
     });
     ep002.total_cost = config_taxi_init + (distance_return * config_taxi_rate);
 
-    // เพิ่มรายการค่าใช้จ่าย EP004 ถ้า over_night เป็น true
+    // เพิ่มรายการค่าใช้จ่าย EP004 ถ้า is_holiday เป็น true
     if (frm.doc.is_holiday) {
+      // คำนวน OT rate ใหม่ตาม is_upcountry และ working_hour
+      let is_upcountry = frm.doc.is_upcountry || 0;
+      let ot_rate = 0;
+      
+      if (frm.doc.working_hour > 5 * 3600) { // เกิน 5 ชั่วโมง
+        ot_rate = is_upcountry == 1 ? 1200 : 1000;
+      } else { // 0-5 ชั่วโมง
+        ot_rate = is_upcountry == 1 ? 600 : 500;
+      }
+      
+      // อัพเดท ot_rate ในฟอร์มด้วย
+      frm.set_value("ot_rate", ot_rate);
+      
       let ep004 = frm.add_child("expense_item", {
         input_expense_types: "EP004",
         expense_type: "EP004",
-        total_cost: frm.doc.ot_rate,
+        total_cost: ot_rate, // ใช้ OT rate ที่คำนวนใหม่
         receipt_date: frm.doc.service_date,
         from_date: frm.doc.service_date,
         to_date: frm.doc.finish_date,
@@ -355,7 +379,21 @@ frappe.ui.form.on("SMO Expense Item", {
       row.total_cost = taxi_initial + (taxi_return_distance * rate_per_km);
     }
     if (row.expense_type == "EP004") {
-      row.total_cost = frm.doc.ot_rate;
+      // คำนวน OT rate ใหม่ตาม is_upcountry และ working_hour
+      let is_upcountry = frm.doc.is_upcountry || 0;
+      let ot_rate = 0;
+      
+      if (frm.doc.is_holiday && frm.doc.is_holiday == 1) {
+        if (frm.doc.working_hour > 5 * 3600) { // เกิน 5 ชั่วโมง
+          ot_rate = is_upcountry == 1 ? 1200 : 1000;
+        } else { // 0-5 ชั่วโมง
+          ot_rate = is_upcountry == 1 ? 600 : 500;
+        }
+      }
+      
+      row.total_cost = ot_rate;
+      // อัพเดท ot_rate ในฟอร์มด้วย
+      frm.set_value("ot_rate", ot_rate);
     }
     if (row.expense_type == "EP009") {
       row.total_cost = frm.doc.over_night_rate;
