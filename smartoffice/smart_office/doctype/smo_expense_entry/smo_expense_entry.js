@@ -70,18 +70,37 @@ frappe.ui.form.on("SMO Expense Entry", {
       callback: function (r) {
         if (r.message) {
           let config = r.message;
-          if (frm.doc.config_taxi_rate == 0) {
+          console.log("API Response:", config);
+          console.log("Current form values before set:");
+          console.log("config_taxi_rate:", frm.doc.config_taxi_rate);
+          console.log("config_upcountry_taxi_rate:", frm.doc.config_upcountry_taxi_rate);
+          console.log("config_taxi_init:", frm.doc.config_taxi_init);
+          
+          if (frm.doc.config_taxi_rate == 0 || !frm.doc.config_taxi_rate) {
             frm.set_value("config_taxi_rate", config.taxi_rate);
             frm.refresh_field("config_taxi_rate");
           }
-          if (frm.doc.config_taxi_init == 0) {
+          if (frm.doc.config_upcountry_taxi_rate == 0 || !frm.doc.config_upcountry_taxi_rate) {
+            frm.set_value("config_upcountry_taxi_rate", config.upcountry_taxi_rate);
+            frm.refresh_field("config_upcountry_taxi_rate");
+          }
+          if (frm.doc.config_taxi_late_night == 0 || !frm.doc.config_taxi_late_night) {
+            frm.set_value("config_taxi_late_night", config.taxi_late_night);
+            frm.refresh_field("config_taxi_late_night");
+          }
+          if (frm.doc.config_taxi_init == 0 || !frm.doc.config_taxi_init) {
             frm.set_value("config_taxi_init", config.taxi_start);
             frm.refresh_field("config_taxi_init");
           }
-          if (frm.doc.over_night_rate == 0) {
+          if (frm.doc.over_night_rate == 0 || !frm.doc.over_night_rate) {
             frm.set_value("over_night_rate", config.over_night_rate);
             frm.refresh_field("over_night_rate");
           }
+          
+          console.log("Current form values after set:");
+          console.log("config_taxi_rate:", frm.doc.config_taxi_rate);
+          console.log("config_upcountry_taxi_rate:", frm.doc.config_upcountry_taxi_rate);
+          console.log("config_taxi_init:", frm.doc.config_taxi_init);
           // frm.set_value("config_taxi_rate", r.message);
         }
       },
@@ -207,7 +226,10 @@ frappe.ui.form.on("SMO Expense Entry", {
     // ตรวจสอบและกำหนดค่าเริ่มต้น
     let distance_depart = frm.get_field("distance_depart").value || 0;
     let distance_return = frm.get_field("distance_return").value || 0;
-    let config_taxi_rate = frm.doc.config_taxi_rate || 0;
+    let is_upcountry = frm.doc.is_upcountry || 0;
+    let config_taxi_rate = is_upcountry == 1 ? 
+        (frm.doc.config_upcountry_taxi_rate || 0) : 
+        (frm.doc.config_taxi_rate || 0);
     let config_taxi_init = frm.doc.config_taxi_init || 0;
     
     // เพิ่มรายการค่าใช้จ่าย EP001
@@ -259,6 +281,23 @@ frappe.ui.form.on("SMO Expense Entry", {
       });
     }
 
+    // เพิ่มรายการค่าใช้จ่าย EP010 ถ้าเสร็จงานหลัง 21:00-23:59
+    if (isLateNightTime(frm.doc.finish_date)) {
+      let ep010 = frm.add_child("expense_item", {
+        input_expense_types: "EP010",
+        expense_type: "EP010",
+        total_cost: frm.doc.config_taxi_late_night || 0,
+        receipt_date: frm.doc.service_date,
+        from_date: frm.doc.service_date,
+        to_date: frm.doc.finish_date,
+      });
+      
+      console.log("Added EP010 Late Night:", {
+        finish_date: frm.doc.finish_date,
+        taxi_late_night: frm.doc.config_taxi_late_night
+      });
+    }
+
     // รีเฟรชฟิลด์ expense_item เพื่อแสดงรายการที่เพิ่ม
     frm.refresh_field("expense_item");
     frm.trigger("cal_total");
@@ -297,11 +336,76 @@ frappe.ui.form.on("SMO Expense Entry", {
   },
 });
 
+// Helper function สำหรับตรวจสอบเวลา Late Night (21:00-23:59)
+function isLateNightTime(datetime) {
+  if (!datetime) return false;
+  
+  let date = new Date(datetime);
+  let hour = date.getHours();
+  return hour >= 21 && hour <= 23;
+}
+
+// Helper function สำหรับ recalculate total_cost
+function recalculateRowTotalCost(frm, row) {
+  if (row.expense_type == "EP001") {
+    let taxi_initial = row.taxi_initial || 0;
+    let taxi_depart_distance = row.taxi_depart_distance || 0;
+    let rate_per_km = row.rate_per_km || 0;
+    row.total_cost = taxi_initial + (taxi_depart_distance * rate_per_km);
+    console.log("Recalculated EP001 total_cost:", row.total_cost);
+  } else if (row.expense_type == "EP002") {
+    let taxi_initial = row.taxi_initial || 0;
+    let taxi_return_distance = row.taxi_return_distance || 0;
+    let rate_per_km = row.rate_per_km || 0;
+    row.total_cost = taxi_initial + (taxi_return_distance * rate_per_km);
+    console.log("Recalculated EP002 total_cost:", row.total_cost);
+  } else if (row.expense_type == "EP010") {
+    row.total_cost = frm.doc.config_taxi_late_night || 0;
+    console.log("Recalculated EP010 total_cost:", row.total_cost);
+  }
+}
+
 frappe.ui.form.on("SMO Expense Item", {
   refresh(frm) {},
   expense_item_add: function (frm, cdt, cdn) {
-    let taxi_rate = frm.doc.config_taxi_rate;
-    let taxi_initial = frm.doc.config_taxi_init;
+    // ตรวจสอบและโหลดค่า config หากยังไม่มี
+    if (frm.doc.config_taxi_rate == 0 || frm.doc.config_upcountry_taxi_rate == 0 || !frm.doc.config_upcountry_taxi_rate || frm.doc.config_taxi_late_night == 0 || !frm.doc.config_taxi_late_night) {
+      frappe.call({
+        method: "smartoffice.api.setting.get_taxi",
+        args: {},
+        callback: function (r) {
+          if (r.message) {
+            let config = r.message;
+            console.log("API Response in expense_item_add:", config);
+            
+            if (frm.doc.config_taxi_rate == 0 || !frm.doc.config_taxi_rate) {
+              frm.set_value("config_taxi_rate", config.taxi_rate);
+            }
+            if (frm.doc.config_upcountry_taxi_rate == 0 || !frm.doc.config_upcountry_taxi_rate) {
+              frm.set_value("config_upcountry_taxi_rate", config.upcountry_taxi_rate);
+            }
+            if (frm.doc.config_taxi_late_night == 0 || !frm.doc.config_taxi_late_night) {
+              frm.set_value("config_taxi_late_night", config.taxi_late_night);
+            }
+            if (frm.doc.config_taxi_init == 0 || !frm.doc.config_taxi_init) {
+              frm.set_value("config_taxi_init", config.taxi_start);
+            }
+            
+            // กำหนดค่า default หลังจากได้ค่า config แล้ว
+            setTimeout(() => {
+              frm.script_manager.trigger("expense_item_add", cdt, cdn);
+            }, 100);
+          }
+        }
+      });
+      return;
+    }
+
+    let is_upcountry = frm.doc.is_upcountry || 0;
+    let taxi_rate = is_upcountry == 1 ? 
+        (frm.doc.config_upcountry_taxi_rate || 0) : 
+        (frm.doc.config_taxi_rate || 0);
+    let taxi_initial = frm.doc.config_taxi_init || 0;
     // เข้าถึงแถวที่ถูกเพิ่ม (child row)
     let row = locals[cdt][cdn];
     row.receipt_date = frappe.datetime
@@ -310,6 +414,11 @@ frappe.ui.form.on("SMO Expense Item", {
     // ตั้งค่าฟิลด์ใน child row ด้วยค่าเริ่มต้น
     row.rate_per_km = taxi_rate;
     row.taxi_initial = taxi_initial;
+    
+    console.log("expense_item_add setup:");
+    console.log("taxi_rate:", taxi_rate);
+    console.log("taxi_initial:", taxi_initial);
+    
     // รีเฟรช Child Table เพื่อให้เห็นการเปลี่ยนแปลง
     // row.set_query("expense_type", () => {
     //   return {
@@ -354,30 +463,82 @@ frappe.ui.form.on("SMO Expense Item", {
     let row = locals[cdt][cdn];
     row.expense_type = row.input_expense_types;
 
+    // ตรวจสอบและโหลดค่า config หากยังไม่มี
+    if ((frm.doc.config_taxi_rate == 0 || frm.doc.config_upcountry_taxi_rate == 0 || !frm.doc.config_upcountry_taxi_rate || frm.doc.config_taxi_late_night == 0 || !frm.doc.config_taxi_late_night) && row.rate_per_km == 0) {
+      frappe.call({
+        method: "smartoffice.api.setting.get_taxi",
+        args: {},
+        callback: function (r) {
+          if (r.message) {
+            let config = r.message;
+            console.log("API Response in input_expense_types:", config);
+            
+            if (frm.doc.config_taxi_rate == 0 || !frm.doc.config_taxi_rate) {
+              frm.set_value("config_taxi_rate", config.taxi_rate);
+            }
+            if (frm.doc.config_upcountry_taxi_rate == 0 || !frm.doc.config_upcountry_taxi_rate) {
+              frm.set_value("config_upcountry_taxi_rate", config.upcountry_taxi_rate);
+            }
+            if (frm.doc.config_taxi_late_night == 0 || !frm.doc.config_taxi_late_night) {
+              frm.set_value("config_taxi_late_night", config.taxi_late_night);
+            }
+            if (frm.doc.config_taxi_init == 0 || !frm.doc.config_taxi_init) {
+              frm.set_value("config_taxi_init", config.taxi_start);
+            }
+            
+            // กำหนดค่า rate_per_km หลังจากได้ค่า config แล้ว
+            setTimeout(() => {
+              let row = locals[cdt][cdn];
+              
+              // กำหนดค่า distance สำหรับ EP001 และ EP002
+              if (row.expense_type == "EP001") {
+                row.taxi_depart_distance = frm.get_field("distance_depart").value;
+                row.cal_taxi_depart_distance = frm.get_field("distance_depart").value;
+              } else if (row.expense_type == "EP002") {
+                row.taxi_return_distance = frm.get_field("distance_return").value;
+                row.cal_taxi_return_distance = frm.get_field("distance_return").value;
+              }
+              
+              // คำนวณ total_cost ใหม่
+              recalculateRowTotalCost(frm, row);
+              frm.trigger("cal_total");
+              frm.refresh_field("expense_item");
+            }, 100);
+          }
+        }
+      });
+      return;
+    }
+
     if (row.rate_per_km == 0) {
-      let taxi_rate = frm.doc.config_taxi_rate;
-      let taxi_initial = frm.doc.config_taxi_init;
+      let is_upcountry = frm.doc.is_upcountry || 0;
+      let taxi_rate = is_upcountry == 1 ? 
+          (frm.doc.config_upcountry_taxi_rate || 0) : 
+          (frm.doc.config_taxi_rate || 0);
+      let taxi_initial = frm.doc.config_taxi_init || 0;
+      
+      console.log("Debug taxi rate setup:");
+      console.log("is_upcountry:", is_upcountry);
+      console.log("config_taxi_rate:", frm.doc.config_taxi_rate);
+      console.log("config_upcountry_taxi_rate:", frm.doc.config_upcountry_taxi_rate);
+      console.log("selected taxi_rate:", taxi_rate);
+      console.log("taxi_initial:", taxi_initial);
+      
       row.rate_per_km = taxi_rate;
       row.taxi_initial = taxi_initial;
     }
     
-    // ตรวจสอบและกำหนดค่าเริ่มต้นสำหรับการคำนวณ
-    let taxi_initial = row.taxi_initial || 0;
-    let rate_per_km = row.rate_per_km || 0;
-    
+    // กำหนดค่า distance สำหรับ EP001 และ EP002
     if (row.expense_type == "EP001") {
       row.taxi_depart_distance = frm.get_field("distance_depart").value;
       row.cal_taxi_depart_distance = frm.get_field("distance_depart").value;
-      let taxi_depart_distance = row.taxi_depart_distance || 0;
-      row.total_cost = taxi_initial + (taxi_depart_distance * rate_per_km);
-    }
-
-    if (row.expense_type == "EP002") {
+    } else if (row.expense_type == "EP002") {
       row.taxi_return_distance = frm.get_field("distance_return").value;
       row.cal_taxi_return_distance = frm.get_field("distance_return").value;
-      let taxi_return_distance = row.taxi_return_distance || 0;
-      row.total_cost = taxi_initial + (taxi_return_distance * rate_per_km);
     }
+    
+    // คำนวณ total_cost สำหรับ EP001, EP002 ใหม่
+    recalculateRowTotalCost(frm, row);
     if (row.expense_type == "EP004") {
       // คำนวน OT rate ใหม่ตาม is_upcountry และ working_hour
       let is_upcountry = frm.doc.is_upcountry || 0;
@@ -400,6 +561,18 @@ frappe.ui.form.on("SMO Expense Item", {
       row.from_date = frm.doc.service_date;
       row.to_date = frm.doc.finish_date;
     }
+    if (row.expense_type == "EP010") {
+      row.total_cost = frm.doc.config_taxi_late_night || 0;
+      row.from_date = frm.doc.service_date;
+      row.to_date = frm.doc.finish_date;
+      
+      console.log("EP010 Late Night setup:", {
+        config_taxi_late_night: frm.doc.config_taxi_late_night,
+        total_cost: row.total_cost
+      });
+    }
+    
+    // เรียกใช้ trigger หลังจากกำหนดค่าเสร็จ
     frm.trigger("cal_total");
     frm.refresh_field("expense_item");
   },
@@ -411,7 +584,14 @@ frappe.ui.form.on("SMO Expense Item", {
     let taxi_depart_distance = row.taxi_depart_distance || 0;
     let rate_per_km = row.rate_per_km || 0;
 
+    console.log("taxi_depart_distance calculation:");
+    console.log("taxi_initial:", taxi_initial);
+    console.log("taxi_depart_distance:", taxi_depart_distance); 
+    console.log("rate_per_km:", rate_per_km);
+    
     row.total_cost = taxi_initial + (taxi_depart_distance * rate_per_km);
+    console.log("calculated total_cost:", row.total_cost);
+    
     frm.trigger("cal_total");
     frm.refresh_field("expense_item");
   },

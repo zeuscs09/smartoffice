@@ -28,6 +28,8 @@
   "distance_return",
   "config_taxi_init",
   "config_taxi_rate",
+  "config_upcountry_taxi_rate",
+  "config_taxi_late_night",
   "working_hour",
   "total_amount",
   "expense_item_section",
@@ -115,6 +117,28 @@
    "fieldtype": "Float",
    "hidden": 1,
    "label": "Taxi Rate",
+   "non_negative": 1,
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "default": "0.00",
+   "description": "Bath/km",
+   "fieldname": "config_upcountry_taxi_rate",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Upcountry Taxi Rate",
+   "non_negative": 1,
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "default": "0.00",
+   "description": "Bath",
+   "fieldname": "config_taxi_late_night",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Taxi Late Night Rate",
    "non_negative": 1,
    "precision": "2",
    "read_only": 1

@@ -8,9 +8,13 @@ def get_taxi_rate():
 def get_taxi():
     taxi_start= frappe.db.get_single_value("Smart Office Setting", "start_taxi")
     taxi_rate = get_taxi_rate()
+    upcountry_taxi_rate = frappe.db.get_single_value("Smart Office Setting", "upcountry_taxi_rate")
+    taxi_late_night = frappe.db.get_single_value("Smart Office Setting", "taxi_late_night")
     result={
         "taxi_start":taxi_start,
         "taxi_rate":taxi_rate,
+        "upcountry_taxi_rate":upcountry_taxi_rate,
+        "taxi_late_night":taxi_late_night,
         "over_night_rate":frappe.db.get_single_value("Smart Office Setting", "over_night_rate")
     }
     return result

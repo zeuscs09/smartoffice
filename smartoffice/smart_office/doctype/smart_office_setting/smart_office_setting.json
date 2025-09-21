@@ -8,6 +8,8 @@
   "start_taxi",
   "taxi_rate",
   "upcountry_taxi_rate",
+  "taxi_late_night",
+  "column_break_upex",
   "over_night_rate",
   "service_report_approval_template",
   "customer_otp_template",
@@ -31,6 +33,7 @@
  "fields": [
   {
    "default": "5.00",
+   "description": "\u0e04\u0e48\u0e32\u0e40\u0e14\u0e34\u0e19\u0e17\u0e32\u0e07\u0e43\u0e19 \u0e01\u0e17\u0e21. \u0e15\u0e48\u0e2d \u0e01\u0e34\u0e42\u0e25\u0e40\u0e21\u0e15\u0e23",
    "fieldname": "taxi_rate",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -52,6 +55,7 @@
    "fieldname": "over_night_rate",
    "fieldtype": "Float",
    "label": "Over night Rate",
+   "precision": "2",
    "reqd": 1
   },
   {
@@ -149,16 +153,31 @@
    "options": "Role"
   },
   {
+   "description": "\u0e04\u0e48\u0e32\u0e40\u0e14\u0e34\u0e19\u0e17\u0e32\u0e07\u0e15\u0e48\u0e32\u0e07\u0e08\u0e31\u0e07\u0e2b\u0e27\u0e31\u0e14\u0e15\u0e48\u0e2d \u0e01\u0e34\u0e42\u0e25\u0e40\u0e21\u0e15\u0e23",
    "fieldname": "upcountry_taxi_rate",
    "fieldtype": "Float",
    "label": "Upcountry Taxi Rate",
+   "precision": "2",
    "reqd": 1
+  },
+  {
+   "default": "300",
+   "description": "\u0e04\u0e48\u0e32\u0e40\u0e14\u0e34\u0e19\u0e17\u0e32\u0e07\u0e2b\u0e25\u0e31\u0e07 21.00 - 23.59",
+   "fieldname": "taxi_late_night",
+   "fieldtype": "Float",
+   "label": "Taxi Late Night",
+   "precision": "2",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_upex",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-09-21 15:10:14.672549",
+ "modified": "2025-09-21 16:37:32.877415",
  "modified_by": "Administrator",
  "module": "Smart Office",
  "name": "Smart Office Setting",
