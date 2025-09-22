@@ -100,7 +100,15 @@ frappe.ui.form.on("SMO Expense Entry", {
           console.log("Current form values after set:");
           console.log("config_taxi_rate:", frm.doc.config_taxi_rate);
           console.log("config_upcountry_taxi_rate:", frm.doc.config_upcountry_taxi_rate);
+          console.log("config_taxi_late_night:", frm.doc.config_taxi_late_night);
           console.log("config_taxi_init:", frm.doc.config_taxi_init);
+          
+          console.log("Distance and Site Info:");
+          console.log("service_report:", frm.doc.service_report);
+          console.log("customer_site:", frm.doc.customer_site);
+          console.log("distance_depart:", frm.doc.distance_depart);
+          console.log("distance_return:", frm.doc.distance_return);
+          console.log("is_upcountry:", frm.doc.is_upcountry);
           // frm.set_value("config_taxi_rate", r.message);
         }
       },
@@ -224,13 +232,20 @@ frappe.ui.form.on("SMO Expense Entry", {
     frm.clear_table("expense_item");
     
     // ตรวจสอบและกำหนดค่าเริ่มต้น
-    let distance_depart = frm.get_field("distance_depart").value || 0;
-    let distance_return = frm.get_field("distance_return").value || 0;
+    let distance_depart = frm.doc.distance_depart || 0;
+    let distance_return = frm.doc.distance_return || 0;
     let is_upcountry = frm.doc.is_upcountry || 0;
     let config_taxi_rate = is_upcountry == 1 ? 
         (frm.doc.config_upcountry_taxi_rate || 0) : 
         (frm.doc.config_taxi_rate || 0);
     let config_taxi_init = frm.doc.config_taxi_init || 0;
+    
+    console.log("Auto Expense Debug:");
+    console.log("distance_depart:", distance_depart);
+    console.log("distance_return:", distance_return);
+    console.log("is_upcountry:", is_upcountry);
+    console.log("selected config_taxi_rate:", config_taxi_rate);
+    console.log("config_taxi_init:", config_taxi_init);
     
     // เพิ่มรายการค่าใช้จ่าย EP001
     let ep001 = frm.add_child("expense_item", {
@@ -302,6 +317,84 @@ frappe.ui.form.on("SMO Expense Entry", {
     frm.refresh_field("expense_item");
     frm.trigger("cal_total");
   },
+  service_report: function(frm) {
+    // เมื่อ service_report เปลี่ยน ให้ trigger การ fetch fields
+    if (frm.doc.service_report) {
+      console.log("Service Report changed, triggering fetch...");
+      
+      // รอให้ fetch fields ทำงานก่อน
+      setTimeout(() => {
+        console.log("After service_report change:");
+        console.log("customer_site:", frm.doc.customer_site);
+        console.log("distance_depart:", frm.doc.distance_depart);  
+        console.log("distance_return:", frm.doc.distance_return);
+        console.log("is_upcountry:", frm.doc.is_upcountry);
+        
+        // ถ้า distance ยังเป็น 0 ให้ลอง trigger อีกครั้ง
+        if ((frm.doc.distance_depart == 0 || !frm.doc.distance_depart) && frm.doc.customer_site) {
+          frm.trigger('customer_site');
+        }
+        
+        // ถ้ายังไม่มี customer_site ให้โหลดจาก service_report
+        if (!frm.doc.customer_site && frm.doc.service_report) {
+          frappe.call({
+            method: "frappe.client.get",
+            args: {
+              doctype: "SMO Service Report",
+              name: frm.doc.service_report
+            },
+            callback: function(r) {
+              if (r.message && r.message.customer_site) {
+                console.log("Loading customer_site from service_report:", r.message.customer_site);
+                frm.set_value("customer_site", r.message.customer_site);
+              }
+            }
+          });
+        }
+      }, 500);
+    }
+  },
+  
+  customer_site: function(frm) {
+    // เมื่อ customer_site เปลี่ยน ให้ trigger การ fetch distance fields
+    if (frm.doc.customer_site) {
+      console.log("Customer Site changed, fetching distance...");
+      
+      setTimeout(() => {
+        console.log("After customer_site change:");
+        console.log("distance_depart:", frm.doc.distance_depart);
+        console.log("distance_return:", frm.doc.distance_return);
+        console.log("is_upcountry:", frm.doc.is_upcountry);
+        
+        // ถ้า distance ยัง = 0 ให้โหลดจาก API
+        if ((frm.doc.distance_depart == 0 || !frm.doc.distance_depart) && frm.doc.customer_site) {
+          frappe.call({
+            method: "frappe.client.get",
+            args: {
+              doctype: "SMO Customer Site",
+              name: frm.doc.customer_site
+            },
+            callback: function(r) {
+              if (r.message) {
+                console.log("Loading distance from customer_site API:", r.message);
+                
+                if (r.message.depart_km && (!frm.doc.distance_depart || frm.doc.distance_depart == 0)) {
+                  frm.set_value("distance_depart", r.message.depart_km);
+                }
+                if (r.message.return_km && (!frm.doc.distance_return || frm.doc.distance_return == 0)) {
+                  frm.set_value("distance_return", r.message.return_km);
+                }
+                if (r.message.is_upcountry !== undefined && (!frm.doc.is_upcountry || frm.doc.is_upcountry == 0)) {
+                  frm.set_value("is_upcountry", r.message.is_upcountry);
+                }
+              }
+            }
+          });
+        }
+      }, 300);
+    }
+  },
+  
   before_save: function(frm) {
     return new Promise((resolve, reject) => {
       frappe.db.get_single_value('Smart Office Setting', 'open_date')
@@ -492,11 +585,11 @@ frappe.ui.form.on("SMO Expense Item", {
               
               // กำหนดค่า distance สำหรับ EP001 และ EP002
               if (row.expense_type == "EP001") {
-                row.taxi_depart_distance = frm.get_field("distance_depart").value;
-                row.cal_taxi_depart_distance = frm.get_field("distance_depart").value;
+                row.taxi_depart_distance = frm.doc.distance_depart || 0;
+                row.cal_taxi_depart_distance = frm.doc.distance_depart || 0;
               } else if (row.expense_type == "EP002") {
-                row.taxi_return_distance = frm.get_field("distance_return").value;
-                row.cal_taxi_return_distance = frm.get_field("distance_return").value;
+                row.taxi_return_distance = frm.doc.distance_return || 0;
+                row.cal_taxi_return_distance = frm.doc.distance_return || 0;
               }
               
               // คำนวณ total_cost ใหม่
@@ -530,11 +623,19 @@ frappe.ui.form.on("SMO Expense Item", {
     
     // กำหนดค่า distance สำหรับ EP001 และ EP002
     if (row.expense_type == "EP001") {
-      row.taxi_depart_distance = frm.get_field("distance_depart").value;
-      row.cal_taxi_depart_distance = frm.get_field("distance_depart").value;
+      row.taxi_depart_distance = frm.doc.distance_depart || 0;
+      row.cal_taxi_depart_distance = frm.doc.distance_depart || 0;
+      console.log("EP001 Distance Setup:", {
+        distance_depart: frm.doc.distance_depart,
+        taxi_depart_distance: row.taxi_depart_distance
+      });
     } else if (row.expense_type == "EP002") {
-      row.taxi_return_distance = frm.get_field("distance_return").value;
-      row.cal_taxi_return_distance = frm.get_field("distance_return").value;
+      row.taxi_return_distance = frm.doc.distance_return || 0;
+      row.cal_taxi_return_distance = frm.doc.distance_return || 0;
+      console.log("EP002 Distance Setup:", {
+        distance_return: frm.doc.distance_return,
+        taxi_return_distance: row.taxi_return_distance
+      });
     }
     
     // คำนวณ total_cost สำหรับ EP001, EP002 ใหม่
